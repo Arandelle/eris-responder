@@ -22,6 +22,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "545bd9fd-2c02-4f7c-a52a-5abf499e9b0c"
+      }
+    },
+    "owner": "arandelle"
   }
 }
