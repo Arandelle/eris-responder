@@ -1,15 +1,13 @@
 import React, { useState } from "react";
+import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  Alert,
-} from "react-native";
-import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail,
+} from "firebase/auth";
 import { auth } from "../services/firebaseConfig";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { useNavigation } from "@react-navigation/native";
+import ForgotPass from "./ForgotPass";
 
 const LoginForm = () => {
   const navigation = useNavigation();
@@ -17,6 +15,7 @@ const LoginForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
+  const [isPromptVisible, setPromptVisible] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleShowPass = () => {
@@ -28,12 +27,10 @@ const LoginForm = () => {
       Alert.alert("Error", "Please enter both email and password");
       return;
     }
-
     setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email, password);
       console.log("Login successful");
-      // Navigate to the next screen or update app state here
       navigation.navigate("Home");
     } catch (error) {
       Alert.alert("Login Error", error.message);
@@ -42,12 +39,11 @@ const LoginForm = () => {
     }
   };
 
-  const handleForgotPassword = async () => {
-    if (!email) {
-      Alert.alert("Error", "Please enter your email address");
-      return;
-    }
+  const handleForgotPassword = () => {
+    setPromptVisible(true);
+  };
 
+  const handlePasswordReset = async (email) => {
     try {
       await sendPasswordResetEmail(auth, email);
       Alert.alert("Success", "Password reset email sent");
@@ -59,9 +55,7 @@ const LoginForm = () => {
   return (
     <View className="flex items-center mt-20">
       <View className="w-full max-w-sm">
-        <Text className="text-center text-2xl mb-3">
-          Welcome to Eris App!
-        </Text>
+        <Text className="text-center text-2xl mb-3">Welcome to Eris App!</Text>
         <View className="space-y-4">
           <View className="space-y-2">
             <Text className="text-lg">Email</Text>
@@ -118,13 +112,11 @@ const LoginForm = () => {
               {loading ? "Logging in..." : "Login"}
             </Text>
           </TouchableOpacity>
-          <Text className="text-lg py-2 text-center">
-            <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
-              <Text className="underline text-lg">
-                Don't have an account? Signup
-              </Text>
-            </TouchableOpacity>
-          </Text>
+          <ForgotPass
+            visible={isPromptVisible}
+            onClose={() => setPromptVisible(false)}
+            onSubmit={handlePasswordReset}
+          />
         </View>
       </View>
     </View>
