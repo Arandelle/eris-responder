@@ -48,7 +48,7 @@ const LoginForm = () => {
         const adminSnapshot = await get(adminRef);
         if (adminSnapshot.exists()) {
           console.log("Login successful");
-          navigation.navigate("Home");
+          navigation.navigate("Eris");
           ToastAndroid.show(
             "Login Successfully",
             ToastAndroid.SHORT,

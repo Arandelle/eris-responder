@@ -7,6 +7,7 @@ import { get, getDatabase, ref } from 'firebase/database';
 import { NavigationContainer } from '@react-navigation/native';
 import Home from './src/screens/Home';
 import LoginForm from './src/screens/LoginForm';
+import TabNavigator from './src/navigation/TabNavigator';
 
 const Stack = createNativeStackNavigator();
 
@@ -50,9 +51,9 @@ const App = () => {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator>
+      <Stack.Navigator screenOptions={{headerShown: false}}>
         {user && isResponder ? (
-          <Stack.Screen name="Home" component={Home} />
+          <Stack.Screen name="Eris" component={TabNavigator} />
         ) : (
           <Stack.Screen name="Login" component={LoginForm} />
         )}
