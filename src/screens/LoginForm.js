@@ -1,13 +1,21 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  ToastAndroid,
+} from "react-native";
 import {
   signInWithEmailAndPassword,
   sendPasswordResetEmail,
 } from "firebase/auth";
-import { auth } from "../services/firebaseConfig";
+import { auth, database } from "../services/firebaseConfig";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { useNavigation } from "@react-navigation/native";
 import ForgotPass from "./ForgotPass";
+import { get, ref } from "firebase/database";
 
 const LoginForm = () => {
   const navigation = useNavigation();
@@ -29,11 +37,33 @@ const LoginForm = () => {
     }
     setLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      console.log("Login successful");
-      navigation.navigate("Home");
+      const userCredentials = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = userCredentials.user;
+      if (user.emailVerified) {
+        const adminRef = ref(database, `admins/${user.uid}`);
+        const adminSnapshot = await get(adminRef);
+        if (adminSnapshot.exists()) {
+          console.log("Login successful");
+          navigation.navigate("Home");
+          ToastAndroid.show(
+            "Login Successfully",
+            ToastAndroid.SHORT,
+            ToastAndroid.BOTTOM
+          );
+        } else {
+          Alert.alert("Error", "You are not an admin");
+          await auth.signOut();
+        }
+      } else {
+        Alert.alert("Error", "Email is not verified");
+        await auth.signOut();
+      }
     } catch (error) {
-      Alert.alert("Login Error", error.message);
+      Alert.alert("Logins Error", error.message);
     } finally {
       setLoading(false);
     }

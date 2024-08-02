@@ -24,7 +24,6 @@ const App = () => {
         
         try {
           const adminSnapshot = await get(adminRef);
-          console.log(`Checking admin status for UID: ${user.uid}`);
           console.log(`Admin snapshot exists: ${adminSnapshot.exists()}`);
           setIsResponder(adminSnapshot.exists());
         } catch (error) {
