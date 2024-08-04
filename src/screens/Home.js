@@ -3,7 +3,7 @@ import { Text, View, TouchableOpacity, Dimensions, StyleSheet } from "react-nati
 import MapView, { Polyline, Marker, Callout } from "react-native-maps";
 import * as Location from 'expo-location';
 import { OPENROUTE_API_KEY } from '@env'
-import { ref, onValue } from "firebase/database";
+import { ref, onValue, set } from "firebase/database";
 import { database } from "../services/firebaseConfig";
 
 const openRouteKey = OPENROUTE_API_KEY;
@@ -30,6 +30,16 @@ const Home = () => {
       setResponderPosition({
         latitude: location.coords.latitude,
         longitude: location.coords.longitude
+      });
+
+      // Watch position changes
+      Location.watchPositionAsync({ distanceInterval: 10 }, (newLocation) => {
+        const { latitude, longitude } = newLocation.coords;
+        setResponderPosition({ latitude, longitude });
+
+        // Update location in Firebase
+        const responderRef = ref(database, `admins/responder1`); // You can use dynamic ID for multiple responders
+        set(responderRef, { latitude, longitude });
       });
     })();
   }, []);
@@ -87,6 +97,20 @@ const Home = () => {
       console.error('Error fetching route:', error)
     }
   };
+
+  useEffect(() => {
+    const responderRef = ref(database, "responders/responder1");
+    const unsubscribe = onValue(responderRef, (snapshot) => {
+      const location = snapshot.val();
+      if (location) {
+        setResponderPosition({
+          latitude: location.latitude,
+          longitude: location.longitude
+        });
+      }
+    });
+    return () => unsubscribe();
+  }, []);
 
   if (loading || !responderPosition) {
     return <View style={styles.container}><Text>Loading...</Text></View>;
