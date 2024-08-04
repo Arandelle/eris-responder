@@ -32,14 +32,12 @@ const Home = () => {
         longitude: location.coords.longitude
       });
 
-      // Watch position changes
-      Location.watchPositionAsync({ distanceInterval: 10 }, (newLocation) => {
-        const { latitude, longitude } = newLocation.coords;
-        setResponderPosition({ latitude, longitude });
+      Location.watchPositionAsync({distanceInterval: 1}, (newLocation) => {
+        const {latitude, longitude} = newLocation.coords;
+        setResponderPosition({latitude, longitude});
 
-        // Update location in Firebase
-        const responderRef = ref(database, `admins/responder1`); // You can use dynamic ID for multiple responders
-        set(responderRef, { latitude, longitude });
+        const responderRef = ref(database, "admins/responder1");
+        set(responderRef, {latitude, longitude});
       });
     })();
   }, []);
@@ -98,19 +96,20 @@ const Home = () => {
     }
   };
 
-  useEffect(() => {
-    const responderRef = ref(database, "responders/responder1");
-    const unsubscribe = onValue(responderRef, (snapshot) => {
+  useEffect(()=>{
+    const respondeRef = ref(database, "admins/responder1");
+    const unsubscribe = onValue(respondeRef, (snapshot) => {
       const location = snapshot.val();
-      if (location) {
+
+      if(location){
         setResponderPosition({
           latitude: location.latitude,
           longitude: location.longitude
         });
       }
     });
-    return () => unsubscribe();
-  }, []);
+    return ()=> unsubscribe();
+  }, [])
 
   if (loading || !responderPosition) {
     return <View style={styles.container}><Text>Loading...</Text></View>;
