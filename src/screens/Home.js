@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { Text, View, TouchableOpacity, Dimensions, StyleSheet } from "react-native";
+import { Text, View, TouchableOpacity, Dimensions, StyleSheet, Image } from "react-native";
 import MapView, { Polyline, Marker, Callout } from "react-native-maps";
 import * as Location from 'expo-location';
 import { OPENROUTE_API_KEY } from '@env'
 import { ref, onValue, set } from "firebase/database";
 import { database } from "../services/firebaseConfig";
+import responderMarker from "../../assets/ambulance.png"
 
 const openRouteKey = OPENROUTE_API_KEY;
 
 const Home = () => {
   const [responderPosition, setResponderPosition] = useState(null);
+  const [heading, setHeading] = useState(0);
   const [emergencyData, setEmergencyData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedEmergency, setSelectedEmergency] = useState(null);
@@ -31,7 +33,7 @@ const Home = () => {
         latitude: location.coords.latitude,
         longitude: location.coords.longitude
       });
-
+      //watch position changes
       Location.watchPositionAsync({distanceInterval: 1}, (newLocation) => {
         const {latitude, longitude} = newLocation.coords;
         setResponderPosition({latitude, longitude});
@@ -141,7 +143,10 @@ const Home = () => {
           coordinate={responderPosition}
           title="You are here"
           pinColor="#42a5f5"
-        />
+          rotation={heading}
+        >
+         <Image source={responderMarker} className="h-12 w-12"/>
+        </Marker>
         {emergencyData.map((emergency) => (
           <Marker
             key={emergency.id}
