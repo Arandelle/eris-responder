@@ -37,7 +37,10 @@ const Home = () => {
       Location.watchPositionAsync({distanceInterval: 1}, (newLocation) => {
         const {latitude, longitude} = newLocation.coords;
         setResponderPosition({latitude, longitude});
-
+        if (route.length > 0) {
+          const newHeading = calculateBearing(latitude, longitude, route[1].latitude, route[1].longitude);
+          setHeading(newHeading);
+        }
         const responderRef = ref(database, "admins/responder1");
         set(responderRef, {latitude, longitude});
       });
