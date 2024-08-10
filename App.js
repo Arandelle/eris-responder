@@ -21,12 +21,12 @@ const App = () => {
       if (user) {
         setUser(user);
         const db = getDatabase();
-        const adminRef = ref(db, `admins/${user.uid}`);
+        const responderRef = ref(db, `responders/${user.uid}`);
         
         try {
-          const adminSnapshot = await get(adminRef);
-          console.log(`Admin snapshot exists: ${adminSnapshot.exists()}`);
-          setIsResponder(adminSnapshot.exists());
+          const responderSnapshot = await get(responderRef);
+          console.log(`responder snapshot exists: ${responderSnapshot.exists()}`);
+          setIsResponder(responderSnapshot.exists());
         } catch (error) {
           console.error('Error fetching admin data:', error);
           Alert.alert("Error", "Account is not found")
