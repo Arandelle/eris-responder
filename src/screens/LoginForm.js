@@ -44,7 +44,7 @@ const LoginForm = () => {
       );
       const user = userCredentials.user;
       if (user.emailVerified || true) {
-        const adminRef = ref(database, `admins/${user.uid}`);
+        const adminRef = ref(database, `responders/${user.uid}`);
         const adminSnapshot = await get(adminRef);
         if (adminSnapshot.exists()) {
           console.log("Login successful");
