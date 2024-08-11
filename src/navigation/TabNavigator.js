@@ -9,7 +9,7 @@ import Profile from "../screens/Profile";
 
 const Tab = createBottomTabNavigator();
 
-const TabNavigator = () => {
+const TabNavigator = ({responderUid}) => {
 
 
   return (
@@ -19,8 +19,8 @@ const TabNavigator = () => {
         headerShown: true,
         tabBarIcon: ({ color, size }) => {
           const icons = {
-            Home: "map-marker-outline",
-            History: "plus",
+            Home: "map-marker-radius-outline",
+            History: "history",
             Notification: "bell-outline",
             Profile: "account-circle-outline",
           };
@@ -45,11 +45,11 @@ const TabNavigator = () => {
           paddingBottom: 10,
           paddingTop: 10,
           height: 70,
-          position: "absolute",
-          bottom: 16,
-          right: 16,
-          left: 16,
-          borderRadius: 10,
+          // position: "absolute",
+          // bottom: 16,
+          // right: 16,
+          // left: 16,
+          // borderRadius: 10,
         },
         tabBarLabelStyle: {
           fontSize: 15,
@@ -57,7 +57,9 @@ const TabNavigator = () => {
         tabBarHideOnKeyboard: true,
       })}
     >
-      <Tab.Screen name="Home" component={Home}/>
+      <Tab.Screen name="Home">
+      {()=> <Home responderUid={responderUid} />}
+      </Tab.Screen>
       <Tab.Screen name="History" component={History}/>
       <Tab.Screen name="Notification" component={Notification}/>
       <Tab.Screen name="Profile" component={Profile}/>

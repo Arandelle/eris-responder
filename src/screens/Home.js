@@ -9,7 +9,7 @@ import responderMarker from "../../assets/ambulance.png"
 
 const openRouteKey = OPENROUTE_API_KEY;
 
-const Home = () => {
+const Home = ({responderUid}) => {
   const [responderPosition, setResponderPosition] = useState(null);
   const [heading, setHeading] = useState(0);
   const [emergencyData, setEmergencyData] = useState([]);
@@ -41,7 +41,7 @@ const Home = () => {
           const newHeading = calculateBearing(latitude, longitude, route[1].latitude, route[1].longitude);
           setHeading(newHeading);
         }
-        const responderRef = ref(database, "admins/responder1");
+        const responderRef = ref(database, `responders/${responderUid}`);
         set(responderRef, {latitude, longitude});
       });
     })();
@@ -102,7 +102,7 @@ const Home = () => {
   };
 
   useEffect(()=>{
-    const respondeRef = ref(database, "admins/responder1");
+    const respondeRef = ref(database,`responders/${responderUid}`);
     const unsubscribe = onValue(respondeRef, (snapshot) => {
       const location = snapshot.val();
 
