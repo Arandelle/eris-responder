@@ -1,15 +1,23 @@
 import React, { useState, useEffect } from "react";
-import { Text, View, TouchableOpacity, Image } from "react-native";
+import {
+  Text,
+  View,
+  TouchableOpacity,
+  Image,
+  Modal,
+  Button,
+  TouchableWithoutFeedback,
+} from "react-native";
 import MapView, { Polyline, Marker, Callout } from "react-native-maps";
-import * as Location from 'expo-location';
-import { OPENROUTE_API_KEY } from '@env'
+import * as Location from "expo-location";
+import { OPENROUTE_API_KEY } from "@env";
 import { ref, onValue, set } from "firebase/database";
 import { database } from "../services/firebaseConfig";
-import responderMarker from "../../assets/ambulance.png"
+import responderMarker from "../../assets/ambulance.png";
 
 const openRouteKey = OPENROUTE_API_KEY;
 
-const Home = ({responderUid}) => {
+const Home = ({ responderUid }) => {
   const [responderPosition, setResponderPosition] = useState(null);
   const [heading, setHeading] = useState(0);
   const [emergencyData, setEmergencyData] = useState([]);
@@ -17,13 +25,18 @@ const Home = ({responderUid}) => {
   const [selectedEmergency, setSelectedEmergency] = useState(null);
   const [route, setRoute] = useState([]);
   const [distance, setDistance] = useState(0);
+  const [showModal, setShowModal] = useState(false);
+
+  const handleShowModal = () => {
+    setShowModal(!showModal);
+  };
 
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
 
-      if (status !== 'granted') {
-        console.error('Permission to access location was denied');
+      if (status !== "granted") {
+        console.error("Permission to access location was denied");
         setResponderPosition({ latitude: 14.33289, longitude: 120.85065 }); // Fallback position
         return;
       }
@@ -31,34 +44,45 @@ const Home = ({responderUid}) => {
       let location = await Location.getCurrentPositionAsync({});
       setResponderPosition({
         latitude: location.coords.latitude,
-        longitude: location.coords.longitude
+        longitude: location.coords.longitude,
       });
       //watch position changes
-      Location.watchPositionAsync({distanceInterval: 1}, (newLocation) => {
-        const {latitude, longitude} = newLocation.coords;
-        setResponderPosition({latitude, longitude});
+      Location.watchPositionAsync({ distanceInterval: 1 }, (newLocation) => {
+        const { latitude, longitude } = newLocation.coords;
+        setResponderPosition({ latitude, longitude });
         if (route.length > 0) {
-          const newHeading = calculateBearing(latitude, longitude, route[1].latitude, route[1].longitude);
+          const newHeading = calculateBearing(
+            latitude,
+            longitude,
+            route[1].latitude,
+            route[1].longitude
+          );
           setHeading(newHeading);
         }
         const responderRef = ref(database, `responders/${responderUid}`);
-        set(responderRef, {latitude, longitude});
+        set(responderRef, { latitude, longitude });
       });
     })();
   }, []);
-  
+
   useEffect(() => {
     const requestRef = ref(database, "emergencyRequest");
     const unsubscribe = onValue(requestRef, (snapshot) => {
       try {
         const data = snapshot.val();
         const emergencyList = Object.entries(data)
-          .filter(([_, emergency]) => emergency.location && emergency.status !== "done")
+          .filter(
+            ([_, emergency]) =>
+              emergency.location && emergency.status !== "done"
+          )
           .map(([id, emergency]) => ({
             id,
             name: emergency.name || "Unknown",
             type: emergency.type || "Unspecified",
-            location: { latitude: emergency.location.latitude, longitude: emergency.location.longitude },
+            location: {
+              latitude: emergency.location.latitude,
+              longitude: emergency.location.longitude,
+            },
             status: emergency.status || "active",
             description: emergency.description || "none",
           }));
@@ -89,51 +113,58 @@ const Home = ({responderUid}) => {
 
       if (data.features && data.features.length > 0) {
         const coordinates = data.features[0].geometry.coordinates;
-        const formattedRoute = coordinates.map(coord => ({
+        const formattedRoute = coordinates.map((coord) => ({
           latitude: coord[1],
-          longitude: coord[0]
+          longitude: coord[0],
         }));
         setRoute(formattedRoute);
         setDistance(data.features[0].properties.summary.distance / 1000);
       }
     } catch (error) {
-      console.error('Error fetching route:', error)
+      console.error("Error fetching route:", error);
     }
   };
 
-  useEffect(()=>{
-    const respondeRef = ref(database,`responders/${responderUid}`);
+  useEffect(() => {
+    const respondeRef = ref(database, `responders/${responderUid}`);
     const unsubscribe = onValue(respondeRef, (snapshot) => {
       const location = snapshot.val();
 
-      if(location){
+      if (location) {
         setResponderPosition({
           latitude: location.latitude,
-          longitude: location.longitude
+          longitude: location.longitude,
         });
       }
     });
-    return ()=> unsubscribe();
-  }, [])
+    return () => unsubscribe();
+  }, []);
 
   if (loading || !responderPosition) {
-    return <View className="flex items-center justify-center w-full h-full"><Text>Loading...</Text></View>;
+    return (
+      <View className="flex items-center justify-center w-full h-full">
+        <Text>Loading...</Text>
+      </View>
+    );
   }
 
-  const handleSelectEmergency = (emergency) =>{
-    setSelectedEmergency(emergency)
-  }
+  const handleSelectEmergency = (emergency) => {
+    setSelectedEmergency(emergency);
+  };
 
   return (
     <View>
-        {selectedEmergency && (
-          <View className="p-2.5 items-center bg-white flex-row justify-between border-t-2 border-t-blue-500 absolute top-0 z-50 w-full">
-            <Text>Distance: {distance.toFixed(2)} km</Text>
-            <TouchableOpacity className="p-2.5 bg-blue-500 rounded-md" onPress={fetchRoute}>
-              <Text className="text-white font-bold">Refresh Route</Text>
-            </TouchableOpacity>
-            </View>
-        )}
+      {selectedEmergency && (
+        <View className="p-2.5 items-center bg-white flex-row justify-between border-t-2 border-t-blue-500 absolute top-0 z-50 w-full">
+          <Text>Distance: {distance.toFixed(2)} km</Text>
+          <TouchableOpacity
+            className="p-2.5 bg-blue-500 rounded-md"
+            onPress={fetchRoute}
+          >
+            <Text className="text-white font-bold">Refresh Route</Text>
+          </TouchableOpacity>
+        </View>
+      )}
       <MapView
         className="w-full h-full"
         initialRegion={{
@@ -148,13 +179,14 @@ const Home = ({responderUid}) => {
           pinColor="#42a5f5"
           rotation={heading}
         >
-         <Image source={responderMarker} className="h-12 w-12"/>
+          <Image source={responderMarker} className="h-12 w-12" />
         </Marker>
-        {emergencyData.map((emergency) => (
+        {/* {emergencyData.map((emergency) => (
           <Marker
             key={emergency.id}
             coordinate={emergency.location}
             pinColor="red"
+            onPress={handleShowModal}
           >
             <Callout className="flex items-center justify-center p-2.5" onPress={()=> handleSelectEmergency(emergency)}>
               <View className="w-48 py-2.5">
@@ -168,7 +200,50 @@ const Home = ({responderUid}) => {
                 </TouchableOpacity>
             </Callout>
           </Marker>
+        ))} */}
+        {emergencyData.map((emergency) => (
+          <Marker
+            key={emergency.id}
+            coordinate={emergency.location}
+            pinColor="red"
+            onPress={handleShowModal}
+          >
+            {showModal && (
+              <Modal transparent={true} animationType="slide">
+                <TouchableWithoutFeedback onPress={handleShowModal}>
+                  <View
+                    className="flex w-full h-full items-center justify-center"
+                    style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
+                  >
+                    <View className="w-80 bg-white rounded-sm shadow-lg">
+                      <View className="flex p-2 justify-between flex-row bg-gray-200">
+                        <Text className="text-lg font-bold">Emergency Id:</Text>
+                        <Text className="text-lg">{emergency.id}</Text>
+                      </View>
+                      <View className="p-2 space-y-3">
+                          <Text className="text-lg">Name: {emergency.name}</Text>
+                          <Text className="text-lg">Type: {emergency.type}</Text>
+                          <Text className="text-lg">Description: {emergency.description}</Text>
+                          <Text className="text-lg"> Submitted: {new Date(emergency.timestamp).toLocaleString()}</Text>
+                          <TouchableOpacity
+                          className="p-2.5 text-white bg-green-500 items-center w-full rounded-md"
+                          onPress={() => {
+                            handleSelectEmergency(emergency), handleShowModal();
+                          }}
+                        >
+                          <Text className="text-white font-bold text-lg">
+                          {route.length > 0 ? "This Area is routed" : "Route this area"}
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  </View>
+                </TouchableWithoutFeedback>
+              </Modal>
+            )}
+          </Marker>
         ))}
+
         {route.length > 0 && (
           <Polyline coordinates={route} strokeColor="red" strokeWidth={2} />
         )}
