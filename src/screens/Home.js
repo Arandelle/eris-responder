@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Text, View, TouchableOpacity, Dimensions, StyleSheet, Image } from "react-native";
+import { Text, View, TouchableOpacity, Image } from "react-native";
 import MapView, { Polyline, Marker, Callout } from "react-native-maps";
 import * as Location from 'expo-location';
 import { OPENROUTE_API_KEY } from '@env'
@@ -117,7 +117,7 @@ const Home = ({responderUid}) => {
   }, [])
 
   if (loading || !responderPosition) {
-    return <View style={styles.container}><Text>Loading...</Text></View>;
+    return <View className="flex items-center justify-center w-full h-full"><Text>Loading...</Text></View>;
   }
 
   const handleSelectEmergency = (emergency) =>{
@@ -125,17 +125,17 @@ const Home = ({responderUid}) => {
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.footer}>
-        <Text>Distance to target: {distance.toFixed(2)} km</Text>
+    <View>
         {selectedEmergency && (
-          <TouchableOpacity style={styles.button} onPress={fetchRoute}>
-            <Text style={styles.buttonText}>Refresh Route</Text>
-          </TouchableOpacity>
+          <View className="p-2.5 items-center bg-white flex-row justify-between border-t-2 border-t-blue-500 absolute top-0 z-50 w-full">
+            <Text>Distance: {distance.toFixed(2)} km</Text>
+            <TouchableOpacity className="p-2.5 bg-blue-500 rounded-md" onPress={fetchRoute}>
+              <Text className="text-white font-bold">Refresh Route</Text>
+            </TouchableOpacity>
+            </View>
         )}
-      </View>
       <MapView
-        style={styles.map}
+        className="w-full h-full"
         initialRegion={{
           ...responderPosition,
           latitudeDelta: 0.005,
@@ -156,13 +156,16 @@ const Home = ({responderUid}) => {
             coordinate={emergency.location}
             pinColor="red"
           >
-            <Callout onPress={()=> handleSelectEmergency(emergency)}>
-              <View style={styles.callout}>
-                <Text style={styles.calloutTitle}>Emergency Details</Text>
+            <Callout className="flex items-center justify-center p-2.5" onPress={()=> handleSelectEmergency(emergency)}>
+              <View className="w-48 py-2.5">
+                <Text className="font-bold text-center mb-2.5">Emergency Details</Text>
                 <Text>Name: {emergency.name}</Text>
                 <Text>Type: {emergency.type}</Text>
                 <Text>Description: {emergency.description}</Text>
               </View>
+              <TouchableOpacity className="p-2.5 text-white bg-green-500 items-center w-full rounded-md">
+                  <Text>Route to this area</Text>
+                </TouchableOpacity>
             </Callout>
           </Marker>
         ))}
@@ -173,39 +176,5 @@ const Home = ({responderUid}) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  map: {
-    width: Dimensions.get('window').width,
-    height: Dimensions.get('window').height * 0.8
-  },
-  footer: {
-    padding: 10,
-    backgroundColor: 'white',
-    alignItems: 'center',
-  },
-  button: {
-    marginTop: 10,
-    padding: 10,
-    backgroundColor: '#007AFF',
-    borderRadius: 5,
-  },
-  buttonText: {
-    color: 'white',
-    fontWeight: 'bold',
-  },
-  callout: {
-    width: 200,
-    padding: 10,
-  },
-  calloutTitle: {
-    fontWeight: 'bold',
-    fontSize: 16,
-    marginBottom: 10,
-  },
-});
 
 export default Home;
