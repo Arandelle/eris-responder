@@ -181,27 +181,45 @@ const Home = ({ responderUid }) => {
         >
           <Image source={responderMarker} className="h-12 w-12" />
         </Marker>
-        {/* {emergencyData.map((emergency) => (
+        {emergencyData.map((emergency) => (
           <Marker
             key={emergency.id}
             coordinate={emergency.location}
             pinColor="red"
-            onPress={handleShowModal}
           >
-            <Callout className="flex items-center justify-center p-2.5" onPress={()=> handleSelectEmergency(emergency)}>
-              <View className="w-48 py-2.5">
-                <Text className="font-bold text-center mb-2.5">Emergency Details</Text>
-                <Text>Name: {emergency.name}</Text>
-                <Text>Type: {emergency.type}</Text>
-                <Text>Description: {emergency.description}</Text>
+            <Callout onPress={() => handleSelectEmergency(emergency)}>
+              <View className="w-80 bg-white rounded-sm shadow-lg">
+                <View className="flex p-2 justify-between flex-row bg-gray-200">
+                  <Text className="font-bold">Emergency Id:</Text>
+                  <Text>{emergency.id}</Text>
+                </View>
+                <View className="p-2 space-y-3">
+                  <Text>Name: {emergency.name}</Text>
+                  <Text>Type: {emergency.type}</Text>
+                  <Text>
+                    Description: {emergency.description}
+                  </Text>
+                  <Text>
+                    Submitted: {new Date(emergency.timestamp).toLocaleString()}
+                  </Text>
+                  <TouchableOpacity
+                    className={`p-2.5 text-white items-center w-full rounded-md ${selectedEmergency?.id === emergency.id && route.length > 0 ? "bg-red-500" : "bg-green-500"}`}
+                    onPress={() => {
+                      handleSelectEmergency(emergency)
+                    }}
+                  >
+                    <Text className="text-white font-bold">
+                      {selectedEmergency?.id === emergency.id && route.length > 0
+                        ? "This Area is routed"
+                        : "Route this area"}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               </View>
-              <TouchableOpacity className="p-2.5 text-white bg-green-500 items-center w-full rounded-md">
-                  <Text>Route to this area</Text>
-                </TouchableOpacity>
             </Callout>
           </Marker>
-        ))} */}
-        {emergencyData.map((emergency) => (
+        ))}
+        {/* {emergencyData.map((emergency) => (
           <Marker
             key={emergency.id}
             coordinate={emergency.location}
@@ -242,7 +260,7 @@ const Home = ({ responderUid }) => {
               </Modal>
             )}
           </Marker>
-        ))}
+        ))} */}
 
         {route.length > 0 && (
           <Polyline coordinates={route} strokeColor="red" strokeWidth={2} />
