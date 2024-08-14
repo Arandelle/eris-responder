@@ -19,6 +19,8 @@ import { OPENROUTE_API_KEY } from "@env";
 import { ref, onValue, set } from "firebase/database";
 import { database } from "../services/firebaseConfig";
 import responderMarker from "../../assets/ambulance.png";
+import drunk from "../../assets/drunk.png"
+import crime from "../../assets/murder.png"
 
 const openRouteKey = OPENROUTE_API_KEY;
 
@@ -92,6 +94,7 @@ const Home = ({ responderUid }) => {
             },
             status: emergency.status || "active",
             description: emergency.description || "none",
+            timestamp: new Date(emergency.timestamp).toLocaleString(),
           }));
         setEmergencyData(emergencyList);
         setLoading(false);
@@ -195,7 +198,9 @@ const Home = ({ responderUid }) => {
             coordinate={emergency.location}
             pinColor="red"
             onPress={() => handleShowEmergencyDetails(emergency)}
-          />
+          >
+         {emergency.type === "noise" && <Image source={drunk} className="h-14 w-12" />}
+          </Marker>
         ))}
         {/* {emergencyData.map((emergency) => (
           <Marker
@@ -303,7 +308,7 @@ const Home = ({ responderUid }) => {
                 </Text>
                 <Text className="text-lg">
                   {" "}
-                  Submitted: {new Date(emergencyDetails.timestamp).toLocaleString()}
+                  Submitted: {emergencyDetails.timestamp}
                 </Text>
                 <TouchableOpacity
                     className={`p-2.5 text-white items-center w-full rounded-md ${selectedEmergency?.id === emergencyDetails.id && route.length > 0 ? "bg-red-500" : "bg-green-500"}`}
@@ -313,8 +318,8 @@ const Home = ({ responderUid }) => {
                   >
                     <Text className="text-white font-bold">
                       {selectedEmergency?.id === emergencyDetails.id && route.length > 0
-                        ? "This Area is routed"
-                        : "Route this area"}
+                        ? "Responding..."
+                        : "Navigate to this location"}
                     </Text>
                   </TouchableOpacity>
               </View>
