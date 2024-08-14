@@ -8,7 +8,12 @@ import {
   Button,
   TouchableWithoutFeedback,
 } from "react-native";
-import MapView, { Polyline, Marker, Callout } from "react-native-maps";
+import MapView, {
+  Polyline,
+  Marker,
+  Callout,
+  MapUrlTile,
+} from "react-native-maps";
 import * as Location from "expo-location";
 import { OPENROUTE_API_KEY } from "@env";
 import { ref, onValue, set } from "firebase/database";
@@ -22,13 +27,15 @@ const Home = ({ responderUid }) => {
   const [heading, setHeading] = useState(0);
   const [emergencyData, setEmergencyData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [emergencyDetails, setEmergencyDetails] = useState(null);
   const [selectedEmergency, setSelectedEmergency] = useState(null);
   const [route, setRoute] = useState([]);
   const [distance, setDistance] = useState(0);
   const [showModal, setShowModal] = useState(false);
 
-  const handleShowModal = () => {
-    setShowModal(!showModal);
+  const handleShowEmergencyDetails = (emergency) => {
+    setEmergencyDetails(emergency);
+    setShowModal(true);
   };
 
   useEffect(() => {
@@ -150,6 +157,7 @@ const Home = ({ responderUid }) => {
 
   const handleSelectEmergency = (emergency) => {
     setSelectedEmergency(emergency);
+    setShowModal(false)
   };
 
   return (
@@ -186,6 +194,14 @@ const Home = ({ responderUid }) => {
             key={emergency.id}
             coordinate={emergency.location}
             pinColor="red"
+            onPress={() => handleShowEmergencyDetails(emergency)}
+          />
+        ))}
+        {/* {emergencyData.map((emergency) => (
+          <Marker
+            key={emergency.id}
+            coordinate={emergency.location}
+            pinColor="red"
           >
             <Callout onPress={() => handleSelectEmergency(emergency)}>
               <View className="w-80 bg-white rounded-sm shadow-lg">
@@ -218,7 +234,7 @@ const Home = ({ responderUid }) => {
               </View>
             </Callout>
           </Marker>
-        ))}
+        ))} */}
         {/* {emergencyData.map((emergency) => (
           <Marker
             key={emergency.id}
@@ -266,6 +282,46 @@ const Home = ({ responderUid }) => {
           <Polyline coordinates={route} strokeColor="red" strokeWidth={2} />
         )}
       </MapView>
+
+      <Modal transparent={true} animationType="slide" visible={showModal}>
+        <TouchableWithoutFeedback onPress={()=> setShowModal(false)}>
+          <View
+            className="flex w-full h-full items-center justify-center"
+            style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
+          >
+            {emergencyDetails && (
+              <View className="w-80 bg-white rounded-sm shadow-lg">
+              <View className="flex p-2 justify-between flex-row bg-gray-200">
+                <Text className="text-lg font-bold">Emergency Id:</Text>
+                <Text className="text-lg">{emergencyDetails.id}</Text>
+              </View>
+              <View className="p-2 space-y-3">
+                <Text className="text-lg">Name: {emergencyDetails.name}</Text>
+                <Text className="text-lg">Type: {emergencyDetails.type}</Text>
+                <Text className="text-lg">
+                  Description: {emergencyDetails.description}
+                </Text>
+                <Text className="text-lg">
+                  {" "}
+                  Submitted: {new Date(emergencyDetails.timestamp).toLocaleString()}
+                </Text>
+                <TouchableOpacity
+                    className={`p-2.5 text-white items-center w-full rounded-md ${selectedEmergency?.id === emergencyDetails.id && route.length > 0 ? "bg-red-500" : "bg-green-500"}`}
+                    onPress={() => {
+                      handleSelectEmergency(emergencyDetails)
+                    }}
+                  >
+                    <Text className="text-white font-bold">
+                      {selectedEmergency?.id === emergencyDetails.id && route.length > 0
+                        ? "This Area is routed"
+                        : "Route this area"}
+                    </Text>
+                  </TouchableOpacity>
+              </View>
+            </View>)}
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
     </View>
   );
 };
