@@ -13,7 +13,7 @@ import MapView, {
 } from "react-native-maps";
 import * as Location from "expo-location";
 import { OPENROUTE_API_KEY } from "@env";
-import { ref, onValue, set } from "firebase/database";
+import { ref, onValue, set, update } from "firebase/database";
 import { database } from "../services/firebaseConfig";
 import responderMarker from "../../assets/ambulance.png";
 import drunk from "../../assets/drunk.png"
@@ -45,7 +45,7 @@ const Home = ({ responderUid, setIsProfileComplete }) => {
 
       if (status !== "granted") {
         console.error("Permission to access location was denied");
-        setResponderPosition({ latitude: 14.33289, longitude: 120.85065 }); // Fallback position
+        setResponderPosition({ latitude: 14.33289, longitude: 120.85065} ); // Fallback position
         return;
       }
 
@@ -68,7 +68,8 @@ const Home = ({ responderUid, setIsProfileComplete }) => {
           setHeading(newHeading);
         }
         const responderRef = ref(database, `responders/${responderUid}`);
-        set(responderRef, { latitude, longitude });
+        update(responderRef, { location: { latitude, longitude } },
+          );
       });
     })();
   }, []);
@@ -137,12 +138,12 @@ const Home = ({ responderUid, setIsProfileComplete }) => {
   useEffect(() => {
     const respondeRef = ref(database, `responders/${responderUid}`);
     const unsubscribe = onValue(respondeRef, (snapshot) => {
-      const location = snapshot.val();
+      const responderData = snapshot.val();
 
-      if (location) {
+      if (responderData && responderData.location) {
         setResponderPosition({
-          latitude: location.latitude,
-          longitude: location.longitude,
+          latitude: responderData.location.latitude,
+          longitude: responderData.location.longitude,
         });
       }
     });
