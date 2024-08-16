@@ -1,6 +1,6 @@
   import { useState, useEffect } from 'react';
   import { createNativeStackNavigator } from "@react-navigation/native-stack";
-  import { Alert, Text, View, TouchableOpacity } from 'react-native';
+  import { Alert, Text, View, TouchableOpacity,Image } from 'react-native';
   import { auth } from './src/services/firebaseConfig';
   import { onAuthStateChanged } from 'firebase/auth';
   import { get, getDatabase, ref } from 'firebase/database';
@@ -9,6 +9,7 @@
   import LoginForm from './src/screens/LoginForm';
   import TabNavigator from './src/navigation/TabNavigator';
   import UpdateProfile from './src/screens/UpdateProfile';
+  import Logo from "./assets/logo.png"
 
   const Stack = createNativeStackNavigator();
 
@@ -45,8 +46,9 @@
     if (loading) {
       return (
         <View className="flex w-full h-full items-center justify-center">
-          <Text>Loading...</Text>
-        </View>
+       <Image source={Logo} alt="Loading..."/>
+       <Text>Loading please wait...</Text>
+      </View>
       );
     }
 

@@ -5,14 +5,11 @@ import {
   TouchableOpacity,
   Image,
   Modal,
-  Button,
   TouchableWithoutFeedback,
 } from "react-native";
 import MapView, {
   Polyline,
   Marker,
-  Callout,
-  MapUrlTile,
 } from "react-native-maps";
 import * as Location from "expo-location";
 import { OPENROUTE_API_KEY } from "@env";
@@ -21,6 +18,7 @@ import { database } from "../services/firebaseConfig";
 import responderMarker from "../../assets/ambulance.png";
 import drunk from "../../assets/drunk.png"
 import crime from "../../assets/murder.png"
+import Logo from "../../assets/logo.png"
 
 const openRouteKey = OPENROUTE_API_KEY;
 
@@ -152,8 +150,9 @@ const Home = ({ responderUid }) => {
 
   if (loading || !responderPosition) {
     return (
-      <View className="flex items-center justify-center w-full h-full">
-        <Text>Loading...</Text>
+      <View className="flex w-full h-full items-center justify-center">
+       <Image source={Logo} alt="Loading..."/>
+       <Text>Your map is loading...</Text>
       </View>
     );
   }
@@ -199,89 +198,9 @@ const Home = ({ responderUid }) => {
             pinColor="red"
             onPress={() => handleShowEmergencyDetails(emergency)}
           >
-         {emergency.type === "noise" && <Image source={drunk} className="h-14 w-12" />}
+         {emergency.type === "noise" && <Image source={drunk} className="h-14 w-12 animate-spin" />}
           </Marker>
         ))}
-        {/* {emergencyData.map((emergency) => (
-          <Marker
-            key={emergency.id}
-            coordinate={emergency.location}
-            pinColor="red"
-          >
-            <Callout onPress={() => handleSelectEmergency(emergency)}>
-              <View className="w-80 bg-white rounded-sm shadow-lg">
-                <View className="flex p-2 justify-between flex-row bg-gray-200">
-                  <Text className="font-bold">Emergency Id:</Text>
-                  <Text>{emergency.id}</Text>
-                </View>
-                <View className="p-2 space-y-3">
-                  <Text>Name: {emergency.name}</Text>
-                  <Text>Type: {emergency.type}</Text>
-                  <Text>
-                    Description: {emergency.description}
-                  </Text>
-                  <Text>
-                    Submitted: {new Date(emergency.timestamp).toLocaleString()}
-                  </Text>
-                  <TouchableOpacity
-                    className={`p-2.5 text-white items-center w-full rounded-md ${selectedEmergency?.id === emergency.id && route.length > 0 ? "bg-red-500" : "bg-green-500"}`}
-                    onPress={() => {
-                      handleSelectEmergency(emergency)
-                    }}
-                  >
-                    <Text className="text-white font-bold">
-                      {selectedEmergency?.id === emergency.id && route.length > 0
-                        ? "This Area is routed"
-                        : "Route this area"}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </Callout>
-          </Marker>
-        ))} */}
-        {/* {emergencyData.map((emergency) => (
-          <Marker
-            key={emergency.id}
-            coordinate={emergency.location}
-            pinColor="red"
-            onPress={handleShowModal}
-          >
-            {showModal && (
-              <Modal transparent={true} animationType="slide">
-                <TouchableWithoutFeedback onPress={handleShowModal}>
-                  <View
-                    className="flex w-full h-full items-center justify-center"
-                    style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
-                  >
-                    <View className="w-80 bg-white rounded-sm shadow-lg">
-                      <View className="flex p-2 justify-between flex-row bg-gray-200">
-                        <Text className="text-lg font-bold">Emergency Id:</Text>
-                        <Text className="text-lg">{emergency.id}</Text>
-                      </View>
-                      <View className="p-2 space-y-3">
-                          <Text className="text-lg">Name: {emergency.name}</Text>
-                          <Text className="text-lg">Type: {emergency.type}</Text>
-                          <Text className="text-lg">Description: {emergency.description}</Text>
-                          <Text className="text-lg"> Submitted: {new Date(emergency.timestamp).toLocaleString()}</Text>
-                          <TouchableOpacity
-                          className="p-2.5 text-white bg-green-500 items-center w-full rounded-md"
-                          onPress={() => {
-                            handleSelectEmergency(emergency), handleShowModal();
-                          }}
-                        >
-                          <Text className="text-white font-bold text-lg">
-                          {route.length > 0 ? "This Area is routed" : "Route this area"}
-                          </Text>
-                        </TouchableOpacity>
-                      </View>
-                    </View>
-                  </View>
-                </TouchableWithoutFeedback>
-              </Modal>
-            )}
-          </Marker>
-        ))} */}
 
         {route.length > 0 && (
           <Polyline coordinates={route} strokeColor="red" strokeWidth={2} />
