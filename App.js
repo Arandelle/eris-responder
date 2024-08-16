@@ -1,6 +1,6 @@
   import { useState, useEffect } from 'react';
   import { createNativeStackNavigator } from "@react-navigation/native-stack";
-  import { Alert, Text, View } from 'react-native';
+  import { Alert, Text, View, TouchableOpacity } from 'react-native';
   import { auth } from './src/services/firebaseConfig';
   import { onAuthStateChanged } from 'firebase/auth';
   import { get, getDatabase, ref } from 'firebase/database';
@@ -8,6 +8,7 @@
   import Home from './src/screens/Home';
   import LoginForm from './src/screens/LoginForm';
   import TabNavigator from './src/navigation/TabNavigator';
+  import UpdateProfile from './src/screens/UpdateProfile';
 
   const Stack = createNativeStackNavigator();
 
@@ -53,9 +54,26 @@
       <NavigationContainer>
         <Stack.Navigator screenOptions={{headerShown: false}}>
           {user && isResponder ? (
-            <Stack.Screen name="Eris">
-            {()=> <TabNavigator responderUid={user.uid}/>}
-            </Stack.Screen>
+           <>
+              <Stack.Screen name="Eris">
+              {()=> <TabNavigator responderUid={user.uid}/>}
+              </Stack.Screen>
+              <Stack.Screen
+                name="UpdateProfile"
+                component={UpdateProfile}
+                options={({ navigation }) => ({
+                  title: "Update your profile",
+                  headerShown: true,
+                  headerLeft: () => (
+                    <TouchableOpacity
+                      onPress={() => navigation.navigate("Profile")}
+                    >
+                      <Text className="text-2xl">{`<`}</Text>
+                    </TouchableOpacity>
+                  ),
+                })}
+              />
+           </>
           ) : (
             <Stack.Screen name="Login" component={LoginForm} />
           )}
