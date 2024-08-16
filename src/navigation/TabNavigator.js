@@ -1,4 +1,4 @@
-import React from "react";
+import {useState} from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Home from "../screens/Home";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
@@ -10,7 +10,7 @@ import Profile from "../screens/Profile";
 const Tab = createBottomTabNavigator();
 
 const TabNavigator = ({responderUid}) => {
-
+  const [isProfileComplete, setIsProfileComplete] = useState(false);
 
   return (
     <Tab.Navigator
@@ -58,11 +58,22 @@ const TabNavigator = ({responderUid}) => {
       })}
     >
       <Tab.Screen name="Home">
-      {()=> <Home responderUid={responderUid} />}
+      {(props)=> <Home {...props} responderUid={responderUid}   setIsProfileComplete={setIsProfileComplete} />}
       </Tab.Screen>
       <Tab.Screen name="History" component={History}/>
       <Tab.Screen name="Notification" component={Notification}/>
-      <Tab.Screen name="Profile" component={Profile}/>
+      <Tab.Screen
+        name="Profile"
+        options={{
+          title: "Profile",
+          headerShown: true,
+          tabBarBadge: !isProfileComplete ? true : null,
+        }}
+      >
+        {(props) => (
+          <Profile {...props} responderUid={responderUid} setIsProfileComplete={setIsProfileComplete} />
+        )}
+      </Tab.Screen>
       
     </Tab.Navigator>
   );

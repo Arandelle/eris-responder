@@ -19,10 +19,11 @@ import responderMarker from "../../assets/ambulance.png";
 import drunk from "../../assets/drunk.png"
 import crime from "../../assets/murder.png"
 import Logo from "../../assets/logo.png"
+import FetchingData from "../services/FetchingData";
 
 const openRouteKey = OPENROUTE_API_KEY;
 
-const Home = ({ responderUid }) => {
+const Home = ({ responderUid, setIsProfileComplete }) => {
   const [responderPosition, setResponderPosition] = useState(null);
   const [heading, setHeading] = useState(0);
   const [emergencyData, setEmergencyData] = useState([]);
@@ -175,6 +176,7 @@ const Home = ({ responderUid }) => {
           </TouchableOpacity>
         </View>
       )}
+      <FetchingData setIsProfileComplete={setIsProfileComplete}/>
       <MapView
         className="w-full h-full"
         initialRegion={{

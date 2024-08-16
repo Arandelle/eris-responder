@@ -21,7 +21,7 @@ const UpdateProfile = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { onProfileUpdated, setIsProfileComplete } = route.params;
-  const [responderData, setResponderData] = useState(null);
+  const [userData, setUserData] = useState(null);
   const [mobileNum, setMobileNum] = useState("");
   const [firstname, setFirstName] = useState("");
   const [lastname, setLastName] = useState("");
@@ -36,14 +36,14 @@ const UpdateProfile = () => {
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        const userRef = ref(database, `users/${user.uid}`);
+        const userRef = ref(database, `responders/${user.uid}`);
 
         try {
           const snapshot = await new Promise((resolve, reject) => {
             onValue(userRef, resolve, reject, { onlyOnce: true });
           });
           const data = snapshot.val();
-          setResponderData(data);
+          setUserData(data);
           setMobileNum(data?.mobileNum || "");
           setFirstName(data?.firstname || "");
           setLastName(data?.lastname || "");
@@ -90,7 +90,7 @@ const UpdateProfile = () => {
       const userRef = ref(database, `responders/${user.uid}`);
       try {
         await update(userRef, updatedData);
-        setResponderData(updatedData);
+        setUserData(updatedData);
         Alert.alert(
           "Success",
           "Profile updated successfully!",

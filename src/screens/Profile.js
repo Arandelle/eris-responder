@@ -2,9 +2,12 @@ import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
+  Button,
   ActivityIndicator,
+  ScrollView,
   SafeAreaView,
   Alert,
+  StyleSheet,
   TouchableOpacity,
   Modal,
   TouchableWithoutFeedback,
@@ -14,9 +17,9 @@ import { ref, onValue } from "firebase/database";
 import { auth, database } from "../services/firebaseConfig";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 
-const Profile = () => {
+const Profile = ({ setIsProfileComplete }) => {
   const navigation = useNavigation();
-  const [responderData, setResponderData] = useState(null);
+  const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [logout, setLogout] = useState(false);
 
@@ -28,7 +31,7 @@ const Profile = () => {
         onValue(userRef, resolve, reject, { onlyOnce: true });
       });
       const data = snapshot.val();
-      setResponderData(data);
+      setUserData(data);
     } catch (error) {
       console.error("Error fetching user data:", error);
       Alert.alert("Error", "Failed to fetch user data. Please try again.");
@@ -52,7 +55,16 @@ const Profile = () => {
   const handleShowUpdateForm = () => {
     navigation.navigate("UpdateProfile", {
       onProfileUpdated: (updatedData) => {
-        setResponderData(updatedData);}
+        setUserData(updatedData);
+        const isProfileCompleted =
+          updatedData.firstname &&
+          updatedData.lastname &&
+          updatedData.age &&
+          updatedData.gender &&
+          updatedData.address &&
+          updatedData.mobileNum;
+        setIsProfileComplete(isProfileCompleted);
+      },
     });
   };
 
@@ -91,13 +103,13 @@ const Profile = () => {
         <View>
           <View className="items-center pb-5">
             <Text className="text-2xl font-bold pb-2">
-              {responderData?.firstname && responderData?.lastname
-                ? `${responderData.firstname} ${responderData.lastname}`
+              {userData?.firstname && userData?.lastname
+                ? `${userData.firstname} ${userData.lastname}`
                 : renderPlaceholder(null, "Your Name")}
             </Text>
             <Text className="text-lg text-white bg-sky-300 p-1 rounded-lg">
-              {responderData?.mobileNum
-                ? responderData.mobileNum
+              {userData?.mobileNum
+                ? userData.mobileNum
                 : renderPlaceholder(null, "Phone number")}
             </Text>
           </View>
@@ -106,8 +118,8 @@ const Profile = () => {
               <Text className="text-xl font-bold mb-2 ">
                 Age:{" "}
                 <Text className="text-lg text-gray-500 font-bold">
-                  {responderData?.age
-                    ? responderData?.age
+                  {userData?.age
+                    ? userData?.age
                     : renderPlaceholder(null, "Age")}
                 </Text>
               </Text>
@@ -116,8 +128,8 @@ const Profile = () => {
               <Text className="text-xl font-bold mb-2 ">
                 Gender:{" "}
                 <Text className="text-lg text-gray-500 font-bold">
-                  {responderData?.gender
-                    ? responderData?.gender
+                  {userData?.gender
+                    ? userData?.gender
                     : renderPlaceholder(null, "Your gender")}
                 </Text>
               </Text>
@@ -125,14 +137,14 @@ const Profile = () => {
             <View>
               <Text className="text-xl font-bold mb-2 ">Email Address:</Text>
               <Text className="text-lg text-gray-500 font-bold">
-                {responderData?.email}
+                {userData?.email}
               </Text>
             </View>
             <View>
               <Text className="text-xl font-bold mb-2 ">Current Address:</Text>
               <Text className="text-lg text-gray-500 font-bold">
-                {responderData?.address
-                  ? responderData.address
+                {userData?.address
+                  ? userData.address
                   : renderPlaceholder(null, "House No. Street Barangay")}
               </Text>
             </View>
