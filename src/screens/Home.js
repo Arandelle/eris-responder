@@ -82,15 +82,15 @@ const Home = ({ responderUid, setIsProfileComplete }) => {
         const emergencyList = Object.entries(data)
           .filter(
             ([_, emergency]) =>
-              emergency.location && emergency.status !== "done"
+              emergency.locationCoords && emergency.status !== "done"
           )
           .map(([id, emergency]) => ({
             id,
             name: emergency.name || "Unknown",
             type: emergency.type || "Unspecified",
             location: {
-              latitude: emergency.location.latitude,
-              longitude: emergency.location.longitude,
+              latitude: emergency.locationCoords.latitude,
+              longitude: emergency.locationCoords.longitude,
             },
             status: emergency.status || "active",
             description: emergency.description || "none",
@@ -140,10 +140,10 @@ const Home = ({ responderUid, setIsProfileComplete }) => {
     const unsubscribe = onValue(respondeRef, (snapshot) => {
       const responderData = snapshot.val();
 
-      if (responderData && responderData.location) {
+      if (responderData && responderData.locationCoords) {
         setResponderPosition({
-          latitude: responderData.location.latitude,
-          longitude: responderData.location.longitude,
+          latitude: responderData.locationCoords.latitude,
+          longitude: responderData.locationCoords.longitude,
         });
       }
     });
