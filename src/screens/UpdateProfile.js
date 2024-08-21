@@ -66,7 +66,7 @@ const UpdateProfile = () => {
   const handleUpdateProfile = async () => {
     const user = auth.currentUser;
     const isProfileCompleted =
-      firstname && lastname && age && address && mobileNum && selectedGender;
+     Boolean( firstname && lastname && age && address && mobileNum && selectedGender);
     // if (!firstname || !lastname || !age || !address || !mobileNum) {
     //   Alert.alert(
     //     "Validation Error",
