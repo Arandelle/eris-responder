@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   Modal,
   TouchableWithoutFeedback,
+  Image
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { ref, onValue } from "firebase/database";
@@ -102,6 +103,12 @@ const Profile = ({ setIsProfileComplete }) => {
       <View className="flex-1 justify-between bg-white rounded-lg m-4 p-5 shadow-md ">
         <View>
           <View className="items-center pb-5">
+          {userData.img ? (
+            <Image source={{uri: userData.img}}
+            className="h-[100px] w-[100px] rounded-full" />
+          ) : (
+            <Text className="text-lg text-gray-900 italic">Image not available</Text>
+          )}
             <Text className="text-2xl font-bold pb-2">
               {userData?.firstname && userData?.lastname
                 ? `${userData.firstname} ${userData.lastname}`
