@@ -112,7 +112,7 @@ const UpdateProfile = () => {
         await update(userRef, updatedData);
         setUserData(updatedData);
 
-        navigation.setParams({updatedUserData: updatedData})
+        navigation.setParams({ updatedUserData: updatedData });
 
         Alert.alert(
           "Success",
@@ -162,43 +162,46 @@ const UpdateProfile = () => {
     setMobileNum(value);
   };
 
-  const ImageUrl = [
-    "https://flowbite.com/docs/images/people/profile-picture-1.jpg",
-    "https://flowbite.com/docs/images/people/profile-picture-2.jpg",
-    "https://flowbite.com/docs/images/people/profile-picture-3.jpg",
-    "https://flowbite.com/docs/images/people/profile-picture-4.jpg",
-    "https://flowbite.com/docs/images/people/profile-picture-5.jpg",
-  ];
+  const multiavatar = Array.from({ length: 10 },(_, i) => 
+  `https://api.multiavatar.com/${i + 1}.png`
+  );
+  const flowbite = Array.from({ length: 5 },(_, i) => 
+  `https://flowbite.com/docs/images/people/profile-picture-${i+1}.jpg`
+  );
+
+  const ImageUrl = [...flowbite, ...multiavatar]
 
   return (
     <SafeAreaView className="flex-1">
       <ScrollView className="">
         <View className="flex-1">
           <Text className="text-lg m-4 text-sky-600 font-bold">Avatar: </Text>
-          <View className="flex flex-row space-x-3 justify-center">
-            {ImageUrl.map((url) => (
-              <TouchableOpacity
-                key={url}
-                onPress={() => setSelectedProfile(url)}
-                className="relative"
-              >
-                <Image
-                  source={{ uri: url }}
-                  className="h-[70px] w-[70px] rounded-full"
-                />
+          <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
+            <View className="flex flex-row space-x-3 justify-center">
+              {ImageUrl.map((url) => (
+                <TouchableOpacity
+                  key={url}
+                  onPress={() => setSelectedProfile(url)}
+                  className="relative"
+                >
+                  <Image
+                    source={{ uri: url }}
+                    className="h-[70px] w-[70px] rounded-full"
+                  />
 
-                {selectedProfile === url && (
-                  <View className="absolute top-0 right-0 bg-white rounded-full">
-                    <Icon
-                      name="checkbox-marked-circle"
-                      size={20}
-                      color={"green"}
-                    />
-                  </View>
-                )}
-              </TouchableOpacity>
-            ))}
-          </View>
+                  {selectedProfile === url && (
+                    <View className="absolute top-0 right-0 bg-white rounded-full">
+                      <Icon
+                        name="checkbox-marked-circle"
+                        size={20}
+                        color={"green"}
+                      />
+                    </View>
+                  )}
+                </TouchableOpacity>
+              ))}
+            </View>
+          </ScrollView>
           <View className="m-4">
             <CustomInput
               label={"First Name"}
