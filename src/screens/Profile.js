@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback} from "react";
 import {
   View,
   Text,
@@ -11,14 +11,15 @@ import {
   TouchableOpacity,
   Modal,
   TouchableWithoutFeedback,
-  Image
+  Image,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { ref, onValue } from "firebase/database";
 import { auth, database } from "../services/firebaseConfig";
 import { onAuthStateChanged, signOut } from "firebase/auth";
+import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
-const Profile = ({ setIsProfileComplete }) => {
+const Profile = () => {
   const navigation = useNavigation();
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -53,20 +54,22 @@ const Profile = ({ setIsProfileComplete }) => {
     return () => unsubscribeAuth();
   }, []);
 
+  useFocusEffect(
+    useCallback(() => {
+      const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          fetchUserData(user.uid);
+        } else {
+          navigation.navigate("Login");
+        }
+      });
+
+      return () => unsubscribeAuth();
+    }, [navigation])
+  );
+
   const handleShowUpdateForm = () => {
-    navigation.navigate("UpdateProfile", {
-      onProfileUpdated: (updatedData) => {
-        setUserData(updatedData);
-        const isProfileCompleted =
-          updatedData.firstname &&
-          updatedData.lastname &&
-          updatedData.age &&
-          updatedData.gender &&
-          updatedData.address &&
-          updatedData.mobileNum;
-        setIsProfileComplete(isProfileCompleted);
-      },
-    });
+    navigation.navigate("UpdateProfile");
   };
 
   if (loading) {
@@ -101,73 +104,70 @@ const Profile = ({ setIsProfileComplete }) => {
   return (
     <SafeAreaView className="flex-1 bg-gray-200">
       <View className="flex-1 justify-between bg-white rounded-lg m-4 p-5 shadow-md ">
-        <View>
-          <View className="items-center pb-5">
-          {userData.img ? (
-            <Image source={{uri: userData.img}}
-            className="h-[100px] w-[100px] rounded-full" />
-          ) : (
-            <Text className="text-lg text-gray-900 italic">Image not available</Text>
-          )}
-            <Text className="text-2xl font-bold pb-2">
-              {userData?.firstname && userData?.lastname
-                ? `${userData.firstname} ${userData.lastname}`
-                : renderPlaceholder(null, "Your Name")}
-            </Text>
-            <Text className="text-lg text-white bg-sky-300 p-1 rounded-lg">
-              {userData?.mobileNum
-                ? userData.mobileNum
-                : renderPlaceholder(null, "Phone number")}
+        <View className="items-center border-b-2 border-b-gray-300">
+          <View className="relative">
+            {userData?.img ? (
+              <Image
+                source={{ uri: userData.img }}
+                style={{ width: 100, height: 100, borderRadius: 50 }}
+              />
+            ) : (
+              <Text className="text-gray-900 text-lg">Image not available</Text>
+            )}
+            <TouchableOpacity
+              className="absolute bottom-0 right-0 rounded-full p-2 bg-white"
+              onPress={handleShowUpdateForm}
+            >
+              <Icon name="pencil" size={20} color={"blue"} />
+            </TouchableOpacity>
+          </View>
+          <Text className="text-2xl font-bold p-2">
+            {userData?.firstname && userData?.lastname
+              ? `${userData.firstname} ${userData.lastname}`
+              : renderPlaceholder(null, "Your Name")}
+          </Text>
+        </View>
+
+        <View className="mb-5 space-y-8">
+          <Text className="italic font-bold bg-gray-200 p-2 text-lg rounded-md">
+            user id: {auth.currentUser.uid}
+          </Text>
+          <View>
+            <Text className="text-xl font-bold mb-2 ">
+              Age:{" "}
+              <Text className="text-lg text-gray-500 font-bold">
+                {userData?.age ? userData?.age : renderPlaceholder(null, "Age")}
+              </Text>
             </Text>
           </View>
-          <View className="mb-5 space-y-8">
-            <View>
-              <Text className="text-xl font-bold mb-2 ">
-                Age:{" "}
-                <Text className="text-lg text-gray-500 font-bold">
-                  {userData?.age
-                    ? userData?.age
-                    : renderPlaceholder(null, "Age")}
-                </Text>
-              </Text>
-            </View>
-            <View>
-              <Text className="text-xl font-bold mb-2 ">
-                Gender:{" "}
-                <Text className="text-lg text-gray-500 font-bold">
-                  {userData?.gender
-                    ? userData?.gender
-                    : renderPlaceholder(null, "Your gender")}
-                </Text>
-              </Text>
-            </View>
-            <View>
-              <Text className="text-xl font-bold mb-2 ">Email Address:</Text>
+          <View>
+            <Text className="text-xl font-bold mb-2 ">
+              Gender:{" "}
               <Text className="text-lg text-gray-500 font-bold">
-                {userData?.email}
+                {userData?.gender
+                  ? userData?.gender
+                  : renderPlaceholder(null, "Your gender")}
               </Text>
-            </View>
-            <View>
-              <Text className="text-xl font-bold mb-2 ">Current Address:</Text>
-              <Text className="text-lg text-gray-500 font-bold">
-                {userData?.address
-                  ? userData.address
-                  : renderPlaceholder(null, "House No. Street Barangay")}
-              </Text>
-            </View>
+            </Text>
+          </View>
+          <View>
+            <Text className="text-xl font-bold mb-2 ">Email Address:</Text>
+            <Text className="text-lg text-gray-500 font-bold">
+              {userData?.email}
+            </Text>
+          </View>
+          <View>
+            <Text className="text-xl font-bold mb-2 ">Current Address:</Text>
+            <Text className="text-lg text-gray-500 font-bold">
+              {userData?.address
+                ? userData.address
+                : renderPlaceholder(null, "House No. Street Barangay")}
+            </Text>
           </View>
         </View>
         <View className="mb-2 space-y-2.5">
           <TouchableOpacity
-            className="p-3 bg-green-500 rounded-md"
-            onPress={handleShowUpdateForm}
-          >
-            <Text className="text-center text-lg text-white font-bold">
-              Update profile
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            className="p-3 bg-red-500 rounded-md"
+            className="p-3 bg-blue-400 rounded-full"
             onPress={handleLogoutModal}
           >
             <Text className="text-center text-lg text-white font-bold">
@@ -193,13 +193,22 @@ const Profile = ({ setIsProfileComplete }) => {
                   Are you sure you want to logout?
                 </Text>
                 <View className="space-y-3 py-3 px-5">
-                    <TouchableOpacity className="p-3 w-full bg-blue-600 rounded-2xl" onPress={handleLogout}>
-                      <Text className="text-white text-lg text-center font-extrabold">Confirm</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity className="p-3 w-full border-2 border-blue-500 rounded-2xl" 
-                    onPress={handleLogoutModal}>
-                      <Text className="text-center text-lg font-extrabold text-blue-500">Cancel</Text>
-                    </TouchableOpacity>
+                  <TouchableOpacity
+                    className="p-3 w-full bg-blue-600 rounded-2xl"
+                    onPress={handleLogout}
+                  >
+                    <Text className="text-white text-lg text-center font-extrabold">
+                      Confirm
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    className="p-3 w-full border-2 border-blue-500 rounded-2xl"
+                    onPress={handleLogoutModal}
+                  >
+                    <Text className="text-center text-lg font-extrabold text-blue-500">
+                      Cancel
+                    </Text>
+                  </TouchableOpacity>
                 </View>
               </View>
             </View>
