@@ -6,19 +6,17 @@ import {
   Image,
   Modal,
   TouchableWithoutFeedback,
+  Alert
 } from "react-native";
-import MapView, {
-  Polyline,
-  Marker,
-} from "react-native-maps";
+import MapView, { Polyline, Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import { OPENROUTE_API_KEY } from "@env";
 import { ref, onValue, set, update } from "firebase/database";
 import { database } from "../services/firebaseConfig";
 import responderMarker from "../../assets/ambulance.png";
-import drunk from "../../assets/drunk.png"
-import crime from "../../assets/murder.png"
-import Logo from "../../assets/logo.png"
+import drunk from "../../assets/drunk.png";
+import crime from "../../assets/murder.png";
+import Logo from "../../assets/logo.png";
 import FetchingData from "../services/FetchingData";
 
 const openRouteKey = OPENROUTE_API_KEY;
@@ -40,38 +38,48 @@ const Home = ({ responderUid, setIsProfileComplete }) => {
   };
 
   useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
+    const requestLocation = async () => {
+      try {
+        let { status } = await Location.requestForegroundPermissionsAsync();
 
-      if (status !== "granted") {
-        console.error("Permission to access location was denied");
-        setResponderPosition({ latitude: 14.33289, longitude: 120.85065} ); // Fallback position
-        return;
-      }
-
-      let location = await Location.getCurrentPositionAsync({});
-      setResponderPosition({
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-      });
-      //watch position changes
-      Location.watchPositionAsync({ distanceInterval: 1 }, (newLocation) => {
-        const { latitude, longitude } = newLocation.coords;
-        setResponderPosition({ latitude, longitude });
-        if (route.length > 0) {
-          const newHeading = calculateBearing(
-            latitude,
-            longitude,
-            route[1].latitude,
-            route[1].longitude
+        if (status !== "granted") {
+          console.error("Permission to access location was denied");
+          Alert.alert(
+            "Eris says: ",
+            "Permission to access location was denied"
           );
-          setHeading(newHeading);
+          setResponderPosition({ latitude: 14.33289, longitude: 120.85065 }); //fallback position
+          setLoading(false);
+          return;
         }
-        const responderRef = ref(database, `responders/${responderUid}`);
-        update(responderRef, { location: { latitude, longitude } },
-          );
-      });
-    })();
+
+        let location = await Location.getCurrentPositionAsync({});
+        setResponderPosition({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+        });
+
+        //watch postion changes
+
+        Location.watchPositionAsync({ distanceInterval: 1 }, (newLocation) => {
+          const { latitude, longitude } = newLocation.coords;
+          setResponderPosition({ latitude, longitude });
+
+          const responderRef = ref(database, `responders/${responderUid}`);
+          update(responderRef, { location: { latitude, longitude } });
+        });
+        setLoading(false);
+      } catch (error) {
+        console.error("Location request failed: ", error);
+        Alert.alert(
+          "Location permission was denied",
+          "The app is using a default fallback location. Please enable location permissions in your device settings for accurate location tracking."
+        );
+        setResponderPosition({ latitude: 14.33289, longitude: 120.85065 }); // Fallback position
+        setLoading(false); // Stop loading on error
+      }
+    };
+    requestLocation();
   }, []);
 
   useEffect(() => {
@@ -153,15 +161,15 @@ const Home = ({ responderUid, setIsProfileComplete }) => {
   if (loading || !responderPosition) {
     return (
       <View className="flex w-full h-full items-center justify-center">
-       <Image source={Logo} alt="Loading..."/>
-       <Text>Your map is loading...</Text>
+        <Image source={Logo} alt="Loading..." />
+        <Text>Your map is loading...</Text>
       </View>
     );
   }
 
   const handleSelectEmergency = (emergency) => {
     setSelectedEmergency(emergency);
-    setShowModal(false)
+    setShowModal(false);
   };
 
   return (
@@ -177,7 +185,7 @@ const Home = ({ responderUid, setIsProfileComplete }) => {
           </TouchableOpacity>
         </View>
       )}
-      <FetchingData setIsProfileComplete={setIsProfileComplete}/>
+      <FetchingData setIsProfileComplete={setIsProfileComplete} />
       <MapView
         className="w-full h-full"
         initialRegion={{
@@ -201,7 +209,9 @@ const Home = ({ responderUid, setIsProfileComplete }) => {
             pinColor="red"
             onPress={() => handleShowEmergencyDetails(emergency)}
           >
-         {emergency.type === "noise" && <Image source={drunk} className="h-14 w-12 animate-spin" />}
+            {emergency.type === "noise" && (
+              <Image source={drunk} className="h-14 w-12 animate-spin" />
+            )}
           </Marker>
         ))}
 
@@ -211,41 +221,48 @@ const Home = ({ responderUid, setIsProfileComplete }) => {
       </MapView>
 
       <Modal transparent={true} animationType="slide" visible={showModal}>
-        <TouchableWithoutFeedback onPress={()=> setShowModal(false)}>
+        <TouchableWithoutFeedback onPress={() => setShowModal(false)}>
           <View
             className="flex w-full h-full items-center justify-center"
             style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
           >
             {emergencyDetails && (
               <View className="w-80 bg-white rounded-sm shadow-lg">
-              <View className="flex p-2 justify-between flex-row bg-gray-200">
-                <Text className="text-lg font-bold">Emergency Id:</Text>
-                <Text className="text-lg">{emergencyDetails.id}</Text>
-              </View>
-              <View className="p-2 space-y-3">
-                <Text className="text-lg">Name: {emergencyDetails.name}</Text>
-                <Text className="text-lg">Type: {emergencyDetails.type}</Text>
-                <Text className="text-lg">
-                  Description: {emergencyDetails.description}
-                </Text>
-                <Text className="text-lg">
-                  {" "}
-                  Submitted: {emergencyDetails.timestamp}
-                </Text>
-                <TouchableOpacity
-                    className={`p-2.5 text-white items-center w-full rounded-md ${selectedEmergency?.id === emergencyDetails.id && route.length > 0 ? "bg-red-500" : "bg-green-500"}`}
+                <View className="flex p-2 justify-between flex-row bg-gray-200">
+                  <Text className="text-lg font-bold">Emergency Id:</Text>
+                  <Text className="text-lg">{emergencyDetails.id}</Text>
+                </View>
+                <View className="p-2 space-y-3">
+                  <Text className="text-lg">Name: {emergencyDetails.name}</Text>
+                  <Text className="text-lg">Type: {emergencyDetails.type}</Text>
+                  <Text className="text-lg">
+                    Description: {emergencyDetails.description}
+                  </Text>
+                  <Text className="text-lg">
+                    {" "}
+                    Submitted: {emergencyDetails.timestamp}
+                  </Text>
+                  <TouchableOpacity
+                    className={`p-2.5 text-white items-center w-full rounded-md ${
+                      selectedEmergency?.id === emergencyDetails.id &&
+                      route.length > 0
+                        ? "bg-red-500"
+                        : "bg-green-500"
+                    }`}
                     onPress={() => {
-                      handleSelectEmergency(emergencyDetails)
+                      handleSelectEmergency(emergencyDetails);
                     }}
                   >
                     <Text className="text-white font-bold">
-                      {selectedEmergency?.id === emergencyDetails.id && route.length > 0
+                      {selectedEmergency?.id === emergencyDetails.id &&
+                      route.length > 0
                         ? "Responding..."
                         : "Navigate to this location"}
                     </Text>
                   </TouchableOpacity>
+                </View>
               </View>
-            </View>)}
+            )}
           </View>
         </TouchableWithoutFeedback>
       </Modal>
