@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback} from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -19,7 +19,7 @@ import { auth, database } from "../services/firebaseConfig";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
-const Profile = () => {
+const Profile = ({setIsProfileComplete}) => {
   const navigation = useNavigation();
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -34,6 +34,10 @@ const Profile = () => {
       });
       const data = snapshot.val();
       setUserData(data);
+
+       // Check if the profile is complete and update the state
+       const profileComplete = data?.firstname && data?.lastname && data?.age && data?.address && data?.gender;
+       setIsProfileComplete(profileComplete);
     } catch (error) {
       console.error("Error fetching user data:", error);
       Alert.alert("Error", "Failed to fetch user data. Please try again.");
@@ -103,79 +107,98 @@ const Profile = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-200">
-      <View className="flex-1 justify-between bg-white rounded-lg m-4 p-5 shadow-md ">
-        <View className="items-center border-b-2 border-b-gray-300">
-          <View className="relative">
-            {userData?.img ? (
-              <Image
-                source={{ uri: userData.img }}
-                style={{ width: 100, height: 100, borderRadius: 50 }}
-              />
-            ) : (
-              <Text className="text-gray-900 text-lg">Image not available</Text>
+      <ScrollView>
+        <View className="flex-1 justify-between bg-white rounded-lg m-4 p-5 shadow-md ">
+          <View className="items-center border-b-2 border-b-gray-300">
+            <View className="relative">
+              {userData?.img ? (
+                <Image
+                  source={{ uri: userData.img }}
+                  style={{ width: 100, height: 100, borderRadius: 50 }}
+                />
+              ) : (
+                <Text className="text-gray-900 text-lg">
+                  Image not available
+                </Text>
+              )}
+              <TouchableOpacity
+                className="absolute bottom-0 right-0 rounded-full p-2 bg-white"
+                onPress={handleShowUpdateForm}
+              >
+                <Icon name="pencil" size={20} color={"blue"} />
+              </TouchableOpacity>
+            </View>
+            <Text className="text-2xl font-bold p-2">
+              {userData?.firstname && userData?.lastname
+                ? `${userData.firstname} ${userData.lastname}`
+                : renderPlaceholder(null, "Your Name")}
+            </Text>
+          </View>
+
+          <View className="mb-5 space-y-8 py-2">
+            <Text className="italic font-bold bg-blue-200 p-2 text-lg rounded-md">
+              user id: {auth.currentUser.uid}
+            </Text>
+            <View>
+              <Text className="text-xl font-bold mb-2 ">Contact:</Text>
+              <View className="flex flex-col justify-between space-y-1">
+                <Text className="text-lg text-gray-500 font-bold">
+                  {userData?.email}
+                </Text>
+                <Text className="text-lg text-gray-500 font-bold">
+                  {userData.mobileNum}
+                </Text>
+              </View>
+            </View>
+            <View>
+              <Text className="text-xl font-bold mb-2 ">
+                Age:{" "}
+                <Text className="text-lg text-gray-500 font-bold">
+                  {userData?.age
+                    ? userData?.age
+                    : renderPlaceholder(null, "Age")}
+                </Text>
+              </Text>
+            </View>
+            <View>
+              <Text className="text-xl font-bold mb-2 ">
+                Gender:{" "}
+                <Text className="text-lg text-gray-500 font-bold">
+                  {userData?.gender
+                    ? userData?.gender
+                    : renderPlaceholder(null, "Your gender")}
+                </Text>
+              </Text>
+            </View>
+            <View>
+              <Text className="text-xl font-bold mb-2 ">Current Address:</Text>
+              <Text className="text-lg text-gray-500 font-bold">
+                {userData?.address
+                  ? userData.address
+                  : renderPlaceholder(null, "House No. Street Barangay")}
+              </Text>
+            </View>
+
+            {!userData.profileComplete && (
+              <View className="p-4 bg-red-100 rounded-md">
+                <Text className="text-gray-900">
+                  Please update your profile for security purposes
+                </Text>
+              </View>
             )}
+          </View>
+          <View className="mb-2 space-y-2.5">
             <TouchableOpacity
-              className="absolute bottom-0 right-0 rounded-full p-2 bg-white"
-              onPress={handleShowUpdateForm}
+              className="p-3 bg-blue-500 rounded-full"
+              onPress={handleLogoutModal}
             >
-              <Icon name="pencil" size={20} color={"blue"} />
+              <Text className="text-center text-lg text-white font-bold">
+                Logout
+              </Text>
             </TouchableOpacity>
           </View>
-          <Text className="text-2xl font-bold p-2">
-            {userData?.firstname && userData?.lastname
-              ? `${userData.firstname} ${userData.lastname}`
-              : renderPlaceholder(null, "Your Name")}
-          </Text>
         </View>
-
-        <View className="mb-5 space-y-8">
-          <Text className="italic font-bold bg-gray-200 p-2 text-lg rounded-md">
-            user id: {auth.currentUser.uid}
-          </Text>
-          <View>
-            <Text className="text-xl font-bold mb-2 ">
-              Age:{" "}
-              <Text className="text-lg text-gray-500 font-bold">
-                {userData?.age ? userData?.age : renderPlaceholder(null, "Age")}
-              </Text>
-            </Text>
-          </View>
-          <View>
-            <Text className="text-xl font-bold mb-2 ">
-              Gender:{" "}
-              <Text className="text-lg text-gray-500 font-bold">
-                {userData?.gender
-                  ? userData?.gender
-                  : renderPlaceholder(null, "Your gender")}
-              </Text>
-            </Text>
-          </View>
-          <View>
-            <Text className="text-xl font-bold mb-2 ">Email Address:</Text>
-            <Text className="text-lg text-gray-500 font-bold">
-              {userData?.email}
-            </Text>
-          </View>
-          <View>
-            <Text className="text-xl font-bold mb-2 ">Current Address:</Text>
-            <Text className="text-lg text-gray-500 font-bold">
-              {userData?.address
-                ? userData.address
-                : renderPlaceholder(null, "House No. Street Barangay")}
-            </Text>
-          </View>
-        </View>
-        <View className="mb-2 space-y-2.5">
-          <TouchableOpacity
-            className="p-3 bg-blue-400 rounded-full"
-            onPress={handleLogoutModal}
-          >
-            <Text className="text-center text-lg text-white font-bold">
-              Logout
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+      </ScrollView>
       <Modal
         animationType="slide"
         transparent={true}

@@ -78,21 +78,21 @@ const UpdateProfile = () => {
         selectedProfile
     );
 
-    if (
-      !firstname ||
-      !lastname ||
-      !age ||
-      !address ||
-      !mobileNum ||
-      !selectedGender ||
-      !selectedProfile
-    ) {
-      Alert.alert(
-        "Validation Error",
-        "Please fill in all fields before updating your profile."
-      );
-      return; // Exit the function if any field is empty
-    }
+    // if (
+    //   !firstname ||
+    //   !lastname ||
+    //   !age ||
+    //   !address ||
+    //   !mobileNum ||
+    //   !selectedGender ||
+    //   !selectedProfile
+    // ) {
+    //   Alert.alert(
+    //     "Validation Error",
+    //     "Please fill in all fields before updating your profile."
+    //   );
+    //   return; // Exit the function if any field is empty
+    // }
 
     if (user) {
       const updatedData = {
@@ -181,6 +181,11 @@ const UpdateProfile = () => {
           <Text className="text-lg m-4 text-sky-600 font-bold">Avatar: </Text>
           <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
             <View className="flex flex-row space-x-3 justify-center">
+            <TouchableOpacity>
+              <View className="h-[70px] w-[70px] rounded-full bg-gray-200 flex justify-center items-center">
+                <Icon name="plus" size={40} color={"gray"}/>
+              </View>
+            </TouchableOpacity>
               {ImageUrl.map((url) => (
                 <TouchableOpacity
                   key={url}

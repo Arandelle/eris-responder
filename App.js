@@ -10,6 +10,7 @@
   import TabNavigator from './src/navigation/TabNavigator';
   import UpdateProfile from './src/screens/UpdateProfile';
   import Logo from "./assets/logo.png"
+  import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
   const Stack = createNativeStackNavigator();
 
@@ -54,7 +55,12 @@
 
     return (
       <NavigationContainer>
-        <Stack.Navigator screenOptions={{headerShown: false}}>
+        <Stack.Navigator screenOptions={{headerShown: false,
+         headerTitleAlign: "center",
+          headerTitleStyle: {
+            fontWeight: "900",
+            fontSize: 24,
+          },}}>
           {user && isResponder ? (
            <>
               <Stack.Screen name="Eris">
@@ -70,7 +76,7 @@
                     <TouchableOpacity
                       onPress={() => navigation.navigate("Profile")}
                     >
-                      <Text className="text-2xl">{`<`}</Text>
+                     <Icon name="arrow-left-thick" size={25} color={"blue"}/>
                     </TouchableOpacity>
                   ),
                 })}
