@@ -43,7 +43,7 @@ const LoginForm = () => {
         password
       );
       const user = userCredentials.user;
-      if (user.emailVerified || true) {
+      if (user.emailVerified) {
         const adminRef = ref(database, `responders/${user.uid}`);
         const adminSnapshot = await get(adminRef);
         if (adminSnapshot.exists()) {
