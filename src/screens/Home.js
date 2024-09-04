@@ -12,12 +12,13 @@ import MapView, { Polyline, Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import { OPENROUTE_API_KEY } from "@env";
 import { ref, onValue, set, update } from "firebase/database";
-import { database } from "../services/firebaseConfig";
+import { auth, database } from "../services/firebaseConfig";
 import responderMarker from "../../assets/ambulance.png";
 import drunk from "../../assets/drunk.png";
 import crime from "../../assets/murder.png";
 import Logo from "../../assets/logo.png";
 import FetchingData from "../services/FetchingData";
+import { serverTimestamp, push } from "firebase/database";
 
 const openRouteKey = OPENROUTE_API_KEY;
 
@@ -94,12 +95,14 @@ const Home = ({ responderUid, setIsProfileComplete }) => {
           )
           .map(([id, emergency]) => ({
             id,
+            userId: emergency.userId,
             name: emergency.name || "Unknown",
             type: emergency.type || "Unspecified",
-            location: {
+            locationCoords: {
               latitude: emergency.locationCoords.latitude,
               longitude: emergency.locationCoords.longitude,
             },
+            location: emergency.location,
             status: emergency.status || "active",
             description: emergency.description || "none",
             timestamp: new Date(emergency.timestamp).toLocaleString(),
@@ -167,10 +170,30 @@ const Home = ({ responderUid, setIsProfileComplete }) => {
     );
   }
 
-  const handleSelectEmergency = (emergency) => {
+  const handleSelectEmergency = async (emergency) => {
+    console.log(emergency); // Log the emergency object
+    try {
+      const user = auth.currentUser;
+      const historyRef = ref(database, `responders/${user.uid}/history`);
+      const newHistoryEntry = {
+        emergencyId: emergency.id,
+        userId: emergency.userId,
+        timestamp: serverTimestamp(),
+        location: emergency.location, // This should now be a string like "8RJX+RJV - Tanza, Calabarzon"
+        type: emergency.type,
+        description: emergency.description,
+        status: emergency.status,
+        name: emergency.name,
+      };
+      await push(historyRef, newHistoryEntry);
+    } catch (error) {
+      console.error("Error: ", error);
+    }
     setSelectedEmergency(emergency);
     setShowModal(false);
   };
+  
+  
 
   return (
     <View>
@@ -205,7 +228,7 @@ const Home = ({ responderUid, setIsProfileComplete }) => {
         {emergencyData.map((emergency) => (
           <Marker
             key={emergency.id}
-            coordinate={emergency.location}
+            coordinate={emergency.locationCoords}
             pinColor="red"
             onPress={() => handleShowEmergencyDetails(emergency)}
           >

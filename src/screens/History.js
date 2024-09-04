@@ -1,5 +1,5 @@
 import {useState, useEffect} from 'react'
-import { View, Text, ScrollView, Modal} from 'react-native'
+import { View, Text, ScrollView} from 'react-native'
 import {auth, database } from '../services/firebaseConfig'
 import { ref, get } from 'firebase/database'
 
@@ -15,13 +15,13 @@ const History = () => {
     const user = auth.currentUser;
 
     if (user) {
-      const userRef = ref(database, `emergencyRequest`);
+      const userRef = ref(database, `responders/${user.uid}/history`);
       const historySnapshot = await get(userRef);
       const historyData = historySnapshot.val();
 
       if (historyData) {
         const emergencyPromises = Object.keys(historyData).map(async (key) => {
-          const emergencyRef = ref(database, `emergencyRequest/${key}`);
+          const emergencyRef = ref(database, `responders/${user.uid}/history/${key}`);
           const emergencySnapshot = await get(emergencyRef);
           return { id: key, ...emergencySnapshot.val() };
         });
