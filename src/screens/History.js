@@ -45,7 +45,10 @@ const History = () => {
                 className="mb-4 p-2 border-b border-gray-200"
               >
                 <Text className="text-lg text-blue-600">
-                  Emergency ID: {emergency.id}
+                  Emergency ID: {emergency.emergencyId}
+                </Text>
+                <Text className="text-lg text-blue-600">
+                  History ID: {emergency.id}
                 </Text>
                 <Text className="text-sm text-gray-800">
                   User ID: {emergency.userId}

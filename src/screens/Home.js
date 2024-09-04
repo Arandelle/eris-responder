@@ -54,7 +54,7 @@ const Home = ({ responderUid }) => {
         emergencyId: emergency.id,
         userId: emergency.userId,
         timestamp: serverTimestamp(),
-        location: emergency.location, // This should now be a string like "8RJX+RJV - Tanza, Calabarzon"
+        location: emergency.location,
         type: emergency.type,
         description: emergency.description,
         status: emergency.status,
