@@ -17,7 +17,7 @@ import responderMarker from "../../assets/ambulance.png";
 import drunk from "../../assets/drunk.png";
 import crime from "../../assets/murder.png";
 import Logo from "../../assets/logo.png";
-import FetchingData from "../services/FetchingData";
+import FetchingData from "../components/ProfileReminderModal";
 import { serverTimestamp, push } from "firebase/database";
 
 const openRouteKey = OPENROUTE_API_KEY;
