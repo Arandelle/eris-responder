@@ -17,12 +17,12 @@ import responderMarker from "../../assets/ambulance.png";
 import drunk from "../../assets/drunk.png";
 import crime from "../../assets/murder.png";
 import Logo from "../../assets/logo.png";
-import FetchingData from "../components/ProfileReminderModal";
+import ProfileReminderModal from "../components/ProfileReminderModal";
 import { serverTimestamp, push } from "firebase/database";
 
 const openRouteKey = OPENROUTE_API_KEY;
 
-const Home = ({ responderUid, setIsProfileComplete }) => {
+const Home = ({ responderUid }) => {
   const [responderPosition, setResponderPosition] = useState(null);
   const [heading, setHeading] = useState(0);
   const [emergencyData, setEmergencyData] = useState([]);
@@ -208,7 +208,7 @@ const Home = ({ responderUid, setIsProfileComplete }) => {
           </TouchableOpacity>
         </View>
       )}
-      <FetchingData setIsProfileComplete={setIsProfileComplete} />
+      <ProfileReminderModal />
       <MapView
         className="w-full h-full"
         initialRegion={{

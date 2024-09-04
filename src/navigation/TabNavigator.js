@@ -1,4 +1,4 @@
-import {useState} from "react";
+import {useState, useEffect} from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Home from "../screens/Home";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
@@ -6,11 +6,20 @@ import Notification from "../screens/Notification";
 import { View } from "react-native";
 import History from "../screens/History";
 import Profile from "../screens/Profile";
+import { useFetchData } from "../hooks/useFetchData";
 
 const Tab = createBottomTabNavigator();
 
 const TabNavigator = ({responderUid}) => {
-  const [isProfileComplete, setIsProfileComplete] = useState(false);
+
+  const [isProfileComplete, setIsProfileComplete] = useState(true);
+  const {userData} = useFetchData();
+  
+  useEffect(() => {
+    if (userData) {
+      setIsProfileComplete(userData.profileComplete);
+    }
+  }, [userData]);
 
   return (
     <Tab.Navigator
