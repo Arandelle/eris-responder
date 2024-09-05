@@ -39,42 +39,42 @@ const History = () => {
       <View className="bg-gray-100 h-full p-2 w-full rounded-lg shadow-lg">
         <ScrollView>
           {emergencyHistory.length > 0 ? (
-            emergencyHistory.map((emergency) => (
+            emergencyHistory.map((history) => (
               <View
-                key={emergency.id}
+                key={history.id}
                 className="mb-4 p-2 border-b border-gray-200"
               >
                 <Text className="text-lg text-blue-600">
-                  Emergency ID: {emergency.emergencyId}
+                  Emergency ID: {history.emergencyId}
                 </Text>
                 <Text className="text-lg text-blue-600">
-                  History ID: {emergency.id}
+                  History ID: {history.id}
                 </Text>
                 <Text className="text-sm text-gray-800">
-                  User ID: {emergency.userId}
+                  User ID: {history.userId}
                 </Text>
                 <Text className="text-sm text-gray-800">
-                  Type: {emergency.type}
+                  Type: {history.type}
                 </Text>
                 <Text className="text-sm text-gray-600">
-                  Name: {emergency.name}
+                  Name: {history.name}
                 </Text>
                 <Text className="text-sm text-gray-600">
-                  Description: {emergency.description}
+                  Description: {history.description}
                 </Text>
                 <Text className="text-sm text-gray-600">
-                  Location: {emergency.location}
+                  Location: {history.location}
                 </Text>
-                <Text className={`text-sm ${emergency.status === "expired" ? "text-red-600" : "text-gray-600 "}`}>
-                  Status: {emergency.status}
+                <Text className={`text-sm ${history.status === "expired" ? "text-red-600" : "text-gray-600 "}`}>
+                  Status: {history.status}
                 </Text>
-                {emergency.status === "expired" && (
+                {history.status === "expired" && (
                 <Text className="text-sm text-gray-600">
-                  Expired At: {new Date(emergency.expiresAt).toLocaleString()}
+                  Expired At: {new Date(history.expiresAt).toLocaleString()}
                 </Text>
                 )}
                 <Text className="text-sm text-gray-600">
-                  Submitted: {new Date(emergency.timestamp).toLocaleString()}
+                  Submitted: {new Date(history.timestamp).toLocaleString()}
                 </Text>
               </View>
             ))

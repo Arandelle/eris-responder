@@ -26,6 +26,8 @@ const EmergencyDetailsModal = ({showModal,setShowModal, emergencyDetails,handleS
                 Submitted: {emergencyDetails.timestamp}
               </Text>
               <TouchableOpacity
+               disabled= {selectedEmergency?.id === emergencyDetails.id &&
+                  route.length > 0}
                 className={`p-2.5 text-white items-center w-full rounded-md ${
                   selectedEmergency?.id === emergencyDetails.id &&
                   route.length > 0

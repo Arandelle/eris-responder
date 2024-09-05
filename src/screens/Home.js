@@ -1,21 +1,18 @@
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Text,
   View,
   TouchableOpacity,
   Image,
-  Modal,
-  TouchableWithoutFeedback,
   Alert,
 } from "react-native";
 import MapView, { Polyline, Marker } from "react-native-maps";
-import { ref, onValue, } from "firebase/database";
+import { ref,serverTimestamp, push, update } from "firebase/database";
 import { auth, database } from "../services/firebaseConfig";
 import responderMarker from "../../assets/ambulance.png";
 import drunk from "../../assets/drunk.png";
 import Logo from "../../assets/logo.png";
 import ProfileReminderModal from "../components/ProfileReminderModal";
-import { serverTimestamp, push } from "firebase/database";
 import useLocation from "../hooks/useLocation"
 import useEmergencyData from "../hooks/useEmergencyData";
 import useRoute from "../hooks/useRoute";
@@ -78,6 +75,9 @@ const Home = ({ responderUid }) => {
       }
 
       await push(notificationRefForUser, newNotificationForUser);
+
+      const emergencyRef = ref(database, `emergencyRequest/${emergency.id}`);
+      await update(emergencyRef, {status: "accepted"});
 
       Alert.alert("Success", "You have successfully accepted the emergency request");
       
