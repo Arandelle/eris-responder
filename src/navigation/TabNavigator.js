@@ -7,6 +7,7 @@ import { View } from "react-native";
 import History from "../screens/History";
 import Profile from "../screens/Profile";
 import { useFetchData } from "../hooks/useFetchData";
+import { useNotificationData } from "../hooks/useNotificationData";
 
 const Tab = createBottomTabNavigator();
 
@@ -14,6 +15,7 @@ const TabNavigator = ({responderUid}) => {
 
   const [isProfileComplete, setIsProfileComplete] = useState(true);
   const {userData} = useFetchData();
+  const {notificationsCount} = useNotificationData();
   
   useEffect(() => {
     if (userData) {
@@ -70,7 +72,14 @@ const TabNavigator = ({responderUid}) => {
       {(props)=> <Home {...props} responderUid={responderUid}   setIsProfileComplete={setIsProfileComplete} />}
       </Tab.Screen>
       <Tab.Screen name="History" component={History}/>
-      <Tab.Screen name="Notification" component={Notification}/>
+      <Tab.Screen
+        name="Notification"
+        component={Notification}
+        options={{
+          title: "Notification",
+          tabBarBadge: notificationsCount === 0 ? null : notificationsCount,
+        }}
+      />
       <Tab.Screen
         name="Profile"
         options={{
