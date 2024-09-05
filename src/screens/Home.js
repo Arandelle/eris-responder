@@ -6,6 +6,7 @@ import {
   Image,
   Modal,
   TouchableWithoutFeedback,
+  Alert,
 } from "react-native";
 import MapView, { Polyline, Marker } from "react-native-maps";
 import { ref, onValue, } from "firebase/database";
@@ -19,9 +20,10 @@ import useLocation from "../hooks/useLocation"
 import useEmergencyData from "../hooks/useEmergencyData";
 import useRoute from "../hooks/useRoute";
 import EmergencyDetailsModal from "./EmergencyDetailsModal";
+import { useFetchData } from "../hooks/useFetchData";
 
 const Home = ({ responderUid }) => {
-
+  const {userData} = useFetchData();
   const {responderPosition, loading: locationLoading } = useLocation(responderUid);
   const {emergencyData, loading: emergencyLoading} = useEmergencyData();
   const [selectedEmergency, setSelectedEmergency] = useState(null);
@@ -61,6 +63,24 @@ const Home = ({ responderUid }) => {
         name: emergency.name,
       };
       await push(historyRef, newHistoryEntry);
+
+      const notificationRefForUser = ref(database, `users/${emergency.userId}/notifications`);
+      const newNotificationForUser = {
+        type: "emergency",
+        message: `Your responder is coming`,
+        description: "Medical assistance is on your way",
+        email: `${userData.email}`,
+        isSeen: false,
+        date: new Date().toISOString(),
+        timestamp: serverTimestamp(),
+        img: `${userData.img}`,
+        icon: "hospital-box"
+      }
+
+      await push(notificationRefForUser, newNotificationForUser);
+
+      Alert.alert("Success", "You have successfully accepted the emergency request");
+      
     } catch (error) {
       console.error("Error: ", error);
     }
