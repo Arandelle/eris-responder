@@ -12,25 +12,10 @@ const useEmergencyData = () => {
         const unsubscribe = onValue(requestRef, (snapshot) => {
           try {
             const data = snapshot.val();
-            const emergencyList = Object.entries(data)
-              .filter(
-                ([_, emergency]) =>
-                  emergency.locationCoords && emergency.status !== "done"
-              )
-              .map(([id, emergency]) => ({
-                id,
-                userId: emergency.userId,
-                name: emergency.name || "Unknown",
-                type: emergency.type || "Unspecified",
-                locationCoords: {
-                  latitude: emergency.locationCoords.latitude,
-                  longitude: emergency.locationCoords.longitude,
-                },
-                location: emergency.location,
-                status: emergency.status || "active",
-                description: emergency.description || "none",
-                timestamp: new Date(emergency.timestamp).toLocaleString(),
-              }));
+            const emergencyList = Object.keys(data).map((key) => ({
+              id: key,
+              ...data[key],
+            }))
             setEmergencyData(emergencyList);
             setLoading(false);
           } catch (error) {

@@ -122,7 +122,7 @@ const Home = ({ responderUid }) => {
           <Marker
             key={emergency.id}
             coordinate={emergency.locationCoords}
-            pinColor="red"
+            pinColor={emergency.status === "pending" ? "red" : "yellow"}
             onPress={() => handleShowEmergencyDetails(emergency)}
           >
             {emergency.type === "noise" && (

@@ -1,39 +1,34 @@
 import {useState, useEffect} from 'react'
 import { View, Text, ScrollView} from 'react-native'
 import {auth, database } from '../services/firebaseConfig'
-import { ref, get } from 'firebase/database'
+import { ref, onValue } from 'firebase/database'
 
 const History = () => {
 
   const [emergencyHistory, setEmergencyHistory] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-      fetchEmergencyHistory();
-  }, []);
-
-  const fetchEmergencyHistory = async () => {
-    const user = auth.currentUser;
-
-    if (user) {
-      const userRef = ref(database, `responders/${user.uid}/history`);
-      const historySnapshot = await get(userRef);
-      const historyData = historySnapshot.val();
-
-      if (historyData) {
-        const emergencyPromises = Object.keys(historyData).map(async (key) => {
-          const emergencyRef = ref(database, `responders/${user.uid}/history/${key}`);
-          const emergencySnapshot = await get(emergencyRef);
-          return { id: key, ...emergencySnapshot.val() };
+    useEffect(() => {
+      const user = auth.currentUser
+      if(user){
+        const requestRef = ref(database, `responders/${user.uid}/history`);
+        const unsubscribe = onValue(requestRef, (snapshot) => {
+          try {
+            const data = snapshot.val();
+            const emergencyList = Object.keys(data).map((key) => ({
+              id: key,
+              ...data[key],
+            }))
+            setEmergencyHistory(emergencyList);
+            setLoading(false);
+          } catch (error) {
+            console.error("Error fetching emergency data:", error);
+            setLoading(false);
+          }
         });
-
-        const emergencies = await Promise.all(emergencyPromises);
-        setEmergencyHistory(emergencies);
-      } else {
-        setEmergencyHistory([]);
+        return () => unsubscribe();
       }
-    }
-  };
-  
+      }, []);
 
   return (
       <View className="bg-gray-100 h-full p-2 w-full rounded-lg shadow-lg">
@@ -75,6 +70,9 @@ const History = () => {
                 )}
                 <Text className="text-sm text-gray-600">
                   Submitted: {new Date(history.timestamp).toLocaleString()}
+                </Text>
+                 <Text className="text-sm text-gray-600">
+                  submiited by user: {new Date(history.date).toLocaleString()}
                 </Text>
               </View>
             ))
