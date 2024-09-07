@@ -76,8 +76,18 @@ const Home = ({ responderUid }) => {
 
       await push(notificationRefForUser, newNotificationForUser);
 
-      const emergencyRef = ref(database, `emergencyRequest/${emergency.id}`);
-      await update(emergencyRef, {status: "accepted"});
+      const updates = {}
+
+      updates[`emergencyRequest/${emergency.id}/status`] = "accepted"
+      updates[`users/${emergency.userId}/emergencyHistory/${emergency.id}/status`] = "accepted"
+
+      updates[`emergencyRequest/${emergency.id}/locationOfResponder`] = {
+        latitude: userData.location.latitude,
+        longitude: userData.location.longitude
+      }
+      updates[`emergencyRequest/${emergency.id}/acceptedBy`] = userData.firstname
+  
+      await update(ref(database), updates);
 
       Alert.alert("Success", "You have successfully accepted the emergency request");
       
