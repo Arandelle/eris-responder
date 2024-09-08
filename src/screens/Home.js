@@ -85,8 +85,21 @@ const Home = ({ responderUid }) => {
         latitude: userData.location.latitude,
         longitude: userData.location.longitude
       }
+
+      updates[`users/${emergency.userId}/emergencyHistory/${emergency.id}/locationOfResponder`] = {
+        latitude: userData.location.latitude,
+        longitude: userData.location.longitude
+      }
+
       updates[`emergencyRequest/${emergency.id}/acceptedBy`] = userData.firstname
-  
+      updates[`users/${emergency.userId}/emergencyHistory/${emergency.id}/acceptedBy`] = userData.firstname
+
+      updates[`users/${emergency.userId}/activeRequest/acceptedBy`] = userData.firstname
+      updates[`users/${emergency.userId}/activeRequest/locationOfResponder`] = {
+        latitude: userData.location.latitude,
+        longitude: userData.location.longitude
+      }
+
       await update(ref(database), updates);
 
       Alert.alert("Success", "You have successfully accepted the emergency request");
