@@ -4,6 +4,7 @@ import {
   View,
   Image,
   Alert,
+  TouchableOpacity,
 } from "react-native";
 import MapView, { Polyline, Marker } from "react-native-maps";
 import { ref,serverTimestamp, push, update, onValue} from "firebase/database";
@@ -23,7 +24,7 @@ const Home = ({ responderUid }) => {
   const {emergencyData, loading: emergencyLoading} = useEmergencyData();
   const [selectedEmergency, setSelectedEmergency] = useState(null);
  
-  const { route, distance } = useRoute(responderPosition, selectedEmergency);
+  const { route,setRoute, distance, fetchRoute} = useRoute(responderPosition, selectedEmergency);
   const [emergencyDetails, setEmergencyDetails] = useState(null);
   const [heading, setHeading] = useState(0);
  
@@ -39,6 +40,7 @@ const Home = ({ responderUid }) => {
         setSelectedEmergency({
           latitude: responderData.locationCoords.latitude,
           longitude: responderData.locationCoords.longitude,
+          id: responderData.requestId
         });
       }
     });
@@ -61,6 +63,11 @@ const Home = ({ responderUid }) => {
 
   const handleSelectEmergency = async (emergency) => {
     try {
+
+      if(selectedEmergency){
+        Alert.alert("Error Navigating", "You have pending emergency,please make sure to assist them first")
+        return;
+      } 
       const user = auth.currentUser;
       const historyRef = ref(database, `responders/${user.uid}/history`);
       const newHistoryEntry = {
@@ -133,7 +140,6 @@ const Home = ({ responderUid }) => {
       console.error("Error: ", error);
     }
     setShowModal(false);
-    console.log(emergency.locationCoords.latitude)
   };
 
 
@@ -184,6 +190,7 @@ const Home = ({ responderUid }) => {
       selectedEmergency={selectedEmergency}
       setSelectedEmergency={setSelectedEmergency}
       route={route}
+      setRoute={setRoute}
        />
     </View>
   );
