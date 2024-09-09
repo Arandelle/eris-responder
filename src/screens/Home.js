@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Text,
   View,
@@ -7,10 +7,9 @@ import {
   Alert,
 } from "react-native";
 import MapView, { Polyline, Marker } from "react-native-maps";
-import { ref,serverTimestamp, push, update } from "firebase/database";
+import { ref,serverTimestamp, push, update, onValue} from "firebase/database";
 import { auth, database } from "../services/firebaseConfig";
 import responderMarker from "../../assets/ambulance.png";
-import drunk from "../../assets/drunk.png";
 import Logo from "../../assets/logo.png";
 import ProfileReminderModal from "../components/ProfileReminderModal";
 import useLocation from "../hooks/useLocation"
@@ -30,6 +29,22 @@ const Home = ({ responderUid }) => {
   const [heading, setHeading] = useState(0);
  
   const [showModal, setShowModal] = useState(false);
+
+  useEffect(() => {
+    const user = auth.currentUser;
+    const respondeRef = ref(database, `responders/${user.uid}/pendingEmergency`);
+    const unsubscribe = onValue(respondeRef, (snapshot) => {
+      const responderData = snapshot.val();
+
+      if (responderData && responderData.locationCoords) {
+        setSelectedEmergency({
+          latitude: responderData.locationCoords.latitude,
+          longitude: responderData.locationCoords.longitude,
+        });
+      }
+    });
+    return () => unsubscribe();
+  }, []);
 
   const handleShowEmergencyDetails = (emergency) => {
     setEmergencyDetails(emergency);
@@ -60,6 +75,17 @@ const Home = ({ responderUid }) => {
         name: emergency.name,
       };
       await push(historyRef, newHistoryEntry);
+
+       // Update responder's pending emergency assistance
+       await update(ref(database, `responders/${user.uid}`), {
+        pendingEmergency: {
+          requestId: emergency.id,
+          locationCoords: {
+            latitude: emergency.locationCoords.latitude,
+            longitude: emergency.locationCoords.longitude,
+          },
+        },
+      });
 
       const notificationRefForUser = ref(database, `users/${emergency.userId}/notifications`);
       const newNotificationForUser = {
@@ -107,10 +133,11 @@ const Home = ({ responderUid }) => {
     } catch (error) {
       console.error("Error: ", error);
     }
-    setSelectedEmergency(emergency);
     setShowModal(false);
+    console.log(emergency.locationCoords.latitude)
   };
-  
+
+
   return (
     <View>
       {selectedEmergency && (
@@ -147,11 +174,7 @@ const Home = ({ responderUid }) => {
             coordinate={emergency.locationCoords}
             pinColor={emergency.status === "pending" ? "red" : "yellow"}
             onPress={() => handleShowEmergencyDetails(emergency)}
-          >
-            {emergency.type === "noise" && (
-              <Image source={drunk} className="h-14 w-12 animate-spin" />
-            )}
-          </Marker>
+          />
         ))}
 
         {route.length > 0 && (
@@ -164,6 +187,7 @@ const Home = ({ responderUid }) => {
       emergencyDetails={emergencyDetails}
       handleSelectEmergency={handleSelectEmergency}
       selectedEmergency={selectedEmergency}
+      setSelectedEmergency={setSelectedEmergency}
       route={route}
        />
     </View>

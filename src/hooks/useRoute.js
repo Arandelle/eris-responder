@@ -1,9 +1,11 @@
 import { OPENROUTE_API_KEY } from "@env";
 import { useState, useEffect } from "react";
+import { auth,database } from "../services/firebaseConfig";
+import {ref, onValue} from "firebase/database";
 
 const openRouteKey = OPENROUTE_API_KEY;
 
-const useRoute = (responderPosition, selectedEmergency) => {
+const useRoute = (responderPosition, selectedEmergency, setSelectedEmergency) => {
 
   const [route, setRoute] = useState([]);
   const [distance, setDistance] = useState(0);
@@ -13,7 +15,7 @@ const useRoute = (responderPosition, selectedEmergency) => {
 
     try {
       const response = await fetch(
-        `https://api.openrouteservice.org/v2/directions/driving-car?api_key=${openRouteKey}&start=${responderPosition.longitude},${responderPosition.latitude}&end=${selectedEmergency.locationCoords.longitude},${selectedEmergency.locationCoords.latitude}`
+        `https://api.openrouteservice.org/v2/directions/driving-car?api_key=${openRouteKey}&start=${responderPosition.longitude},${responderPosition.latitude}&end=${selectedEmergency.longitude},${selectedEmergency.latitude}`
       );
       const data = await response.json();
 
