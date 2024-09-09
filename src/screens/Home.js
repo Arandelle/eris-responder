@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import {
   Text,
   View,
-  TouchableOpacity,
   Image,
   Alert,
 } from "react-native";
@@ -24,7 +23,7 @@ const Home = ({ responderUid }) => {
   const {emergencyData, loading: emergencyLoading} = useEmergencyData();
   const [selectedEmergency, setSelectedEmergency] = useState(null);
  
-  const { route, distance, fetchRoute } = useRoute(responderPosition, selectedEmergency);
+  const { route, distance } = useRoute(responderPosition, selectedEmergency);
   const [emergencyDetails, setEmergencyDetails] = useState(null);
   const [heading, setHeading] = useState(0);
  
@@ -139,21 +138,10 @@ const Home = ({ responderUid }) => {
 
 
   return (
-    <View>
-      {selectedEmergency && (
-        <View className="p-2.5 items-center bg-white flex-row justify-between border-t-2 border-t-blue-500 absolute top-0 z-50 w-full">
-          <Text>Distance: {distance.toFixed(2)} km</Text>
-          <TouchableOpacity
-            className="p-2.5 bg-blue-500 rounded-md"
-            onPress={fetchRoute}
-          >
-            <Text className="text-white font-bold">Refresh Route</Text>
-          </TouchableOpacity>
-        </View>
-      )}
+    <View className="flex-1">
       <ProfileReminderModal />
       <MapView
-        className="w-full h-full"
+        className="flex-1"
         initialRegion={{
           ...responderPosition,
           latitudeDelta: 0.005,
@@ -181,6 +169,13 @@ const Home = ({ responderUid }) => {
           <Polyline coordinates={route} strokeColor="red" strokeWidth={2} />
         )}
       </MapView>
+
+        {selectedEmergency && (
+          <View className="bg-gray-500 p-2">
+          <Text className="text-white text-lg">Distance to user: {distance.toFixed(2)} km</Text>
+          </View>
+        )}
+
       <EmergencyDetailsModal
       showModal={showModal}
       setShowModal={setShowModal}

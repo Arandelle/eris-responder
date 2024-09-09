@@ -39,7 +39,7 @@ const useRoute = (responderPosition, selectedEmergency, setSelectedEmergency) =>
     }
   }, [responderPosition, selectedEmergency]);
 
-  return {route, distance, fetchRoute}
+  return {route, distance}
 };
 
 export default useRoute;
