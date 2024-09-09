@@ -156,7 +156,7 @@ const Home = ({ responderUid }) => {
         >
           <Image source={responderMarker} className="h-12 w-12" />
         </Marker>
-        {emergencyData.map((emergency) => (
+        {emergencyData.filter((emergency) => emergency.status === "pending" || emergency.status === "accepted").map((emergency) => (
           <Marker
             key={emergency.id}
             coordinate={emergency.locationCoords}
