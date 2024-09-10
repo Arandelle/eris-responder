@@ -47,6 +47,12 @@ const Home = ({ responderUid }) => {
     return () => unsubscribe();
   }, []);
 
+  useEffect(()=>{
+    if(!emergencyDetails){
+      Alert.alert("Have a nice day!", "No emergency request yet");
+    }
+  }, [])
+
   const handleShowEmergencyDetails = (emergency) => {
     setEmergencyDetails(emergency);
     setShowModal(true);
