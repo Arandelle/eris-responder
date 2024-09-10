@@ -24,7 +24,7 @@ const Home = ({ responderUid }) => {
   const {emergencyData, loading: emergencyLoading} = useEmergencyData();
   const [selectedEmergency, setSelectedEmergency] = useState(null);
  
-  const { route,setRoute, distance, fetchRoute} = useRoute(responderPosition, selectedEmergency);
+  const { route,setRoute, distance, setDistance} = useRoute(responderPosition, selectedEmergency);
   const [emergencyDetails, setEmergencyDetails] = useState(null);
   const [heading, setHeading] = useState(0);
  
@@ -176,7 +176,7 @@ const Home = ({ responderUid }) => {
         )}
       </MapView>
 
-        {selectedEmergency && (
+        {selectedEmergency && distance > 0 && (
           <View className="bg-gray-500 p-2">
           <Text className="text-white text-lg">Distance to user: {distance.toFixed(2)} km</Text>
           </View>
@@ -191,6 +191,7 @@ const Home = ({ responderUid }) => {
       setSelectedEmergency={setSelectedEmergency}
       route={route}
       setRoute={setRoute}
+      setDistance={setDistance}
        />
     </View>
   );

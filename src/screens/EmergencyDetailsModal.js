@@ -1,4 +1,4 @@
-import { ref, remove } from "firebase/database";
+import { ref, remove, update } from "firebase/database";
 import {
   View,
   TouchableWithoutFeedback,
@@ -17,10 +17,11 @@ const EmergencyDetailsModal = ({
   selectedEmergency,
   setSelectedEmergency,
   route,
-  setRoute
+  setRoute,
+  setDistance
 }) => {
 
-  const handleEmergencyDone = () => {
+  const handleEmergencyDone = (emergency) => {
     Alert.alert("Notice!", "Are you sure this emergency is done?", [
       {
         text: "cancel"
@@ -31,9 +32,18 @@ const EmergencyDetailsModal = ({
             const user = auth.currentUser;
             if(user){
               await remove(ref(database, `responders/${user.uid}/pendingEmergency`));
-              Alert.alert("success!", "This emergency was done");
+
+              const updates = {}
+
+               updates[`emergencyRequest/${emergency.id}/status`] = "done"
+               updates[`users/${emergency.userId}/emergencyHistory/${emergency.id}/status`] = "done"
+
+              await update(ref(database), updates);
+
+              Alert.alert("Success!", "Emergency request succussfully done!");
               setSelectedEmergency({})
               setRoute([])
+              setDistance(0)
             } else{
               console.log("No user available");
             }
@@ -93,8 +103,8 @@ const EmergencyDetailsModal = ({
                 {selectedEmergency?.id === emergencyDetails.id &&
                   route.length > 0 && (
                     <TouchableOpacity className="p-2.5 items-center w-full rounded-md bg-green-500"
-                    onPress={handleEmergencyDone}>
-                      <Text className="text-white">Already Done</Text>
+                    onPress={()=>handleEmergencyDone(emergencyDetails)}>
+                      <Text className="text-white">Mark as done</Text>
                     </TouchableOpacity>
                   )}
               </View>
