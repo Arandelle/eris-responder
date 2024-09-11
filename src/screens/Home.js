@@ -48,7 +48,7 @@ const Home = ({ responderUid }) => {
   }, []);
 
   useEffect(()=>{
-    if(!emergencyDetails){
+    if(!emergencyDetails && responderPosition){
       Alert.alert("Have a nice day!", "No emergency request yet");
     }
   }, [])
@@ -132,6 +132,7 @@ const Home = ({ responderUid }) => {
       updates[`emergencyRequest/${emergency.id}/acceptedBy`] = userData.firstname
       updates[`users/${emergency.userId}/emergencyHistory/${emergency.id}/acceptedBy`] = userData.firstname
 
+      updates[`users/${emergency.userId}/activeRequest/responderId`] = user.uid
       updates[`users/${emergency.userId}/activeRequest/acceptedBy`] = userData.firstname
       updates[`users/${emergency.userId}/activeRequest/locationOfResponder`] = {
         latitude: userData.location.latitude,
