@@ -10,30 +10,32 @@ const useLocation = (responderUid) => {
   const [responderPosition, setResponderPosition] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const updateLocation = async (latitude, longitude) =>{
+  const updateLocation = async (latitude, longitude) => {
     const responderRef = ref(database, `responders/${responderUid}/location`);
     
-    try{
-      await update(responderRef, {latitude, longitude})
-
-      if(userData?.pendingEmergency?.userId){
-        const userActiveRequestRef  = ref(database, `users/${userData.pendingEmergency.userId}/activeRequest`);
+    try {
+      // Always update the responder's location
+      await update(responderRef, { latitude, longitude });
+      console.log("Responder location updated successfully");
+  
+      if (userData?.pendingEmergency?.userId) {
+        // Check if the user actually has an active request
+        const userActiveRequestRef = ref(database, `users/${userData.pendingEmergency.userId}/activeRequest`);
         const activeRequestSnapshot = await get(userActiveRequestRef);
-
-        if(activeRequestSnapshot.exists()){
-          const responderLocation = ref(database, `users/${userData.pendingEmergency.userId}/activeRequest`);
-          await update(responderLocation, {latitude, longitude});
-        } else{
-          console.log("User dont have activeRequest")
+  
+        if (activeRequestSnapshot.exists()) {
+          // User has an active request, update responder's location for the user
+          const responderLocationForUser = ref(database, `users/${userData.pendingEmergency.userId}/activeRequest/locationOfResponder`);
+          await update(responderLocationForUser, { latitude, longitude });
+          console.log("Responder location updated for user with active request");
+        } else {
+          console.log("User does not have an active request. Skipping update of locationOfResponder.");
         }
-      }else{
-        console.log("responder has no pending emergency yet")
       }
-    } catch(error){
-      console.error("Error updating location: ", error)
+    } catch (error) {
+      console.error("Error updating location: ", error);
     }
   }
-
   useEffect(() => {
     const requestLocation = async () => {
       try {
