@@ -41,8 +41,8 @@ const EmergencyDetailsModal = ({
               await update(ref(database), updates);
 
               Alert.alert("Success!", "Emergency request succussfully done!");
-              setSelectedEmergency({})
-              setRoute([])
+              setSelectedEmergency(false)
+              setRoute(0)
               setDistance(0)
             } else{
               console.log("No user available");
