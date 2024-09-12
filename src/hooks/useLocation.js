@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import * as Location from "expo-location";
 import { Alert } from "react-native";
-import { ref, update, onValue } from "firebase/database";
+import { ref, update, onValue, get } from "firebase/database";
 import { database } from "../services/firebaseConfig";
 import { useFetchData } from "./useFetchData";
 
@@ -12,17 +12,25 @@ const useLocation = (responderUid) => {
 
   const updateLocation = async (latitude, longitude) =>{
     const responderRef = ref(database, `responders/${responderUid}/location`);
-          
-    if (userData?.pendingEmergency?.userId) {
-      const responderLocationForUser = ref(database, `users/${userData.pendingEmergency.userId}/activeRequest/locationOfResponder`);
+    
+    try{
+      await update(responderRef, {latitude, longitude})
 
-      try {
-        await update(responderRef, { latitude, longitude });
-        await update(responderLocationForUser, { latitude, longitude });
-        console.log("Location successfully updated for both responder and user");
-      } catch (error) {
-        console.error("Error updating location: ", error);
+      if(userData?.pendingEmergency?.userId){
+        const userActiveRequestRef  = ref(database, `users/${userData.pendingEmergency.userId}/activeRequest`);
+        const activeRequestSnapshot = await get(userActiveRequestRef);
+
+        if(activeRequestSnapshot.exists()){
+          const responderLocation = ref(database, `users/${userData.pendingEmergency.userId}/activeRequest`);
+          await update(responderLocation, {latitude, longitude});
+        } else{
+          console.log("User dont have activeRequest")
+        }
+      }else{
+        console.log("responder has no pending emergency yet")
       }
+    } catch(error){
+      console.error("Error updating location: ", error)
     }
   }
 
