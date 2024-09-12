@@ -10,6 +10,22 @@ const useLocation = (responderUid) => {
   const [responderPosition, setResponderPosition] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const updateLocation = async (latitude, longitude) =>{
+    const responderRef = ref(database, `responders/${responderUid}/location`);
+          
+    if (userData?.pendingEmergency?.userId) {
+      const responderLocationForUser = ref(database, `users/${userData.pendingEmergency.userId}/activeRequest/locationOfResponder`);
+
+      try {
+        await update(responderRef, { latitude, longitude });
+        await update(responderLocationForUser, { latitude, longitude });
+        console.log("Location successfully updated for both responder and user");
+      } catch (error) {
+        console.error("Error updating location: ", error);
+      }
+    }
+  }
+
   useEffect(() => {
     const requestLocation = async () => {
       try {
@@ -23,21 +39,7 @@ const useLocation = (responderUid) => {
           );
 
           const fallbackLocation = { latitude: 14.33289, longitude: 120.85065 }; // fallback position
-          const responderRef = ref(database, `responders/${responderUid}/location`);
-          
-          // Ensure that the userData is available and valid before updating
-          if (userData?.pendingEmergency?.userId) {
-            const responderLocationForUser = ref(database, `users/${userData.pendingEmergency.userId}/activeRequest/locationOfResponder`);
-            
-            try {
-              await update(responderRef, fallbackLocation);
-              await update(responderLocationForUser, fallbackLocation);
-              console.log("Fallback location successfully updated to both responder and user");
-            } catch (error) {
-              console.error("Error updating location: ", error);
-            }
-          }
-
+          await updateLocation(fallbackLocation.latitude, fallbackLocation.longitude)
           setResponderPosition(fallbackLocation);
           setLoading(false);
           return;
@@ -50,21 +52,7 @@ const useLocation = (responderUid) => {
         Location.watchPositionAsync({ distanceInterval: 1 }, async (newLocation) => {
           const { latitude, longitude } = newLocation.coords;
           setResponderPosition({ latitude, longitude });
-
-          const responderRef = ref(database, `responders/${responderUid}/location`);
-          
-          // Ensure user data is available and valid before updating
-          if (userData?.pendingEmergency?.userId) {
-            const responderLocationForUser = ref(database, `users/${userData.pendingEmergency.userId}/activeRequest/locationOfResponder`);
-
-            try {
-              await update(responderRef, { latitude, longitude });
-              await update(responderLocationForUser, { latitude, longitude });
-              console.log("Location successfully updated for both responder and user");
-            } catch (error) {
-              console.error("Error updating location: ", error);
-            }
-          }
+          await updateLocation(latitude, longitude)
         });
 
         setLoading(false);
@@ -76,21 +64,7 @@ const useLocation = (responderUid) => {
         );
         
         const fallbackLocation = { latitude: 14.33289, longitude: 120.85065 };
-
-        const responderRef = ref(database, `responders/${responderUid}/location`);
-        
-        if (userData?.pendingEmergency?.userId) {
-          const responderLocationForUser = ref(database, `users/${userData.pendingEmergency.userId}/activeRequest/locationOfResponder`);
-          
-          try {
-            await update(responderRef, fallbackLocation);
-            await update(responderLocationForUser, fallbackLocation);
-            console.log("Fallback location successfully updated for both responder and user");
-          } catch (error) {
-            console.error("Error updating location: ", error);
-          }
-        }
-
+        await updateLocation(fallbackLocation.latitude, fallbackLocation.longitude)
         setResponderPosition(fallbackLocation);
         setLoading(false);
       }
