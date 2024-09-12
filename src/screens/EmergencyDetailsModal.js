@@ -32,6 +32,7 @@ const EmergencyDetailsModal = ({
             const user = auth.currentUser;
             if(user){
               await remove(ref(database, `responders/${user.uid}/pendingEmergency`));
+              await remove(ref(database, `users/${emergency.userId}/activeRequest`))
 
               const updates = {}
 
