@@ -48,7 +48,7 @@ const Home = ({ responderUid }) => {
   }, []);
 
   useEffect(()=>{
-    if(!emergencyDetails && responderPosition){
+    if(responderPosition && !userData.pendingEmergency){
       Alert.alert("Have a nice day!", "No emergency request yet");
     }
   }, [])
@@ -70,7 +70,7 @@ const Home = ({ responderUid }) => {
   const handleSelectEmergency = async (emergency) => {
     try {
 
-      if(emergencyDetails){
+      if(userData.pendingEmergency){
         Alert.alert("Error Navigating", "You have pending emergency,please make sure to assist them first")
         return;
       } 
@@ -89,7 +89,7 @@ const Home = ({ responderUid }) => {
       await push(historyRef, newHistoryEntry);
 
        // Update responder's pending emergency assistance
-       await update(ref(database, `responders/${user.uid}`), {
+       await update(ref(database, `responders/${user.uid}/`), {
         pendingEmergency: {
           userId: emergency.userId, 
           requestId: emergency.id,

@@ -33,11 +33,10 @@ const EmergencyDetailsModal = ({
           try {
             const user = auth.currentUser;
             if (user) {
-              
+              await remove(ref(database, `responders/${user.uid}/pendingEmergency`));
+              await remove(ref(database, `users/${emergency.userId}/activeRequest`));
+
               const updates = {};
-              
-              updates[`responders/${user.uid}/pendingEmergency/status`] = "done"
-              updates[`users/${emergency.userId}/activeRequest/status`] = "done"
               updates[`emergencyRequest/${emergency.id}/status`] = "done";
               updates[
                 `users/${emergency.userId}/emergencyHistory/${emergency.id}/status`
@@ -49,6 +48,7 @@ const EmergencyDetailsModal = ({
               setSelectedEmergency(false);
               setRoute(0);
               setDistance(0);
+              setShowModal(false);
             } else {
               console.log("No user available");
             }
