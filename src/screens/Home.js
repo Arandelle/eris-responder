@@ -70,7 +70,7 @@ const Home = ({ responderUid }) => {
   const handleSelectEmergency = async (emergency) => {
     try {
 
-      if(!emergency.location){
+      if(emergencyDetails){
         Alert.alert("Error Navigating", "You have pending emergency,please make sure to assist them first")
         return;
       } 

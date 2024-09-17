@@ -28,20 +28,16 @@ const EmergencyDetailsModal = ({
         text: "cancel",
       },
       {
-        text: "Sure",
+        text: "Mark as Done",
         onPress: async () => {
           try {
             const user = auth.currentUser;
             if (user) {
-              await remove(
-                ref(database, `responders/${user.uid}/pendingEmergency`)
-              );
-              await remove(
-                ref(database, `users/${emergency.userId}/activeRequest`)
-              );
-
+              
               const updates = {};
-
+              
+              updates[`responders/${user.uid}/pendingEmergency/status`] = "done"
+              updates[`users/${emergency.userId}/activeRequest/status`] = "done"
               updates[`emergencyRequest/${emergency.id}/status`] = "done";
               updates[
                 `users/${emergency.userId}/emergencyHistory/${emergency.id}/status`
@@ -72,17 +68,17 @@ const EmergencyDetailsModal = ({
           style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
         >
           {emergencyDetails && (
-            <View className="justify-center bg-white w-full absolute bottom-0 rounded-t-xl">
+            <View className=" bg-white w-full absolute bottom-0 rounded-t-xl">
               <View className="flex p-3 justify-between flex-row bg-gray-200 rounded-t-xl">
                 <Text className="text-lg font-bold">Emergency Id:</Text>
                 <Text className="text-lg">{emergencyDetails.id}</Text>
               </View>
 
-              <View className="flex p-3 flex-row items-center space-x-2">
+              <View className="flex px-3 py-6 flex-row items-center space-x-2">
               <View className="flex flex-col items-center justify-center space-y-2">
                   <Image
                     source={{
-                      uri: "https://flowbite.com/docs/images/people/profile-picture-1.jpg",
+                      uri: emergencyDetails.img,
                     }}
                     className="h-20 w-20 rounded-full"
                   />
@@ -98,13 +94,13 @@ const EmergencyDetailsModal = ({
                   <Text className="text-lg">
                     {emergencyDetails.type.toUpperCase()}
                   </Text>
-                  <Text className="text-lg">
+                  <Text className="text-lg bg-yellow-100 p-2 rounded-lg">
                     {emergencyDetails.description}
                   </Text>
                 </View>
               </View>
 
-              <View className="space-y-3 p-3 pt-0">
+              <View className="space-y-3 px-3 py-4 pt-0">
                 <TouchableOpacity
                   disabled={
                     selectedEmergency?.id === emergencyDetails.id &&
@@ -130,7 +126,7 @@ const EmergencyDetailsModal = ({
                 {selectedEmergency?.id === emergencyDetails.id &&
                   route.length > 0 && (
                     <TouchableOpacity
-                      className="py-3 items-center w-full rounded-md bg-green-500"
+                      className="py-3 items-center w-full rounded-md bg-gray-500"
                       onPress={() => handleEmergencyDone(emergencyDetails)}
                     >
                       <Text className="text-white font-bold text-lg">
