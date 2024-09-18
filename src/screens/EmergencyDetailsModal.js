@@ -1,4 +1,4 @@
-import { ref, remove, update } from "firebase/database";
+import { get, ref, remove, update } from "firebase/database";
 import {
   View,
   TouchableWithoutFeedback,
@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { auth, database } from "../services/firebaseConfig";
 import { getTimeDifference } from "../helper/getTimeDifference";
+import { useFetchData } from "../hooks/useFetchData";
 
 const EmergencyDetailsModal = ({
   showModal,
@@ -22,6 +23,9 @@ const EmergencyDetailsModal = ({
   setRoute,
   setDistance,
 }) => {
+
+  const  {userData} = useFetchData();
+
   const handleEmergencyDone = (emergency) => {
     Alert.alert("Notice!", "Are you sure this emergency is done?", [
       {
@@ -33,22 +37,38 @@ const EmergencyDetailsModal = ({
           try {
             const user = auth.currentUser;
             if (user) {
-              await remove(ref(database, `responders/${user.uid}/pendingEmergency`));
-              await remove(ref(database, `users/${emergency.userId}/activeRequest`));
 
-              const updates = {};
-              updates[`emergencyRequest/${emergency.id}/status`] = "done";
-              updates[
-                `users/${emergency.userId}/emergencyHistory/${emergency.id}/status`
-              ] = "done";
+              const responderDataRef = ref(database, `responders/${user.uid}/pendingEmergency`);
+              const responderSnapshot = await get(responderDataRef);
 
-              await update(ref(database), updates);
+              if(responderSnapshot.exists()){
+                const responderData = responderSnapshot.val();
+                const historyId = responderData.historyId;
 
-              Alert.alert("Success!", "Emergency request succussfully done!");
-              setSelectedEmergency(false);
-              setRoute(0);
-              setDistance(0);
-              setShowModal(false);
+                await remove(ref(database, `responders/${user.uid}/pendingEmergency`));
+                await remove(ref(database, `users/${emergency.userId}/activeRequest`));
+  
+                const updates = {};
+                updates[`emergencyRequest/${emergency.id}/status`] = "done";
+                updates[
+                  `users/${emergency.userId}/emergencyHistory/${emergency.id}/status`
+                ] = "done";
+                updates[
+                  `responders/${user.uid}/history/${historyId}/status`
+                ] = "done";
+  
+                await update(ref(database), updates);
+  
+                Alert.alert("Success!", "Emergency request succussfully done!");
+                setSelectedEmergency(false);
+                setRoute(0);
+                setDistance(0);
+                setShowModal(false);
+
+              } else{
+                console.log("No pending emergency")
+              }
+           
             } else {
               console.log("No user available");
             }

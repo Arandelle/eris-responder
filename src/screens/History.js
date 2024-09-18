@@ -2,6 +2,7 @@ import {useState, useEffect} from 'react'
 import { View, Text, ScrollView} from 'react-native'
 import {auth, database } from '../services/firebaseConfig'
 import { ref, onValue } from 'firebase/database'
+import { getTimeDifference } from '../helper/getTimeDifference'
 
 const History = () => {
 
@@ -30,6 +31,15 @@ const History = () => {
       }
       }, []);
 
+      emergencyHistory.sort((a, b) => new Date(b.date) - new Date(a.date) )
+
+      const emergencyStatus = {
+        pending: "bg-yellow-300",
+        accepted: "bg-orange-300",
+        done: "bg-green-300",
+        expired: "bg-red-300"
+      }
+
   return (
       <View className="bg-gray-100 h-full p-2 w-full rounded-lg shadow-lg">
         <ScrollView>
@@ -37,43 +47,37 @@ const History = () => {
             emergencyHistory.map((history) => (
               <View
                 key={history.id}
-                className="mb-4 p-2 border-b border-gray-200"
+                className=""
               >
-                <Text className="text-lg text-blue-600">
-                  Emergency ID: {history.emergencyId}
-                </Text>
-                <Text className="text-lg text-blue-600">
-                  History ID: {history.id}
-                </Text>
-                <Text className="text-sm text-gray-800">
-                  User ID: {history.userId}
-                </Text>
-                <Text className="text-sm text-gray-800">
-                  Type: {history.type}
-                </Text>
-                <Text className="text-sm text-gray-600">
-                  Name: {history.name}
-                </Text>
-                <Text className="text-sm text-gray-600">
-                  Description: {history.description}
-                </Text>
-                <Text className="text-sm text-gray-600">
-                  Location: {history.location}
-                </Text>
-                <Text className={`text-sm ${history.status === "expired" ? "text-red-600" : "text-gray-600 "}`}>
-                  Status: {history.status}
-                </Text>
-                {history.status === "expired" && (
-                <Text className="text-sm text-gray-600">
-                  Expired At: {new Date(history.expiresAt).toLocaleString()}
-                </Text>
-                )}
-                <Text className="text-sm text-gray-600">
-                  Submitted: {new Date(history.timestamp).toLocaleString()}
-                </Text>
-                 <Text className="text-sm text-gray-600">
-                  submiited by user: {new Date(history.date).toLocaleString()}
-                </Text>
+                <View className={`flex flex-row justify-between p-2 border border-gray-500 ${emergencyStatus[history.status]}`}>
+                  <Text className="text-lg font-bold">History ID:</Text>
+                  <Text className="text-lg">{history.id}</Text>
+                </View>
+              <View className="space-y-2 p-3">
+                  <Text className="text-lg font-bold">
+                    Type: {history.type.toUpperCase()}
+                  </Text>
+                  <Text className="text-lg">
+                    Name: {history.name}
+                  </Text>
+                  <Text className="text-lg">
+                    Description: {history.description}
+                  </Text>
+                  <Text className="text-lg">
+                    Location: {history.location}
+                  </Text>
+                  <Text className="text-lg ">
+                    Status: {history.status.toUpperCase()}
+                  </Text>
+                  <Text className="text-lg">
+                    Submitted:{" "}
+                    {new Date(history.date).toLocaleString()}
+                  </Text>
+                  <Text className="text-lg">
+                    Date Accepted:
+                    {new Date(history.dateAccepted).toLocaleString()}
+                  </Text>
+              </View>
               </View>
             ))
           ) : (

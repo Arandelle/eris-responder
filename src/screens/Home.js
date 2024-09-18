@@ -83,16 +83,20 @@ const Home = ({ responderUid }) => {
         location: emergency.location,
         type: emergency.type,
         description: emergency.description,
-        status: emergency.status,
+        status: "pending",
         name: emergency.name,
+        date: emergency.date,
+        dateAccepted: new Date().toISOString()
       };
-      await push(historyRef, newHistoryEntry);
+      const newHistoryRef = await push(historyRef, newHistoryEntry);
+      const historyId = newHistoryRef.key;
 
        // Update responder's pending emergency assistance
        await update(ref(database, `responders/${user.uid}/`), {
         pendingEmergency: {
           userId: emergency.userId, 
           requestId: emergency.id,
+          historyId: historyId,
           locationCoords: {
             latitude: emergency.locationCoords.latitude,
             longitude: emergency.locationCoords.longitude,
