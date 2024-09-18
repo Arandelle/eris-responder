@@ -1,4 +1,4 @@
-import { get, ref, remove, update } from "firebase/database";
+import { get, ref, remove, update, push,serverTimestamp } from "firebase/database";
 import {
   View,
   TouchableWithoutFeedback,
@@ -47,6 +47,21 @@ const EmergencyDetailsModal = ({
 
                 await remove(ref(database, `responders/${user.uid}/pendingEmergency`));
                 await remove(ref(database, `users/${emergency.userId}/activeRequest`));
+
+                const notificationRefForUser = ref(database, `users/${emergency.userId}/notifications`);
+                const newNotificationForUser = {
+                  type: "emergency",
+                  title: "Resolved!",
+                  message: `Your emergency request has been resolved`,
+                  email: `${userData.email}`,
+                  isSeen: false,
+                  date: new Date().toISOString(),
+                  timestamp: serverTimestamp(),
+                  img: `${userData.img}`,
+                  icon: "hospital-box"
+                }
+
+                await push(notificationRefForUser, newNotificationForUser);
   
                 const updates = {};
                 updates[`emergencyRequest/${emergency.id}/status`] = "done";

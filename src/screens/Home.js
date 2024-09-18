@@ -107,8 +107,8 @@ const Home = ({ responderUid }) => {
       const notificationRefForUser = ref(database, `users/${emergency.userId}/notifications`);
       const newNotificationForUser = {
         type: "emergency",
-        message: `Your responder is coming`,
-        description: "Medical assistance is on your way",
+        title: `Your responder is coming`,
+        message: "Medical assistance is on your way",
         email: `${userData.email}`,
         isSeen: false,
         date: new Date().toISOString(),
