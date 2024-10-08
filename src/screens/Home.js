@@ -71,7 +71,7 @@ const Home = ({ responderUid }) => {
     try {
 
       if(userData.pendingEmergency){
-        Alert.alert("Error Navigating", "You have pending emergency,please make sure to assist them first")
+        Alert.alert("Error Navigating", "You have on-going emergency,please make sure to assist them first")
         return;
       } 
       const user = auth.currentUser;
@@ -83,7 +83,7 @@ const Home = ({ responderUid }) => {
         location: emergency.location,
         type: emergency.type,
         description: emergency.description,
-        status: "pending",
+        status: "on-going",
         name: emergency.name,
         date: emergency.date,
         dateAccepted: new Date().toISOString()
@@ -91,7 +91,7 @@ const Home = ({ responderUid }) => {
       const newHistoryRef = await push(historyRef, newHistoryEntry);
       const historyId = newHistoryRef.key;
 
-       // Update responder's pending emergency assistance
+       // Update responder's on-going emergency assistance
        await update(ref(database, `responders/${user.uid}/`), {
         pendingEmergency: {
           userId: emergency.userId, 

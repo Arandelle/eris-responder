@@ -137,7 +137,7 @@ const Profile = ({setIsProfileComplete}) => {
 
           <View className="mb-5 space-y-8 py-2">
             <Text className="italic font-bold bg-blue-200 p-2 text-lg rounded-md">
-              user id: {auth.currentUser.uid}
+             {userData?.customId}
             </Text>
             <View>
               <Text className="text-xl font-bold mb-2 ">Contact:</Text>
