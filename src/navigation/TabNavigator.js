@@ -71,7 +71,14 @@ const TabNavigator = ({responderUid}) => {
       <Tab.Screen name="Home">
       {(props)=> <Home {...props} responderUid={responderUid}   setIsProfileComplete={setIsProfileComplete} />}
       </Tab.Screen>
-      <Tab.Screen name="History" component={History}/>
+      <Tab.Screen 
+      name="History" 
+      component={History}
+      options={{
+        title: "Emergency Records",
+        tabBarLabel: "Records",
+      }}
+      />
       <Tab.Screen
         name="Notification"
         component={Notification}

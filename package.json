@@ -25,6 +25,7 @@
     "react-native-dotenv": "^3.4.11",
     "react-native-elements": "^3.4.3",
     "react-native-maps": "^1.17.3",
+    "react-native-tab-view": "^3.5.2",
     "use-latest-callback": "^0.2.1"
   },
   "devDependencies": {

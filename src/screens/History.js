@@ -1,91 +1,82 @@
-import {useState, useEffect} from 'react'
-import { View, Text, ScrollView} from 'react-native'
-import {auth, database } from '../services/firebaseConfig'
-import { ref, onValue } from 'firebase/database'
-import { getTimeDifference } from '../helper/getTimeDifference'
+import React, { useState, useEffect } from 'react';
+import { View, Text, ScrollView } from 'react-native';
+import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
+import { auth, database } from '../services/firebaseConfig';
+import { ref, onValue } from 'firebase/database';
 
-const History = () => {
-
+const FilteredHistory = ({ status }) => {
   const [emergencyHistory, setEmergencyHistory] = useState([]);
-  const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-      const user = auth.currentUser
-      if(user){
-        const requestRef = ref(database, `responders/${user.uid}/history`);
-        const unsubscribe = onValue(requestRef, (snapshot) => {
-          try {
-            const data = snapshot.val();
-            const emergencyList = Object.keys(data).map((key) => ({
-              id: key,
-              ...data[key],
-            }))
-            setEmergencyHistory(emergencyList);
-            setLoading(false);
-          } catch (error) {
-            console.error("Error fetching emergency data:", error);
-            setLoading(false);
-          }
-        });
-        return () => unsubscribe();
-      }
-      }, []);
+  useEffect(() => {
+    const user = auth.currentUser;
+    if (user) {
+      const requestRef = ref(database, `responders/${user.uid}/history`);
+      const unsubscribe = onValue(requestRef, (snapshot) => {
+        const data = snapshot.val();
+        const emergencyList = Object.keys(data)
+          .map((key) => ({
+            id: key,
+            ...data[key],
+          }))
+          .filter((item) => item.status === status); // Filter by status
 
-      emergencyHistory.sort((a, b) => new Date(b.date) - new Date(a.date) )
-
-      const emergencyStatus = {
-        "awaiting response": "bg-yellow-300",
-       "on-going": "bg-orange-300",
-        resolved: "bg-green-300",
-        expired: "bg-red-300"
-      }
+        setEmergencyHistory(emergencyList);
+      });
+      return () => unsubscribe();
+    }
+  }, [status]);
 
   return (
-      <View className="bg-gray-100 h-full p-2 w-full rounded-lg shadow-lg">
-        <ScrollView>
-          {emergencyHistory.length > 0 ? (
-            emergencyHistory.map((history) => (
-              <View
-                key={history.id}
-                className=""
-              >
-                <View className={`flex flex-row justify-between p-2 border border-gray-500 ${emergencyStatus[history.status]}`}>
-                  <Text className="text-lg font-bold">Records ID:</Text>
-                  <Text className="text-lg">{history.id}</Text>
-                </View>
-              <View className="space-y-2 p-3">
-                  <Text className="text-lg font-bold">
-                    Type: {history.type.toUpperCase()}
-                  </Text>
-                  <Text className="text-lg">
-                    Name: {history.name}
-                  </Text>
-                  <Text className="text-lg">
-                    Description: {history.description}
-                  </Text>
-                  <Text className="text-lg">
-                    Location: {history.location}
-                  </Text>
-                  <Text className="text-lg ">
-                    Status: {history.status.toUpperCase()}
-                  </Text>
-                  <Text className="text-lg">
-                    Submitted:{" "}
-                    {new Date(history.date).toLocaleString()}
-                  </Text>
-                  <Text className="text-lg">
-                    Date Accepted:
-                    {new Date(history.dateAccepted).toLocaleString()}
-                  </Text>
-              </View>
-              </View>
-            ))
-          ) : (
-            <Text className="text-center text-gray-500">No records found</Text>
-          )}
-        </ScrollView>
-      </View>
-  )
-}
+    <ScrollView>
+      {emergencyHistory.length > 0 ? (
+        emergencyHistory.map((history) => (
+          <View key={history.id}>
+            <Text>Type: {history.type.toUpperCase()}</Text>
+            <Text>Name: {history.name}</Text>
+            <Text>Status: {history.status.toUpperCase()}</Text>
+          </View>
+        ))
+      ) : (
+        <Text>No records found for {status}</Text>
+      )}
+    </ScrollView>
+  );
+};
 
-export default History
+const History = () => {
+  const [index, setIndex] = useState(0);
+  const [routes] = useState([
+    { key: 'awaiting', title: 'Awaiting Response' },
+    { key: 'ongoing', title: 'On-going' },
+    { key: 'resolved', title: 'Resolved' },
+    { key: 'expired', title: 'Expired' },
+  ]);
+
+  const renderScene = SceneMap({
+    awaiting: () => <FilteredHistory status="awaiting response" />,
+    ongoing: () => <FilteredHistory status="on-going" />,
+    resolved: () => <FilteredHistory status="resolved" />,
+    expired: () => <FilteredHistory status="expired" />,
+  });
+
+  return (
+    <TabView
+      navigationState={{ index, routes }}
+      renderScene={renderScene}
+      onIndexChange={setIndex}
+      initialLayout={{ width: 400 }} // Adjust width if needed
+      renderTabBar={(props) => (
+        <TabBar
+          {...props}
+          indicatorStyle={{ backgroundColor: 'blue' }}
+          style={{ backgroundColor: 'white' }}
+          labelStyle={{fontWeight: "bold"}}
+          activeColor='blue'
+          inactiveColor='gray'
+        />
+      )}
+    />
+  );
+};
+
+export default History;
