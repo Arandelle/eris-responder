@@ -34,9 +34,9 @@ const History = () => {
       emergencyHistory.sort((a, b) => new Date(b.date) - new Date(a.date) )
 
       const emergencyStatus = {
-        pending: "bg-yellow-300",
-        accepted: "bg-orange-300",
-        done: "bg-green-300",
+        "awaiting response": "bg-yellow-300",
+       "on-going": "bg-orange-300",
+        resolved: "bg-green-300",
         expired: "bg-red-300"
       }
 
@@ -50,7 +50,7 @@ const History = () => {
                 className=""
               >
                 <View className={`flex flex-row justify-between p-2 border border-gray-500 ${emergencyStatus[history.status]}`}>
-                  <Text className="text-lg font-bold">History ID:</Text>
+                  <Text className="text-lg font-bold">Records ID:</Text>
                   <Text className="text-lg">{history.id}</Text>
                 </View>
               <View className="space-y-2 p-3">
@@ -81,7 +81,7 @@ const History = () => {
               </View>
             ))
           ) : (
-            <Text className="text-center text-gray-500">No history found</Text>
+            <Text className="text-center text-gray-500">No records found</Text>
           )}
         </ScrollView>
       </View>

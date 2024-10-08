@@ -27,12 +27,12 @@ const EmergencyDetailsModal = ({
   const  {userData} = useFetchData();
 
   const handleEmergencyDone = (emergency) => {
-    Alert.alert("Notice!", "Are you sure this emergency is done?", [
+    Alert.alert("Notice!", "Are you sure this emergency is resolved?", [
       {
         text: "cancel",
       },
       {
-        text: "Mark as Done",
+        text: "Mark as  Resolved",
         onPress: async () => {
           try {
             const user = auth.currentUser;
@@ -64,17 +64,17 @@ const EmergencyDetailsModal = ({
                 await push(notificationRefForUser, newNotificationForUser);
   
                 const updates = {};
-                updates[`emergencyRequest/${emergency.id}/status`] = "done";
+                updates[`emergencyRequest/${emergency.id}/status`] = "resolved";
                 updates[
                   `users/${emergency.userId}/emergencyHistory/${emergency.id}/status`
-                ] = "done";
+                ] = "resolved";
                 updates[
                   `responders/${user.uid}/history/${historyId}/status`
-                ] = "done";
+                ] = "resolved";
   
                 await update(ref(database), updates);
   
-                Alert.alert("Success!", "Emergency request succussfully done!");
+                Alert.alert("Success!", "Emergency request succussfully resolved!");
                 setSelectedEmergency(false);
                 setRoute(0);
                 setDistance(0);
@@ -106,7 +106,7 @@ const EmergencyDetailsModal = ({
             <View className=" bg-white w-full absolute bottom-0 rounded-t-xl">
               <View className="flex p-3 justify-between flex-row bg-gray-200 rounded-t-xl">
                 <Text className="text-lg font-bold">Emergency Id:</Text>
-                <Text className="text-lg">{emergencyDetails.id}</Text>
+                <Text className="text-lg">{emergencyDetails.customId}</Text>
               </View>
 
               <View className="flex px-3 py-6 flex-row items-center space-x-2">
@@ -165,7 +165,7 @@ const EmergencyDetailsModal = ({
                       onPress={() => handleEmergencyDone(emergencyDetails)}
                     >
                       <Text className="text-white font-bold text-lg">
-                        Mark as done
+                        Mark as resolved
                       </Text>
                     </TouchableOpacity>
                   )}

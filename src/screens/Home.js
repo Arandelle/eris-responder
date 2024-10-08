@@ -121,8 +121,8 @@ const Home = ({ responderUid }) => {
 
       const updates = {}
 
-      updates[`emergencyRequest/${emergency.id}/status`] = "accepted"
-      updates[`users/${emergency.userId}/emergencyHistory/${emergency.id}/status`] = "accepted"
+      updates[`emergencyRequest/${emergency.id}/status`] = "on-going"
+      updates[`users/${emergency.userId}/emergencyHistory/${emergency.id}/status`] = "on-going"
 
       updates[`emergencyRequest/${emergency.id}/locationOfResponder`] = {
         latitude: userData.location.latitude,
@@ -146,7 +146,7 @@ const Home = ({ responderUid }) => {
 
       await update(ref(database), updates);
 
-      Alert.alert("Success", "You have successfully accepted the emergency request");
+      Alert.alert("Success", "We are counting on you to ensure a successful resolution");
       
     } catch (error) {
       console.error("Error: ", error);
@@ -174,11 +174,11 @@ const Home = ({ responderUid }) => {
         >
           <Image source={responderMarker} className="h-12 w-12" />
         </Marker>
-        {emergencyData.filter((emergency) => emergency.status === "pending" || emergency.status === "accepted").map((emergency) => (
+        {emergencyData.filter((emergency) => emergency.status === "awaiting response" || emergency.status === "on-going").map((emergency) => (
           <Marker
             key={emergency.id}
             coordinate={emergency.locationCoords}
-            pinColor={emergency.status === "pending" ? "red" : "yellow"}
+            pinColor={emergency.status === "awaiting response" ? "red" : "yellow"}
             onPress={() => handleShowEmergencyDetails(emergency)}
           />
         ))}
