@@ -4,8 +4,8 @@ import Home from "../screens/Home";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import Notification from "../screens/Notification";
 import { View } from "react-native";
-import History from "../screens/History";
 import Profile from "../screens/Profile";
+import TopBarNavigator from "../navigation/TopBarNavigator";
 import { useFetchData } from "../hooks/useFetchData";
 import { useNotificationData } from "../hooks/useNotificationData";
 
@@ -31,7 +31,7 @@ const TabNavigator = ({responderUid}) => {
         tabBarIcon: ({ color, size }) => {
           const icons = {
             Home: "map-marker-radius-outline",
-            History: "history",
+            Records: "history",
             Notification: "bell-outline",
             Profile: "account-circle-outline",
           };
@@ -72,8 +72,8 @@ const TabNavigator = ({responderUid}) => {
       {(props)=> <Home {...props} responderUid={responderUid}   setIsProfileComplete={setIsProfileComplete} />}
       </Tab.Screen>
       <Tab.Screen 
-      name="History" 
-      component={History}
+      name="Records" 
+      component={TopBarNavigator}
       options={{
         title: "Emergency Records",
         tabBarLabel: "Records",
