@@ -1,4 +1,5 @@
-import { get, ref, remove, update, push,serverTimestamp } from "firebase/database";
+import { useState, useEffect } from "react";
+import { get, ref, remove, update, push,serverTimestamp, onValue } from "firebase/database";
 import {
   View,
   TouchableWithoutFeedback,
@@ -11,6 +12,7 @@ import {
 import { auth, database } from "../services/firebaseConfig";
 import { getTimeDifference } from "../helper/getTimeDifference";
 import { useFetchData } from "../hooks/useFetchData";
+import useFetchUSer from "../hooks/useFetchUSer";
 
 const EmergencyDetailsModal = ({
   showModal,
@@ -25,6 +27,20 @@ const EmergencyDetailsModal = ({
 }) => {
 
   const  {userData} = useFetchData();
+  const [userDetails, setUserDetails] = useState(null);
+
+  useEffect(() => {
+    if (emergencyDetails?.userId) {
+      const userRef = ref(database, `users/${emergencyDetails.userId}`);
+      const unsubscribe = onValue(userRef, (snapshot) => {
+        if (snapshot.exists()) {
+          setUserDetails(snapshot.val());
+        }
+      });
+
+      return () => unsubscribe();
+    }
+  }, [emergencyDetails]);
 
   const handleEmergencyDone = (emergency) => {
     Alert.alert("Notice!", "Are you sure this emergency is resolved?", [
@@ -102,7 +118,7 @@ const EmergencyDetailsModal = ({
           className="flex w-full h-full"
           style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
         >
-          {emergencyDetails && (
+          {emergencyDetails &&  (
             <View className=" bg-white w-full absolute bottom-0 rounded-t-xl">
               <View className="flex p-3 justify-between flex-row bg-gray-200 rounded-t-xl">
                 <Text className="text-lg font-bold">Emergency Id:</Text>
@@ -113,7 +129,7 @@ const EmergencyDetailsModal = ({
               <View className="flex flex-col items-center justify-center space-y-2">
                   <Image
                     source={{
-                      uri: emergencyDetails.img,
+                      uri: userDetails?.img,
                     }}
                     className="h-20 w-20 rounded-full"
                   />
@@ -122,10 +138,13 @@ const EmergencyDetailsModal = ({
                   </Text>
               </View>
                 <View className="p-2 space-y-1">
-                  <Text className="text-lg">{emergencyDetails.location}</Text>
-                  <Text className="text-lg font-bold">
-                    {emergencyDetails.name}
-                  </Text>
+                  <Text className="text-lg">{userDetails?.location.address}</Text>
+                 <View className="flex flex-row items-center space-x-2">
+                    <Text className="text-lg font-bold">
+                      {userDetails?.firstname} {userDetails?.lastname} 
+                    </Text>
+                    <Text className="p-1 rounded-lg bg-yellow-100">{userDetails?.customId}</Text>
+                 </View>
                   <Text className="text-lg">
                     {emergencyDetails.type.toUpperCase()}
                   </Text>
