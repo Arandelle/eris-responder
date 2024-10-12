@@ -16,20 +16,15 @@ import useEmergencyData from "../hooks/useEmergencyData";
 import useRoute from "../hooks/useRoute";
 import EmergencyDetailsModal from "./EmergencyDetailsModal";
 import { useFetchData } from "../hooks/useFetchData";
-import useFetchUSer from "../hooks/useFetchUSer";
 
 const Home = ({ responderUid }) => {
   const {userData} = useFetchData();
   const {responderPosition, loading: locationLoading } = useLocation(responderUid);
   const {emergencyData, loading: emergencyLoading} = useEmergencyData();
-  const [selectedEmergency, setSelectedEmergency] = useState(null);
-
-  const {dataOfUser } = useFetchUSer()
- 
+  const [selectedEmergency, setSelectedEmergency] = useState(null); 
   const { route,setRoute, distance, setDistance} = useRoute(responderPosition, selectedEmergency);
   const [emergencyDetails, setEmergencyDetails] = useState(null);
   const [heading, setHeading] = useState(0);
- 
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
@@ -209,7 +204,6 @@ const Home = ({ responderUid }) => {
       route={route}
       setRoute={setRoute}
       setDistance={setDistance}
-      dataOfUser={dataOfUser}
        />
     </View>
   );

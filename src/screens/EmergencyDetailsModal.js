@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import { get, ref, remove, update, push,serverTimestamp, onValue } from "firebase/database";
+import { get, ref, remove, update, push,serverTimestamp } from "firebase/database";
 import {
   View,
   TouchableWithoutFeedback,
@@ -12,7 +11,7 @@ import {
 import { auth, database } from "../services/firebaseConfig";
 import { getTimeDifference } from "../helper/getTimeDifference";
 import { useFetchData } from "../hooks/useFetchData";
-import useFetchUSer from "../hooks/useFetchUSer";
+import useFetchUser from "../hooks/useFetchUser";
 
 const EmergencyDetailsModal = ({
   showModal,
@@ -27,20 +26,7 @@ const EmergencyDetailsModal = ({
 }) => {
 
   const  {userData} = useFetchData();
-  const [userDetails, setUserDetails] = useState(null);
-
-  useEffect(() => {
-    if (emergencyDetails?.userId) {
-      const userRef = ref(database, `users/${emergencyDetails.userId}`);
-      const unsubscribe = onValue(userRef, (snapshot) => {
-        if (snapshot.exists()) {
-          setUserDetails(snapshot.val());
-        }
-      });
-
-      return () => unsubscribe();
-    }
-  }, [emergencyDetails]);
+  const {userDetails} = useFetchUser({userId: emergencyDetails?.userId});
 
   const handleEmergencyDone = (emergency) => {
     Alert.alert("Notice!", "Are you sure this emergency is resolved?", [
