@@ -98,8 +98,8 @@ const Home = ({ responderUid }) => {
           requestId: emergency.id,
           historyId: historyId,
           locationCoords: {
-            latitude: emergency.locationCoords.latitude,
-            longitude: emergency.locationCoords.longitude,
+            latitude: emergency.latitude,
+            longitude: emergency.longitude,
           },
         },
       });
@@ -174,14 +174,17 @@ const Home = ({ responderUid }) => {
         >
           <Image source={responderMarker} className="h-12 w-12" />
         </Marker>
-        {emergencyData.filter((emergency) => emergency.status === "awaiting response" || emergency.status === "on-going").map((emergency) => (
-          <Marker
-            key={emergency.id}
-            coordinate={emergency.locationCoords}
-            pinColor={emergency.status === "awaiting response" ? "red" : "yellow"}
-            onPress={() => handleShowEmergencyDetails(emergency)}
-          />
-        ))}
+        {emergencyData
+  .filter((emergency) => emergency.status === "awaiting response" || emergency.status === "on-going")
+  .map((emergency) => (
+    <Marker
+      key={emergency.id}
+      coordinate={{ latitude: emergency.latitude, longitude: emergency.longitude }}
+      pinColor={emergency.status === "awaiting response" ? "red" : "yellow"}
+      onPress={() => handleShowEmergencyDetails(emergency)}
+    />
+))}
+
 
         {route.length > 0 && (
           <Polyline coordinates={route} strokeColor="red" strokeWidth={2} />
