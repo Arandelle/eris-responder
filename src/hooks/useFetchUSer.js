@@ -2,7 +2,7 @@ import { onValue, ref } from 'firebase/database';
 import {useEffect, useState} from 'react'
 import { database } from '../services/firebaseConfig';
 
-const useFetchUser = ({userId}) => {
+const useFetchUser = (userId) => {
 
     const [userDetails, setUserDetails] = useState(null);
 

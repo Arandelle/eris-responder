@@ -26,7 +26,7 @@ const EmergencyDetailsModal = ({
 }) => {
 
   const  {userData} = useFetchData();
-  const {userDetails} = useFetchUser({userId: emergencyDetails?.userId});
+  const {userDetails} = useFetchUser(emergencyDetails?.userId);
 
   const handleEmergencyDone = (emergency) => {
     Alert.alert("Notice!", "Are you sure this emergency is resolved?", [
