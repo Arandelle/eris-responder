@@ -1,7 +1,7 @@
 import { View, Text, ScrollView, Image } from 'react-native';
 import useFetchRecord from '../hooks/useFetchRecord';
 import useFetchUser from '../hooks/useFetchUser';
-import { formatDate } from '../helper/FormatDate';
+import { formatDateWithTime } from '../helper/FormatDate';
 
 const Records = ({ status }) => {
   const {emergencyRecords} = useFetchRecord(status);
@@ -76,12 +76,12 @@ const RecordItem = ({records}) => {
  
         <View className="flex flex-row">
           <Text className="w-1/3 font-bold text-gray-500">Reported At:</Text>
-          <Text className="flex-1 font-bold">{formatDate(records.date)}</Text>
+          <Text className="flex-1 font-bold">{formatDateWithTime(records.date)}</Text>
         </View>
  
         <View className="flex flex-row">
           <Text className="w-1/3 font-bold text-gray-500">Response Time:</Text>
-          <Text className="flex-1 font-bold">{formatDate(records.dateAccepted)}</Text>
+          <Text className="flex-1 font-bold">{formatDateWithTime(records.dateAccepted)}</Text>
         </View>
  
         <View className="flex flex-row">
