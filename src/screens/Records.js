@@ -29,7 +29,6 @@ const Records = ({ status }) => {
 
 const RecordItem = ({records}) => {
   const {userDetails} = useFetchUser(records.userId);
-
   
   const emergencyStatus = {
     "awaiting response": 'bg-orange-100 text-orange-600',
@@ -41,16 +40,20 @@ const RecordItem = ({records}) => {
   return (
     <View className="border border-gray-300 rounded-lg">
     <View className="flex flex-row space-x-2 p-4">
-       <Image 
-         source={{ uri: userDetails?.img }} 
-         className="h-12 w-12 rounded-full" 
-       />
-       <View>
-         <Text className="text-lg font-bold">
-           {`${userDetails?.firstname} ${userDetails?.lastname}` || "Loading..."}
-         </Text>
-         <Text className="text-sm text-gray-400">{userDetails?.customId}</Text>
-       </View>
+    {records !== "awaiting response" && (
+      <>
+         <Image 
+           source={{ uri: userDetails?.img }} 
+           className="h-12 w-12 rounded-full" 
+         />
+         <View>
+           <Text className="text-lg font-bold">
+             {`${userDetails?.firstname} ${userDetails?.lastname}` || "Loading..."}
+           </Text>
+           <Text className="text-sm text-gray-400">{userDetails?.customId}</Text>
+         </View>
+      </>
+    )}
     </View>
  
     <View className="mx-2 mb-2 rounded-md p-4 space-y-2 bg-gray-100">
@@ -86,7 +89,7 @@ const RecordItem = ({records}) => {
  
         <View className="flex flex-row">
           <Text className="w-1/3 font-bold text-gray-500">Emergency Id:</Text>
-          <Text className="flex-1 font-bold">{records?.customId}</Text>
+          <Text className="flex-1 font-bold">{records?.emergencyId}</Text>
         </View>
       </View>
     </View>

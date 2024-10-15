@@ -78,7 +78,7 @@ const Home = ({ responderUid }) => {
       const user = auth.currentUser;
       const historyRef = ref(database, `responders/${user.uid}/history`);
       const newHistoryEntry = {
-        emergencyId: emergency.id,
+        emergencyId: emergency.emergencyId,
         userId: emergency.userId,
         timestamp: serverTimestamp(),
         location: emergency.location.address,
