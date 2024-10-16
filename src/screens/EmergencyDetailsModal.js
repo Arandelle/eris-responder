@@ -24,7 +24,7 @@ const EmergencyDetailsModal = ({
   setRoute,
   setDistance,
 }) => {
-  
+
   const {userDetails} = useFetchUser(emergencyDetails?.userId);
 
   const handleEmergencyDone = (emergency) => {
@@ -53,7 +53,7 @@ const EmergencyDetailsModal = ({
                 const newNotificationForUser = {
                   responderId: user.uid,
                   type: "responder",
-                  title: "Emergency Report Resolved!",
+                  title: "Emergency report resolved!",
                   message: `Your report for ${emergency.type} has been resolved`,
                   isSeen: false,
                   date: new Date().toISOString(),
@@ -118,7 +118,7 @@ const EmergencyDetailsModal = ({
               </View>
 
               <View className="flex px-3 py-6 flex-row items-center space-x-2">
-              <View className="flex flex-col items-center justify-center space-y-2">
+              <View className="flex flex-col items-center space-y-3">
                   <Image
                     source={{
                       uri: userDetails?.img,
@@ -129,18 +129,18 @@ const EmergencyDetailsModal = ({
                     {getTimeDifference(emergencyDetails.timestamp)}
                   </Text>
               </View>
-                <View className="p-2 space-y-1">
-                  <Text className="text-lg">{userDetails?.location.address}</Text>
+                <View className="p-2 space-y-3">
                  <View className="flex flex-row items-center space-x-2">
                     <Text className="text-lg font-bold">
                       {userDetails?.firstname} {userDetails?.lastname} 
                     </Text>
                     <Text className="p-1 rounded-lg bg-yellow-100">{userDetails?.customId}</Text>
                  </View>
+                 <Text className="text-lg">{userDetails?.location.address}</Text>
                   <Text className="text-lg">
                     {emergencyDetails.type.toUpperCase()}
                   </Text>
-                  <Text className="text-lg bg-yellow-100 p-2 rounded-lg">
+                  <Text className="text-lg bg-yellow-100 p-2 rounded-lg max-w-xs">
                     {emergencyDetails.description}
                   </Text>
                 </View>
