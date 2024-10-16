@@ -18,7 +18,6 @@ const Notification = () => {
   const {
     notificationsCount,
     notifications,
-    handleSpecificNotification,
     markAllNotificationsAsRead,
   } = useNotificationData();
   const [viewAll, setViewAll] = useState(false);
@@ -79,6 +78,7 @@ const NotificationItem = ({ notification }) => {
   const navigation = useNavigation();
   const { userData } = useFetchData();
   const { userDetails } = useFetchUser(notification.userId);
+  const { handleSpecificNotification} = useNotificationData();
 
   const notificationData = {
     users: "bg-red-500",
@@ -96,7 +96,7 @@ const NotificationItem = ({ notification }) => {
   return (
     <TouchableOpacity
       onPress={() => {
-        handleSpecificNotification(notification.id);
+        handleSpecificNotification(notification.emergencyId);
         if (userData?.profileComplete && notification.type === "users") {
           navigation.navigate("Profile");
         } else if (notification.type === "emergency") {
@@ -131,7 +131,7 @@ const NotificationItem = ({ notification }) => {
             <Text className="font-semibold text-lg text-gray-800">
               {notification.title}
             </Text>
-            <Text>{notification.message.toUpperCase()}</Text>
+            <Text>{notification.message}</Text>
           </View>
           <View className="flex flex-row justify-between text-xs text-gray-500">
             <Text>{getTimeDifference(notification.timestamp)}</Text>

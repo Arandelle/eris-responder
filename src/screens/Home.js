@@ -39,7 +39,7 @@ const Home = ({ responderUid }) => {
         setSelectedEmergency({
           latitude: responderData.locationCoords.latitude,
           longitude: responderData.locationCoords.longitude,
-          id: responderData.emergency,
+          id: responderData.emergencyId,
         });
       }
     });
@@ -110,13 +110,13 @@ const Home = ({ responderUid }) => {
       );
       const newNotificationForUser = {
         responderId: user.uid,
-        type: "emergency",
-        title: `Your responder is coming`,
-        message: "Medical assistance is on your way",
+        type: "responder",
+        title: `Emergency report receieved!`,
+        message: `Your report for ${emergency.type} has been recieved. Help is on the way`,
         isSeen: false,
         date: new Date().toISOString(),
         timestamp: serverTimestamp(),
-        icon: "hospital-box",
+        icon: "car-emergency",
       };
 
       await push(notificationRefForUser, newNotificationForUser);

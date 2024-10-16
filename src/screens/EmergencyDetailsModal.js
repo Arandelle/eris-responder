@@ -24,8 +24,7 @@ const EmergencyDetailsModal = ({
   setRoute,
   setDistance,
 }) => {
-
-  const  {userData} = useFetchData();
+  
   const {userDetails} = useFetchUser(emergencyDetails?.userId);
 
   const handleEmergencyDone = (emergency) => {
@@ -53,15 +52,13 @@ const EmergencyDetailsModal = ({
                 const notificationRefForUser = ref(database, `users/${emergency.userId}/notifications`);
                 const newNotificationForUser = {
                   responderId: user.uid,
-                  type: "emergency",
-                  title: "Resolved!",
-                  message: `Your emergency request has been resolved`,
-                  email: `${userData.email}`,
+                  type: "responder",
+                  title: "Emergency Report Resolved!",
+                  message: `Your report for ${emergency.type} has been resolved`,
                   isSeen: false,
                   date: new Date().toISOString(),
                   timestamp: serverTimestamp(),
-                  img: `${userData.img}`,
-                  icon: "hospital-box"
+                  icon: "shield-check"
                 }
 
                 await push(notificationRefForUser, newNotificationForUser);

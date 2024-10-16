@@ -66,6 +66,7 @@
               <Stack.Screen name="Eris">
               {()=> <TabNavigator responderUid={user.uid}/>}
               </Stack.Screen>
+              <Stack.Screen name='Map' component={Home} />
               <Stack.Screen
                 name="UpdateProfile"
                 component={UpdateProfile}
