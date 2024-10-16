@@ -40,8 +40,6 @@ const RecordItem = ({records}) => {
   return (
     <View className="border border-gray-300 rounded-lg">
     <View className="flex flex-row space-x-2 p-4">
-    {records !== "awaiting response" && (
-      <>
          <Image 
            source={{ uri: userDetails?.img }} 
            className="h-12 w-12 rounded-full" 
@@ -52,8 +50,6 @@ const RecordItem = ({records}) => {
            </Text>
            <Text className="text-sm text-gray-400">{userDetails?.customId}</Text>
          </View>
-      </>
-    )}
     </View>
  
     <View className="mx-2 mb-2 rounded-md p-4 space-y-2 bg-gray-100">
@@ -84,8 +80,15 @@ const RecordItem = ({records}) => {
  
         <View className="flex flex-row">
           <Text className="w-1/3 font-bold text-gray-500">Response Time:</Text>
-          <Text className="flex-1 font-bold">{formatDateWithTime(records.dateAccepted)}</Text>
+          <Text className="flex-1 font-bold">{formatDateWithTime(records.responseTime)}</Text>
         </View>
+
+        {records.dateResolved && (
+          <View className="flex flex-row">
+          <Text className="w-1/3 font-bold text-gray-500">Date Resolved:</Text>
+          <Text className="flex-1 font-bold">{formatDateWithTime(records.dateResolved)}</Text>
+        </View>
+        )}
  
         <View className="flex flex-row">
           <Text className="w-1/3 font-bold text-gray-500">Emergency Id:</Text>

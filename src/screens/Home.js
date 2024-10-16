@@ -39,7 +39,7 @@ const Home = ({ responderUid }) => {
         setSelectedEmergency({
           latitude: responderData.locationCoords.latitude,
           longitude: responderData.locationCoords.longitude,
-          id: responderData.requestId,
+          id: responderData.emergency,
         });
       }
     });
@@ -68,13 +68,13 @@ const Home = ({ responderUid }) => {
 
   const handleSelectEmergency = async (emergency) => {
     try {
-      if (userData.pendingEmergency) {
-        Alert.alert(
-          "Error Navigating",
-          "You have on-going emergency,please make sure to assist them first"
-        );
-        return;
-      }
+      // if (userData.pendingEmergency) {
+      //   Alert.alert(
+      //     "Error Navigating",
+      //     "You have on-going emergency,please make sure to assist them first"
+      //   );
+      //   return;
+      // }
       const user = auth.currentUser;
       const historyRef = ref(database, `responders/${user.uid}/history`);
       const newHistoryEntry = {
@@ -86,7 +86,7 @@ const Home = ({ responderUid }) => {
         description: emergency.description,
         status: "on-going",
         date: emergency.date,
-        dateAccepted: new Date().toISOString(),
+        responseTime: new Date().toISOString(),
       };
       const newHistoryRef = await push(historyRef, newHistoryEntry);
       const historyId = newHistoryRef.key;
@@ -95,7 +95,7 @@ const Home = ({ responderUid }) => {
       await update(ref(database, `responders/${user.uid}/`), {
         pendingEmergency: {
           userId: emergency.userId,
-          requestId: emergency.id,
+          emergencyId: emergency.emergencyId,
           historyId: historyId,
           locationCoords: {
             latitude: emergency.location.latitude,
@@ -109,7 +109,7 @@ const Home = ({ responderUid }) => {
         `users/${emergency.userId}/notifications`
       );
       const newNotificationForUser = {
-        responderId: auth.currentUser.uid,
+        responderId: user.uid,
         type: "emergency",
         title: `Your responder is coming`,
         message: "Medical assistance is on your way",
@@ -140,19 +140,22 @@ const Home = ({ responderUid }) => {
         longitude: userData.location.longitude,
       };
 
-      updates[`emergencyRequest/${emergency.id}/acceptedBy`] =
-        userData.firstname;
+      updates[`emergencyRequest/${emergency.id}/responderId`] =
+        user.uid;
       updates[
-        `users/${emergency.userId}/emergencyHistory/${emergency.id}/acceptedBy`
-      ] = userData.firstname;
+        `users/${emergency.userId}/emergencyHistory/${emergency.id}/responderId`
+      ] = user.uid;
 
       updates[`users/${emergency.userId}/activeRequest/responderId`] = user.uid;
-      updates[`users/${emergency.userId}/activeRequest/acceptedBy`] =
-        userData.firstname;
       updates[`users/${emergency.userId}/activeRequest/locationOfResponder`] = {
         latitude: userData.location.latitude,
         longitude: userData.location.longitude,
       };
+
+      updates[`emergencyRequest/${emergency.id}/responseTime`] = new Date().toISOString();
+      updates[
+        `users/${emergency.userId}/emergencyHistory/${emergency.id}/responseTime`
+      ] = new Date().toISOString();
 
       await update(ref(database), updates);
 
@@ -164,6 +167,7 @@ const Home = ({ responderUid }) => {
       console.error("Error: ", error);
     }
     setShowModal(false);
+    console.log(selectedEmergency)
   };
 
   return (
@@ -193,7 +197,6 @@ const Home = ({ responderUid }) => {
           )
           .map((emergency) => (
             <Marker
-              key={emergency.id}
               coordinate={{
                 latitude: emergency.location.latitude,
                 longitude: emergency.location.longitude,

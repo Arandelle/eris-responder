@@ -19,7 +19,6 @@ const TopBarNavigator = () => {
            tabBarLabelStyle : {fontWeight: "bold"},
         }
         )}>
-        <Toptab.Screen name="awaiting" children={()=> <Records status="awaiting response" />} />
         <Toptab.Screen name="on-going" children={()=> <Records status="on-going" />} />
         <Toptab.Screen name="resolved" children={()=> <Records status="resolved" />} />
     </Toptab.Navigator>

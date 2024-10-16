@@ -52,6 +52,7 @@ const EmergencyDetailsModal = ({
 
                 const notificationRefForUser = ref(database, `users/${emergency.userId}/notifications`);
                 const newNotificationForUser = {
+                  responderId: user.uid,
                   type: "emergency",
                   title: "Resolved!",
                   message: `Your emergency request has been resolved`,
@@ -73,6 +74,14 @@ const EmergencyDetailsModal = ({
                 updates[
                   `responders/${user.uid}/history/${historyId}/status`
                 ] = "resolved";
+
+                updates[`emergencyRequest/${emergency.id}/dateResolved`] = new Date().toISOString();
+                updates[
+                  `users/${emergency.userId}/emergencyHistory/${emergency.id}/dateResolved`
+                ] = new Date().toISOString();
+                updates[
+                  `responders/${user.uid}/history/${historyId}/dateResolved`
+                ] =new Date().toISOString();
   
                 await update(ref(database), updates);
   
@@ -108,7 +117,7 @@ const EmergencyDetailsModal = ({
             <View className=" bg-white w-full absolute bottom-0 rounded-t-xl">
               <View className="flex p-3 justify-between flex-row bg-gray-200 rounded-t-xl">
                 <Text className="text-lg font-bold">Emergency Id:</Text>
-                <Text className="text-lg">{emergencyDetails.customId}</Text>
+                <Text className="text-lg">{emergencyDetails.emergencyId}</Text>
               </View>
 
               <View className="flex px-3 py-6 flex-row items-center space-x-2">
@@ -143,11 +152,11 @@ const EmergencyDetailsModal = ({
               <View className="space-y-3 px-3 py-4 pt-0">
                 <TouchableOpacity
                   disabled={
-                    selectedEmergency?.id === emergencyDetails.id &&
+                    selectedEmergency?.id === emergencyDetails.emergencyId &&
                     route.length > 0
                   }
                   className={`py-3 text-white items-center w-full rounded-md ${
-                    selectedEmergency?.id === emergencyDetails.id &&
+                    selectedEmergency?.id === emergencyDetails.emergencyId &&
                     route.length > 0
                       ? "bg-red-500"
                       : "bg-green-500"
@@ -157,13 +166,13 @@ const EmergencyDetailsModal = ({
                   }}
                 >
                   <Text className="text-white font-bold text-lg">
-                    {selectedEmergency?.id === emergencyDetails.id &&
+                    {selectedEmergency?.id === emergencyDetails.emergencyId &&
                     route.length > 0
                       ? "Responding..."
                       : "Navigate to this location"}
                   </Text>
                 </TouchableOpacity>
-                {selectedEmergency?.id === emergencyDetails.id &&
+                {selectedEmergency?.id === emergencyDetails.emergencyId &&
                   route.length > 0 && (
                     <TouchableOpacity
                       className="py-3 items-center w-full rounded-md bg-gray-500"
