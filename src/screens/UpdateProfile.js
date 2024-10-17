@@ -1,18 +1,16 @@
 import React, { useState, useEffect } from "react";
 import {
   View,
-  Button,
   Alert,
   ScrollView,
   SafeAreaView,
   ActivityIndicator,
-  StyleSheet,
   Text,
   TouchableOpacity,
   Image,
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { ref, update, onValue } from "firebase/database";
+import { ref, update, onValue, push, serverTimestamp } from "firebase/database";
 import { auth, database } from "../services/firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
 import CustomInput from "../components/CustomInput";
@@ -111,6 +109,19 @@ const UpdateProfile = () => {
       try {
         await update(userRef, updatedData);
         setUserData(updatedData);
+        setLoading(true)
+
+        const responderNotificationRef = ref(database, `responders/${user.uid}/notifications`);
+        const notificationData = {
+          title: "Profile Updated!",
+          message: `Congratulations!, you have successfully update your profile information.`,
+          isSeen: false,
+          date: new Date().toISOString(),
+          timestamp: serverTimestamp(),
+          icon: "account-check",
+        }
+
+        await push(responderNotificationRef, notificationData);
 
         navigation.setParams({ updatedUserData: updatedData });
 
@@ -136,6 +147,8 @@ const UpdateProfile = () => {
       } catch (error) {
         console.error("Error updating user data:", error);
         Alert.alert("Error", error.message);
+      } finally{
+        setLoading(false)
       }
     } else {
       Alert.alert("Error", "User not authenticated");

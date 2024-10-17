@@ -195,8 +195,9 @@ const Home = ({ responderUid }) => {
               emergency.status === "awaiting response" ||
               emergency.status === "on-going"
           )
-          .map((emergency) => (
+          .map((emergency, key) => (
             <Marker
+              key={key}
               coordinate={{
                 latitude: emergency.location.latitude,
                 longitude: emergency.location.longitude,

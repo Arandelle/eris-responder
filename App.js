@@ -11,6 +11,7 @@
   import UpdateProfile from './src/screens/UpdateProfile';
   import Logo from "./assets/logo.png"
   import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import Records from './src/screens/Records';
 
   const Stack = createNativeStackNavigator();
 
@@ -66,6 +67,7 @@
               <Stack.Screen name="Eris">
               {()=> <TabNavigator responderUid={user.uid}/>}
               </Stack.Screen>
+              <Stack.Screen name='Records' component={Records} />
               <Stack.Screen name='Map' component={Home} />
               <Stack.Screen
                 name="UpdateProfile"
