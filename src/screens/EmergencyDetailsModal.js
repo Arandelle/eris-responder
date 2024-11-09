@@ -44,7 +44,7 @@ const EmergencyDetailsModal = ({
 
               if(responderSnapshot.exists()){
                 const responderData = responderSnapshot.val();
-                const historyId = responderData.historyId;
+                const historyId = responderData?.historyId;
 
                 await remove(ref(database, `responders/${user.uid}/pendingEmergency`));
                 await remove(ref(database, `users/${emergency.userId}/activeRequest`));
@@ -137,11 +137,8 @@ const EmergencyDetailsModal = ({
                     <Text className="p-1 rounded-lg bg-yellow-100">{userDetails?.customId}</Text>
                  </View>
                  <Text className="text-lg">{userDetails?.location.address}</Text>
-                  <Text className="text-lg">
-                    {emergencyDetails.type.toUpperCase()}
-                  </Text>
                   <Text className="text-lg bg-yellow-100 p-2 rounded-lg max-w-xs">
-                    {emergencyDetails.description}
+                    {emergencyDetails.description ?? "No description`"}
                   </Text>
                 </View>
               </View>
@@ -169,7 +166,7 @@ const EmergencyDetailsModal = ({
                       : "Navigate to this location"}
                   </Text>
                 </TouchableOpacity>
-                {selectedEmergency?.id === emergencyDetails.emergencyId &&
+                {selectedEmergency?.id === emergencyDetails?.emergencyId &&
                   route.length > 0 && (
                     <TouchableOpacity
                       className="py-3 items-center w-full rounded-md bg-gray-500"

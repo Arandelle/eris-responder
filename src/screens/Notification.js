@@ -127,10 +127,10 @@ const NotificationItem = ({ notification }) => {
         >
           <View className="relative">
             <View>
-              <Image
-                source={{ uri: notificationImg[notification.icon] }}
-                className="rounded-full h-16 w-16 border-4 border-blue-500"
-              />
+                <Image
+                  source={{ uri: notificationImg[notification.icon] }}
+                  className="rounded-full h-16 w-16"
+                />
               <View
                 className={`absolute bottom-0 -right-[4px] ${
                   notificationData[notification.icon]

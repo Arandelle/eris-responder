@@ -8,6 +8,7 @@ import Profile from "../screens/Profile";
 import TopBarNavigator from "../navigation/TopBarNavigator";
 import { useFetchData } from "../hooks/useFetchData";
 import { useNotificationData } from "../hooks/useNotificationData";
+import colors from "../constants/colors";
 
 const Tab = createBottomTabNavigator();
 
@@ -30,10 +31,10 @@ const TabNavigator = ({responderUid}) => {
         headerShown: true,
         tabBarIcon: ({ color, size }) => {
           const icons = {
-            Home: "map-marker-radius-outline",
+            Home: "map-marker",
             Records: "history",
-            Notification: "bell-outline",
-            Profile: "account-circle-outline",
+            Notification: "bell",
+            Profile: "account-circle",
           };
 
           const iconName = icons[route.name];
@@ -50,8 +51,12 @@ const TabNavigator = ({responderUid}) => {
             </View>
           );
         },
-        tabBarActiveTintColor: "#42a5f5",
-        tabBarInactiveTintColor: "gray",
+        headerTintColor: "white",
+        headerStyle: {
+          backgroundColor:  colors.blue[800],
+          shadowColor: "transparent"},
+        tabBarActiveTintColor: colors.blue[800],
+        tabBarInactiveTintColor: colors.gray[400],
         tabBarStyle: {
           paddingBottom: 10,
           paddingTop: 10,
@@ -68,7 +73,9 @@ const TabNavigator = ({responderUid}) => {
         tabBarHideOnKeyboard: true,
       })}
     >
-      <Tab.Screen name="Home">
+      <Tab.Screen name="Home" options={{
+        headerShown: false
+      }}>
       {(props)=> <Home {...props} responderUid={responderUid}   setIsProfileComplete={setIsProfileComplete} />}
       </Tab.Screen>
       <Tab.Screen 

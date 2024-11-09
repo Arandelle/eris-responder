@@ -82,8 +82,7 @@ const Home = ({ responderUid }) => {
         userId: emergency.userId,
         timestamp: serverTimestamp(),
         location: emergency.location.address,
-        type: emergency.type,
-        description: emergency.description,
+        description: emergency.description ?? "No description",
         status: "on-going",
         date: emergency.date,
         responseTime: new Date().toISOString(),
@@ -136,8 +135,8 @@ const Home = ({ responderUid }) => {
       updates[
         `users/${emergency.userId}/emergencyHistory/${emergency.id}/locationOfResponder`
       ] = {
-        latitude: userData.location.latitude,
-        longitude: userData.location.longitude,
+        latitude: userData?.location.latitude,
+        longitude: userData?.location.longitude,
       };
 
       updates[`emergencyRequest/${emergency.id}/responderId`] =

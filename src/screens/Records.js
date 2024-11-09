@@ -57,12 +57,7 @@ const RecordItem = ({records}) => {
         {records.status.toUpperCase()}
       </Text>
  
-      <View className="space-y-2 p-1">
-        <View className="flex flex-row">
-          <Text className="w-1/3 font-bold text-gray-500">Emergency type:</Text>
-          <Text className="flex-1 font-bold">{records.type.toUpperCase()}</Text>
-        </View>
- 
+      <View className="space-y-2 p-1"> 
         <View className="flex flex-row">
           <Text className="w-1/3 font-bold text-gray-500">Description:</Text>
           <Text className="flex-1 font-bold">{records.description}</Text>

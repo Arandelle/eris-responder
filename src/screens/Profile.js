@@ -18,71 +18,26 @@ import { ref, onValue } from "firebase/database";
 import { auth, database } from "../services/firebaseConfig";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import { useFetchData } from "../hooks/useFetchData";
+import colors from "../constants/colors";
 
-const Profile = ({setIsProfileComplete}) => {
+const Profile = ({ setIsProfileComplete }) => {
   const navigation = useNavigation();
-  const [userData, setUserData] = useState(null);
+  const { userData } = useFetchData();
   const [loading, setLoading] = useState(true);
   const [logout, setLogout] = useState(false);
-
-  const fetchUserData = async (uid) => {
-    setLoading(true);
-    const userRef = ref(database, `responders/${uid}`);
-    try {
-      const snapshot = await new Promise((resolve, reject) => {
-        onValue(userRef, resolve, reject, { onlyOnce: true });
-      });
-      const data = snapshot.val();
-      setUserData(data);
-
-       // Check if the profile is complete and update the state
-       const profileComplete = data?.firstname && data?.lastname && data?.age && data?.address && data?.gender;
-       setIsProfileComplete(profileComplete);
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-      Alert.alert("Error", "Failed to fetch user data. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        fetchUserData(user.uid);
-      } else {
-        navigation.navigate("Login");
-      }
-    });
-
-    return () => unsubscribeAuth();
-  }, []);
-
-  useFocusEffect(
-    useCallback(() => {
-      const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
-        if (user) {
-          fetchUserData(user.uid);
-        } else {
-          navigation.navigate("Login");
-        }
-      });
-
-      return () => unsubscribeAuth();
-    }, [navigation])
-  );
 
   const handleShowUpdateForm = () => {
     navigation.navigate("UpdateProfile");
   };
 
-  if (loading) {
-    return (
-      <SafeAreaView className="flex-1">
-        <ActivityIndicator size="large" color="#007bff" />
-      </SafeAreaView>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <SafeAreaView className="flex-1">
+  //       <ActivityIndicator size="large" color="#007bff" />
+  //     </SafeAreaView>
+  //   );
+  // }
 
   const renderPlaceholder = (value, placeholder) => {
     return value ? (
@@ -106,99 +61,105 @@ const Profile = ({setIsProfileComplete}) => {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-200">
+    <SafeAreaView className="flex-1 bg-white">
       <ScrollView>
-        <View className="flex-1 justify-between bg-white rounded-lg m-4 p-5 shadow-md ">
-          <View className="items-center border-b-2 border-b-gray-300">
-            <View className="relative">
-              {userData?.img ? (
-                <Image
-                  source={{ uri: userData.img }}
-                  style={{ width: 100, height: 100, borderRadius: 50 }}
-                />
-              ) : (
-                <Text className="text-gray-900 text-lg">
-                  Image not available
-                </Text>
-              )}
+        <View className="flex flex-row items-center h-40 bg-blue-800 pl-8 space-x-4">
+          {userData?.img ? (
+            <View className="relative border border-white rounded-full">
+              <Image
+                source={{ uri: userData.img }}
+                className="h-24 w-24  rounded-full"
+              />
               <TouchableOpacity
-                className="absolute bottom-0 right-0 rounded-full p-2 bg-white"
+                className="absolute bottom-0 right-0 rounded-full p-2 bg-blue-800 border border-white"
                 onPress={handleShowUpdateForm}
               >
-                <Icon name="pencil" size={20} color={"blue"} />
+                <Icon name="pencil" size={18} color={"white"} />
               </TouchableOpacity>
             </View>
-            <Text className="text-2xl font-bold p-2">
-              {userData?.firstname && userData?.lastname
-                ? `${userData.firstname} ${userData.lastname}`
-                : renderPlaceholder(null, "Your Name")}
-            </Text>
-          </View>
+          ) : (
+            <Text className="text-gray-900 text-lg">Image not available</Text>
+          )}
 
-          <View className="mb-5 space-y-8 py-2">
-            <Text className="italic font-bold bg-blue-200 p-2 text-lg rounded-md">
-             {userData?.customId}
-            </Text>
-            <View>
-              <Text className="text-xl font-bold mb-2 ">Contact:</Text>
-              <View className="flex flex-col justify-between space-y-1">
-                <Text className="text-lg text-gray-500 font-bold">
-                  {userData?.email}
+          <View className="text-2xl space-y-1 font-bold p-2">
+            {userData?.firstname || userData?.lastname ? (
+              <View className="flex flex-row items-center space-x-2">
+                <Text className="text-xl text-white font-bold">
+                  {[userData?.firstname, userData?.lastname]
+                    .filter(Boolean)
+                    .join(" ")}
                 </Text>
-                <Text className="text-lg text-gray-500 font-bold">
-                  {userData.mobileNum}
-                </Text>
+                {auth.currentUser.emailVerified && (
+                  <View className="p-0.5 rounded-full border border-white bg-green-500">
+                    <Icon name="check" size={12} color={"white"} />
+                  </View>
+                )}
               </View>
-            </View>
-            <View>
-              <Text className="text-xl font-bold mb-2 ">
-                Age:{" "}
-                <Text className="text-lg text-gray-500 font-bold">
-                  {userData?.age
-                    ? userData?.age
-                    : renderPlaceholder(null, "Age")}
+            ) : (
+              <>
+                <Text className="font-bold text-xl text-white">
+                  Update your fullname
                 </Text>
-              </Text>
-            </View>
-            <View>
-              <Text className="text-xl font-bold mb-2 ">
-                Gender:{" "}
-                <Text className="text-lg text-gray-500 font-bold">
-                  {userData?.gender
-                    ? userData?.gender
-                    : renderPlaceholder(null, "Your gender")}
-                </Text>
-              </Text>
-            </View>
-            <View>
-              <Text className="text-xl font-bold mb-2 ">Current Address:</Text>
-              <Text className="text-lg text-gray-500 font-bold">
-                {userData?.address
-                  ? userData.address
-                  : renderPlaceholder(null, "House No. Street Barangay")}
-              </Text>
-            </View>
-
-            {!userData.profileComplete && (
-              <View className="p-4 bg-red-100 rounded-md">
-                <Text className="text-gray-900">
-                  Please update your profile for security purposes
-                </Text>
-              </View>
+              </>
             )}
+            <Text className="text-blue-200">{userData?.customId}</Text>
           </View>
-          <View className="mb-2 space-y-2.5">
+        </View>
+
+        <View className="px-2 py-4 space-y-4">
+          <View className="border-b pb-4 border-gray-300">
+            <View className="space-y-4 py-4 px-6 bg-blue-100 rounded-xl">
+              <View>
+                <Text className="text-xl font-bold">Contact:</Text>
+                <View className="flex flex-col justify-between space-y-1">
+                  <Text className="text-lg text-gray-500 font-bold">
+                    {userData?.email ?? "Add email"}
+                  </Text>
+                  <Text className="text-lg text-gray-500 font-bold">
+                    {userData?.mobileNum ?? "Add mobile number"}
+                  </Text>
+                </View>
+              </View>
+              <View>
+                <Text className="text-xl font-bold mb-2 ">
+                  Gender:{" "}
+                  <Text className="text-lg text-gray-500 font-bold">
+                    {userData?.gender ? userData?.gender : "Your gender"}
+                  </Text>
+                </Text>
+              </View>
+
+              {!userData?.profileComplete && (
+                <View className="p-4 bg-red-50 border-l-4 border-red-400 rounded-md">
+                  <View className="flex flex-row items-center gap-2">
+                    <Icon name={"shield"} color={colors.red[300]} size={20} />
+                    <Text className="text-gray-800 text-lg font-medium">
+                      Finish Setting Up Your Profile
+                    </Text>
+                  </View>
+                  <Text className="text-gray-600 mt-1">
+                    Complete your profile to ensure faster assistance during
+                    emergencies
+                  </Text>
+                </View>
+              )}
+            </View>
+          </View>
+
+          <View className="space-y-4">
             <TouchableOpacity
-              className="p-3 bg-blue-500 rounded-full"
+              className="p-3 flex-row items-center justify-between bg-blue-100 rounded-lg"
               onPress={handleLogoutModal}
             >
-              <Text className="text-center text-lg text-white font-bold">
-                Logout
-              </Text>
+              <View className="flex flex-row space-x-5">
+                <Icon name="logout" size={24} color={colors.blue[800]} />
+                <Text className="text-lg font-bold text-red-500">Logout</Text>
+              </View>
             </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
+
       <Modal
         animationType="slide"
         transparent={true}
@@ -217,7 +178,7 @@ const Profile = ({setIsProfileComplete}) => {
                 </Text>
                 <View className="space-y-3 py-3 px-5">
                   <TouchableOpacity
-                    className="p-3 w-full bg-blue-600 rounded-2xl"
+                    className="p-3 w-full bg-blue-800 rounded-2xl"
                     onPress={handleLogout}
                   >
                     <Text className="text-white text-lg text-center font-extrabold">
@@ -225,10 +186,10 @@ const Profile = ({setIsProfileComplete}) => {
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    className="p-3 w-full border-2 border-blue-500 rounded-2xl"
+                    className="p-3 w-full border-2 border-blue-800 rounded-2xl"
                     onPress={handleLogoutModal}
                   >
-                    <Text className="text-center text-lg font-extrabold text-blue-500">
+                    <Text className="text-center text-lg font-extrabold text-blue-800">
                       Cancel
                     </Text>
                   </TouchableOpacity>
