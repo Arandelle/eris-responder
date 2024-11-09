@@ -106,7 +106,7 @@ const Profile = ({ setIsProfileComplete }) => {
           </View>
         </View>
 
-        <View className="px-2 py-4 space-y-4">
+        <View className="p-4 space-y-4">
           <View className="border-b pb-4 border-gray-300">
             <View className="space-y-4 py-4 px-6 bg-blue-100 rounded-xl">
               <View>
