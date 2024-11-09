@@ -2,17 +2,18 @@ import { useEffect, useState } from 'react';
 import { View, Text, Modal, TouchableOpacity } from 'react-native';
 import { useNavigation } from "@react-navigation/native";
 import { useFetchData } from '../hooks/useFetchData';
+import useCurrentUser from '../hooks/useCurrentUser';
 
 const ProfileReminderModal = () => {
   const navigation = useNavigation();
-  const {userData} = useFetchData();
+  const {currentUser} = useCurrentUser();
   const [modalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
-    if (userData) {
-      setModalVisible(!userData.profileComplete);
+    if (currentUser) {
+      setModalVisible(!currentUser?.profileComplete);
     }
-  }, [userData]);
+  }, [currentUser]);
   
   return (
     <Modal

@@ -1,6 +1,6 @@
 import { View, Text, ScrollView, Image } from "react-native";
 import useFetchRecord from "../hooks/useFetchRecord";
-import useFetchUser from "../hooks/useFetchUser";
+import useFetchData from "../hooks/useFetchData";
 import { formatDateWithTime } from "../helper/FormatDate";
 
 const Records = ({ status }) => {
@@ -28,7 +28,8 @@ const Records = ({ status }) => {
 };
 
 const RecordItem = ({ records }) => {
-  const { userDetails } = useFetchUser(records.userId);
+  const {data: userData} = useFetchData("users");
+  const userDetails = userData?.find((user) => user.id === records.userId);
 
   const emergencyStatus = {
     "awaiting response": "bg-orange-100 text-orange-600",

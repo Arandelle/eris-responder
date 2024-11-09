@@ -3,10 +3,10 @@ import * as Location from "expo-location";
 import { Alert } from "react-native";
 import { ref, update, onValue, get } from "firebase/database";
 import { database } from "../services/firebaseConfig";
-import { useFetchData } from "./useFetchData";
+import  useFetchData  from "./useFetchData";
 
 const useLocation = (responderUid) => {
-  const { userData } = useFetchData();
+  const { data: userData } = useFetchData("responders");
   const [responderPosition, setResponderPosition] = useState(null);
   const [loading, setLoading] = useState(true);
 

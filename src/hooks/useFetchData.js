@@ -1,26 +1,30 @@
-import {useState,useEffect} from 'react'
+import { useEffect, useState } from "react"
 import {ref, onValue} from "firebase/database"
-import {auth, database} from "../services/firebaseConfig"
+import { database } from "../services/firebaseConfig";
 
-export const useFetchData = () => {
-    const [userData, setUserData] = useState(null);
+const useFetchData = (dataType) => {
+    const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(true);
+    useEffect(()=>{
+        const dataRef = ref(database, dataType);
+        const unsubscribe = onValue(dataRef, (snapshot) => {
+            if(snapshot.exists()){
+                const data = snapshot.val();
+                const dataList = Object.keys(data).map((key) =>({
+                    id: key,
+                    ...data[key],
+                }));
+                setData(dataList);
+            }else{
+                setData([])
+            }
+            setLoading(false);
+        });
 
-  useEffect(() => {
-    const user = auth.currentUser;
-    if(user) {
-      const userRef = ref(database, `responders/${user.uid}`);
-      const unsubscribe = onValue(userRef, (snapshot)=>{
-        if(snapshot.exists()){
-          setUserData(snapshot.val());
-        } else{
-          setUserData(null);
-          console.error("No user available");
-        }
-      });
-      // cleanup subscription on unmount
-      return ()=> unsubscribe();
-    }
-  }, []);
+        return () => unsubscribe();
+    }, [dataType])
 
-  return {userData, setUserData};
+  return {data, loading}
 }
+
+export default useFetchData

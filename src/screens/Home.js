@@ -7,16 +7,17 @@ import responderMarker from "../../assets/ambulance.png";
 import Logo from "../../assets/logo.png";
 import ProfileReminderModal from "../components/ProfileReminderModal";
 import useLocation from "../hooks/useLocation";
-import useEmergencyData from "../hooks/useEmergencyData";
 import useRoute from "../hooks/useRoute";
 import EmergencyDetailsModal from "./EmergencyDetailsModal";
-import { useFetchData } from "../hooks/useFetchData";
+import useCurrentUser from "../hooks/useCurrentUser";
+import useFetchData from "../hooks/useFetchData";
 
 const Home = ({ responderUid }) => {
-  const { userData } = useFetchData();
+  
+  const {data: emergencyData, loading: emergencyLoading} = useFetchData("emergencyRequest")
+  const {currentUser} = useCurrentUser()
   const { responderPosition, loading: locationLoading } =
     useLocation(responderUid);
-  const { emergencyData, loading: emergencyLoading } = useEmergencyData();
   const [selectedEmergency, setSelectedEmergency] = useState(null);
   const { route, setRoute, distance, setDistance } = useRoute(
     responderPosition,
@@ -47,8 +48,8 @@ const Home = ({ responderUid }) => {
   }, []);
 
   useEffect(() => {
-    if (responderPosition && !userData.pendingEmergency) {
-      Alert.alert("Have a nice day!", "No emergency request yet");
+    if (responderPosition && !currentUser?.pendingEmergency) {
+      Alert.alert("Have a nice day!", "No emergency report yet");
     }
   }, []);
 
@@ -68,7 +69,7 @@ const Home = ({ responderUid }) => {
 
   const handleSelectEmergency = async (emergency) => {
     try {
-      // if (userData.pendingEmergency) {
+      // if (currentUser?.pendingEmergency) {
       //   Alert.alert(
       //     "Error Navigating",
       //     "You have on-going emergency,please make sure to assist them first"
@@ -128,15 +129,15 @@ const Home = ({ responderUid }) => {
       ] = "on-going";
 
       updates[`emergencyRequest/${emergency.id}/locationOfResponder`] = {
-        latitude: userData.location.latitude,
-        longitude: userData.location.longitude,
+        latitude: currentUser?.location.latitude,
+        longitude: currentUser?.location.longitude,
       };
 
       updates[
         `users/${emergency.userId}/emergencyHistory/${emergency.id}/locationOfResponder`
       ] = {
-        latitude: userData?.location.latitude,
-        longitude: userData?.location.longitude,
+        latitude: currentUser?.location.latitude,
+        longitude: currentUser?.location.longitude,
       };
 
       updates[`emergencyRequest/${emergency.id}/responderId`] =
@@ -147,8 +148,8 @@ const Home = ({ responderUid }) => {
 
       updates[`users/${emergency.userId}/activeRequest/responderId`] = user.uid;
       updates[`users/${emergency.userId}/activeRequest/locationOfResponder`] = {
-        latitude: userData.location.latitude,
-        longitude: userData.location.longitude,
+        latitude: currentUser?.location.latitude,
+        longitude: currentUser?.location.longitude,
       };
 
       updates[`emergencyRequest/${emergency.id}/responseTime`] = new Date().toISOString();

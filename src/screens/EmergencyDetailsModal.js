@@ -10,8 +10,7 @@ import {
 } from "react-native";
 import { auth, database } from "../services/firebaseConfig";
 import { getTimeDifference } from "../helper/getTimeDifference";
-import { useFetchData } from "../hooks/useFetchData";
-import useFetchUser from "../hooks/useFetchUser";
+import useFetchData from "../hooks/useFetchData";
 
 const EmergencyDetailsModal = ({
   showModal,
@@ -25,7 +24,8 @@ const EmergencyDetailsModal = ({
   setDistance,
 }) => {
 
-  const {userDetails} = useFetchUser(emergencyDetails?.userId);
+  const {data: userData} = useFetchData("users")
+  const userDetails = userData?.find((user) => user.id === emergencyDetails?.userId);
 
   const handleEmergencyDone = (emergency) => {
     Alert.alert("Notice!", "Are you sure this emergency is resolved?", [

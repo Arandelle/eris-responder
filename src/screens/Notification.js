@@ -6,13 +6,13 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native";
-import { useFetchData } from "../hooks/useFetchData";
+import  useFetchData  from "../hooks/useFetchData";
 import { getTimeDifference } from "../helper/getTimeDifference";
 import { formatDate } from "../helper/FormatDate";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { useNavigation } from "@react-navigation/native";
 import { useNotificationData } from "../hooks/useNotificationData";
-import useFetchUser from "../hooks/useFetchUser";
+import useCurrentUser from "../hooks/useCurrentUser";
 
 const Notification = () => {
   const {
@@ -76,13 +76,14 @@ const Notification = () => {
 
 const NotificationItem = ({ notification }) => {
   const navigation = useNavigation();
-  const { userData } = useFetchData();
-  const { userDetails } = useFetchUser(notification.userId);
+  const {currentUser} = useCurrentUser();
+  const {data: userData} = useFetchData("users")
+  const userDetails = userData?.find((user) => user.id === notification?.userId);
   const { handleSpecificNotification} = useNotificationData();
 
   const notificationImg = {
-    "account-check": userData?.img,
-    "account-alert": userData?.img,
+    "account-check": currentUser?.img,
+    "account-alert": currentUser?.img,
     "hospital-box": userDetails?.img,
     "shield-check": userDetails?.img,
     "car-emergency": userDetails?.img,

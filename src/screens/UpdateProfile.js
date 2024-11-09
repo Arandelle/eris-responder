@@ -9,8 +9,8 @@ import {
   TouchableOpacity,
   Image,
 } from "react-native";
-import { useNavigation, useRoute } from "@react-navigation/native";
-import { ref, update, onValue, push, serverTimestamp } from "firebase/database";
+import { useNavigation } from "@react-navigation/native";
+import { ref, onValue, push, serverTimestamp } from "firebase/database";
 import { auth, database } from "../services/firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
 import CustomInput from "../components/CustomInput";

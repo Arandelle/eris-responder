@@ -6,23 +6,24 @@ import Notification from "../screens/Notification";
 import { View } from "react-native";
 import Profile from "../screens/Profile";
 import TopBarNavigator from "../navigation/TopBarNavigator";
-import { useFetchData } from "../hooks/useFetchData";
+import  useFetchData  from "../hooks/useFetchData";
 import { useNotificationData } from "../hooks/useNotificationData";
 import colors from "../constants/colors";
+import useCurrentUser from "../hooks/useCurrentUser";
 
 const Tab = createBottomTabNavigator();
 
 const TabNavigator = ({responderUid}) => {
 
+  const {currentUser} = useCurrentUser();
   const [isProfileComplete, setIsProfileComplete] = useState(true);
-  const {userData} = useFetchData();
   const {notificationsCount} = useNotificationData();
   
   useEffect(() => {
-    if (userData) {
-      setIsProfileComplete(userData.profileComplete);
+    if (currentUser) {
+      setIsProfileComplete(currentUser?.profileComplete);
     }
-  }, [userData]);
+  }, [currentUser]);
 
   return (
     <Tab.Navigator

@@ -1,51 +1,40 @@
-import React, { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import {
   View,
   Text,
-  Button,
-  ActivityIndicator,
   ScrollView,
   SafeAreaView,
-  Alert,
-  StyleSheet,
   TouchableOpacity,
   Modal,
   TouchableWithoutFeedback,
   Image,
 } from "react-native";
-import { useNavigation, useFocusEffect } from "@react-navigation/native";
-import { ref, onValue } from "firebase/database";
-import { auth, database } from "../services/firebaseConfig";
-import { onAuthStateChanged, signOut } from "firebase/auth";
+import { useNavigation } from "@react-navigation/native";
+import { auth } from "../services/firebaseConfig";
+import { signOut } from "firebase/auth";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-import { useFetchData } from "../hooks/useFetchData";
 import colors from "../constants/colors";
+import useCurrentUser from "../hooks/useCurrentUser";
 
-const Profile = ({ setIsProfileComplete }) => {
+const Profile = () => {
   const navigation = useNavigation();
-  const { userData } = useFetchData();
-  const [loading, setLoading] = useState(true);
+  const {currentUser, loading} = useCurrentUser();
   const [logout, setLogout] = useState(false);
 
   const handleShowUpdateForm = () => {
     navigation.navigate("UpdateProfile");
   };
 
-  // if (loading) {
-  //   return (
-  //     <SafeAreaView className="flex-1">
-  //       <ActivityIndicator size="large" color="#007bff" />
-  //     </SafeAreaView>
-  //   );
-  // }
-
-  const renderPlaceholder = (value, placeholder) => {
-    return value ? (
-      <Text className="text-xl text-gray-500">{value}</Text>
-    ) : (
-      <Text className="italic text-xl text-gray-900">{placeholder}</Text>
+  if (loading) {
+    return (
+      <SafeAreaView className="flex-1">
+       <View className="h-full flex items-center justify-center"> 
+       <Text>Loading please wait...</Text>
+       </View>
+      </SafeAreaView>
     );
-  };
+  }
+
 
   const handleLogoutModal = () => {
     setLogout(!logout);
@@ -64,10 +53,10 @@ const Profile = ({ setIsProfileComplete }) => {
     <SafeAreaView className="flex-1 bg-white">
       <ScrollView>
         <View className="flex flex-row items-center h-40 bg-blue-800 pl-8 space-x-4">
-          {userData?.img ? (
+          {currentUser?.img ? (
             <View className="relative border border-white rounded-full">
               <Image
-                source={{ uri: userData.img }}
+                source={{ uri: currentUser.img }}
                 className="h-24 w-24  rounded-full"
               />
               <TouchableOpacity
@@ -82,10 +71,10 @@ const Profile = ({ setIsProfileComplete }) => {
           )}
 
           <View className="text-2xl space-y-1 font-bold p-2">
-            {userData?.firstname || userData?.lastname ? (
+            {currentUser?.firstname || currentUser?.lastname ? (
               <View className="flex flex-row items-center space-x-2">
                 <Text className="text-xl text-white font-bold">
-                  {[userData?.firstname, userData?.lastname]
+                  {[currentUser?.firstname, currentUser?.lastname]
                     .filter(Boolean)
                     .join(" ")}
                 </Text>
@@ -102,7 +91,7 @@ const Profile = ({ setIsProfileComplete }) => {
                 </Text>
               </>
             )}
-            <Text className="text-blue-200">{userData?.customId}</Text>
+            <Text className="text-blue-200">{currentUser?.customId}</Text>
           </View>
         </View>
 
@@ -113,10 +102,10 @@ const Profile = ({ setIsProfileComplete }) => {
                 <Text className="text-xl font-bold">Contact:</Text>
                 <View className="flex flex-col justify-between space-y-1">
                   <Text className="text-lg text-gray-500 font-bold">
-                    {userData?.email ?? "Add email"}
+                    {currentUser?.email ?? "Add email"}
                   </Text>
                   <Text className="text-lg text-gray-500 font-bold">
-                    {userData?.mobileNum ?? "Add mobile number"}
+                    {currentUser?.mobileNum ?? "Add mobile number"}
                   </Text>
                 </View>
               </View>
@@ -124,12 +113,12 @@ const Profile = ({ setIsProfileComplete }) => {
                 <Text className="text-xl font-bold mb-2 ">
                   Gender:{" "}
                   <Text className="text-lg text-gray-500 font-bold">
-                    {userData?.gender ? userData?.gender : "Your gender"}
+                    {currentUser?.gender ? currentUser?.gender : "Your gender"}
                   </Text>
                 </Text>
               </View>
 
-              {!userData?.profileComplete && (
+              {!currentUser?.profileComplete && (
                 <View className="p-4 bg-red-50 border-l-4 border-red-400 rounded-md">
                   <View className="flex flex-row items-center gap-2">
                     <Icon name={"shield"} color={colors.red[300]} size={20} />
