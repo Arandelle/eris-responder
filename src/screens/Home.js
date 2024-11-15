@@ -187,7 +187,7 @@ const Home = ({ responderUid }) => {
           pinColor="#42a5f5"
           rotation={heading}
         >
-          <Image source={responderMarker} className="h-12 w-12" />
+          <Image source={responderMarker} className="h-10 w-10" />
         </Marker>
         {emergencyData
           .filter(
