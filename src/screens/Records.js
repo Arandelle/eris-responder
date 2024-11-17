@@ -13,10 +13,8 @@ const Records = ({ status }) => {
       <ScrollView>
         <View className="space-y-2">
           {emergencyRecords.length > 0 ? (
-            emergencyRecords.map((records, key) => (
-              <View className="space-y-2">
-                <RecordItem key={key} records={records} />
-              </View>
+            emergencyRecords.map((records) => (
+                <RecordItem className="space-y-2" key={records.id} records={records} />
             ))
           ) : (
             <Text className="text-center text-gray-500">{`No records found for ${status}`}</Text>

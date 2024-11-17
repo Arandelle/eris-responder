@@ -177,8 +177,8 @@ const Home = ({ responderUid }) => {
         className="flex-1"
         initialRegion={{
           ...responderPosition,
-          latitudeDelta: 0.005,
-          longitudeDelta: 0.005,
+          latitudeDelta: 0.004,
+          longitudeDelta: 0.004,
         }}
       >
         <Marker

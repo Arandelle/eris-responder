@@ -45,9 +45,7 @@ const Notification = () => {
         <View className="h-full w-full">
           {displayedNotifications.length > 0 ? (
             displayedNotifications.map((notification) => (
-              <View>
                 <NotificationItem key={notification.id} notification={notification} />
-              </View>
             ))
           ) : (
             <View className="flex items-center justify-center mt-60">
