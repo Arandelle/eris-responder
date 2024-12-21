@@ -16,6 +16,7 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 import { useNavigation } from "@react-navigation/native";
 import ForgotPass from "./ForgotPass";
 import { get, ref } from "firebase/database";
+import colors from "../constants/colors";
 
 const LoginForm = () => {
   const navigation = useNavigation();
@@ -90,8 +91,8 @@ const LoginForm = () => {
           <View className="space-y-2">
             <Text className="text-lg">Email</Text>
             <View className="relative z-10">
-              <View className="flex items-center absolute top-4 left-3 z-50">
-                <Icon name="alternate-email" size={20} color="black" />
+              <View className="flex items-center absolute top-3 left-3 z-50">
+                <Icon name="alternate-email" size={20} color={colors.gray[500]} />
               </View>
               <TextInput
                 className="bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full ps-10 p-2.5 pl-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
@@ -112,7 +113,7 @@ const LoginForm = () => {
             </View>
             <View className="relative z-10">
               <View className="flex items-center absolute top-3 left-3 z-50">
-                <Icon name="lock" size={20} color="black" />
+                <Icon name="lock" size={20} color={colors.gray[500]} />
               </View>
               <TextInput
                 className="bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full ps-10 p-2.5 pl-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
@@ -128,13 +129,13 @@ const LoginForm = () => {
                 <Icon
                   name={showPass ? "visibility" : "visibility-off"}
                   size={20}
-                  color="black"
+                  color={colors.gray[500]}
                 />
               </TouchableOpacity>
             </View>
           </View>
           <TouchableOpacity
-            className="w-full bg-blue-500 p-3 rounded"
+            className="w-full bg-blue-800 p-2.5 rounded-md"
             onPress={handleLogin}
             disabled={loading}
           >
