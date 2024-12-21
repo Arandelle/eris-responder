@@ -49,6 +49,25 @@ const Profile = () => {
     }
   };
 
+  const SectionStyle = ({onPress, iconName, label, isLogout}) => {
+    return(
+      <View className="space-y-4">
+      <TouchableOpacity
+          className="p-3 flex-row items-center justify-between bg-blue-100 rounded-lg"
+          onPress={onPress}
+        >
+          <View className="flex flex-row space-x-5">
+            <Icon name={iconName} size={24} color={colors.blue[800]} />
+            <Text className={`text-lg font-bold ${isLogout && "text-red-500"}`}>{label}</Text>
+          </View>
+          {!isLogout && (
+            <Icon name="arrow-right" size={24} color={colors.blue[800]} />
+          )}
+        </TouchableOpacity>
+      </View>
+    )
+  }
+
   return (
     <SafeAreaView className="flex-1 bg-white">
       <ScrollView>
@@ -135,30 +154,22 @@ const Profile = () => {
             </View>
           </View>
 
-          <View className="space-y-4">
-          <TouchableOpacity
-              className="p-3 flex-row items-center justify-between bg-blue-100 rounded-lg"
-              onPress={() => navigation.navigate("ChangePassword")}
-            >
-              <View className="flex flex-row space-x-5">
-                <Icon name="lock" size={24} color={colors.blue[800]} />
-                <Text className="text-lg font-bold">Change Password</Text>
-              </View>
-              <Icon name="arrow-right" size={24} color={colors.blue[800]} />
-            </TouchableOpacity>
-          </View>
+        <View>
+           <SectionStyle 
+            onPress={() => navigation.navigate("ChangePassword")}
+            iconName={"lock"}
+            label={"Change Password"}
+           />
+        </View>
 
-          <View className="space-y-4">
-            <TouchableOpacity
-              className="p-3 flex-row items-center justify-between bg-blue-100 rounded-lg"
-              onPress={handleLogoutModal}
-            >
-              <View className="flex flex-row space-x-5">
-                <Icon name="logout" size={24} color={colors.blue[800]} />
-                <Text className="text-lg font-bold text-red-500">Logout</Text>
-              </View>
-            </TouchableOpacity>
-          </View>
+        <View>
+           <SectionStyle 
+            onPress={handleLogoutModal}
+            iconName={"logout"}
+            label={"Logout"}
+            isLogout
+           />
+        </View>
         </View>
       </ScrollView>
 

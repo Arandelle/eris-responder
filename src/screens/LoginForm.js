@@ -111,7 +111,7 @@ const LoginForm = () => {
               </TouchableOpacity>
             </View>
             <View className="relative z-10">
-              <View className="flex items-center absolute top-4 left-3 z-50">
+              <View className="flex items-center absolute top-3 left-3 z-50">
                 <Icon name="lock" size={20} color="black" />
               </View>
               <TextInput
@@ -122,7 +122,7 @@ const LoginForm = () => {
                 secureTextEntry={!showPass}
               />
               <TouchableOpacity
-                className="absolute right-4 top-4 flex items-center"
+                className="absolute right-4 top-3 flex items-center"
                 onPress={handleShowPass}
               >
                 <Icon

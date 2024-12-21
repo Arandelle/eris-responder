@@ -70,6 +70,7 @@ const ChangePassModal = () => {
               oldPassword: value,
             })
           }
+          secureTextEntry
         />
         <Text>New Password</Text>
         <TextInput
@@ -82,6 +83,7 @@ const ChangePassModal = () => {
               newPassword: value,
             })
           }
+          secureTextEntry
         />
         <Text>Re-enter password</Text>
         <TextInput
@@ -94,6 +96,7 @@ const ChangePassModal = () => {
               reEnterPass: value,
             })
           }
+          secureTextEntry
         />
       <TouchableOpacity className={`p-4 rounded-lg ${isComplete ? "bg-blue-500" : "bg-gray-500"}`}
       disabled={!isComplete}
