@@ -11,6 +11,7 @@ import TabNavigator from "./src/navigation/TabNavigator";
 import UpdateProfile from "./src/screens/UpdateProfile";
 import Logo from "./assets/logo.png";
 import Records from "./src/screens/Records";
+import ChangePassModal from "./src/screens/ChangePassModal";
 
 const Stack = createNativeStackNavigator();
 
@@ -74,6 +75,14 @@ const App = () => {
             </Stack.Screen>
             <Stack.Screen name="Records" component={Records} />
             <Stack.Screen name="Map" component={Home} />
+            <Stack.Screen
+              name="ChangePassword"
+              component={ChangePassModal}
+              options={() => ({
+                title: "Change Password",
+                headerShown: true,
+              })}
+            />
             <Stack.Screen
               name="UpdateProfile"
               component={UpdateProfile}

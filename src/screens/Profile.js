@@ -136,6 +136,19 @@ const Profile = () => {
           </View>
 
           <View className="space-y-4">
+          <TouchableOpacity
+              className="p-3 flex-row items-center justify-between bg-blue-100 rounded-lg"
+              onPress={() => navigation.navigate("ChangePassword")}
+            >
+              <View className="flex flex-row space-x-5">
+                <Icon name="lock" size={24} color={colors.blue[800]} />
+                <Text className="text-lg font-bold">Change Password</Text>
+              </View>
+              <Icon name="arrow-right" size={24} color={colors.blue[800]} />
+            </TouchableOpacity>
+          </View>
+
+          <View className="space-y-4">
             <TouchableOpacity
               className="p-3 flex-row items-center justify-between bg-blue-100 rounded-lg"
               onPress={handleLogoutModal}
