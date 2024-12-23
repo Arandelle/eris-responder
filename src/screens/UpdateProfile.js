@@ -11,14 +11,23 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { ref, onValue, push, serverTimestamp } from "firebase/database";
-import { auth, database } from "../services/firebaseConfig";
+import { auth, database, storage} from "../services/firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
 import CustomInput from "../components/CustomInput";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import useCurrentUser from "../hooks/useCurrentUser";
+import useUploadImage from "../hooks/useUploadImage";
+import {
+  deleteObject,
+  getDownloadURL,
+  ref as storageRef,
+  uploadBytes,
+} from "firebase/storage";
+
 
 const UpdateProfile = () => {
   const navigation = useNavigation();
+  const { photo, selectPhoto } = useUploadImage();
   const { currentUser, updateCurrentUser } = useCurrentUser();
   const [userData, setUserData] = useState({
     firstname: "",
@@ -26,6 +35,7 @@ const UpdateProfile = () => {
     mobileNum: "",
     gender: "Male",
     img: "https://flowbite.com/docs/images/people/profile-picture-1.jpg",
+    imageFile: null,
   });
 
   const genders = ["Male", "Female"];
@@ -46,6 +56,19 @@ const UpdateProfile = () => {
       (_, i) => `https://api.multiavatar.com/${i + 1}.png`
     ),
   ];
+
+  useEffect(() => {
+    // This useEffect ensures the check icon appears immediately after the user selects an image from their gallery.
+    // It automatically updates the `userData` object with the chosen image,
+    // so the user doesn't need to click the image again to confirm their selection.
+    if (photo) {
+      setUserData({
+        ...userData,
+        img: null, // Set img to null when a photo is selected to ensure the check icon doesn't appear for img.
+        imageFile: photo, // Set imageFile to the selected photo URI.
+      });
+    }
+  }, [photo]); // Depend on photo, so this useEffect runs every time photo changes.
 
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
@@ -84,14 +107,43 @@ const UpdateProfile = () => {
     setLoading(true);
     const user = auth.currentUser;
 
+    let imageUrl = userData.img;
+
+    //check if user upload photo
+    if (userData.imageFile) {
+      const imageRef = storageRef(storage, `profile-images/${Date.now()}.jpg`);
+
+      try {
+        const response = await fetch(userData.imageFile);
+        const blob = await response.blob();
+        await uploadBytes(imageRef, blob);
+        imageUrl = await getDownloadURL(imageRef);
+      } catch (error) {
+        Alert.alert("Error uploading image", `${error}`);
+        setLoading(false);
+        return;
+      }
+    }
+
+    if (currentUser?.img) {
+      try {
+        const oldImageRef = storageRef(storage, currentUser?.img);
+        await deleteObject(oldImageRef);
+      } catch (deleteError) {
+        Alert.alert("Error Deleting", `${deleteError}`);
+        // if no data still proceed to upload image
+      }
+    }
+
     const updatedData = {
       ...userData,
+      img: imageUrl,
       profileComplete: Boolean(
         userData.firstname &&
           userData.lastname &&
           userData.mobileNum &&
           userData.gender &&
-          userData.img
+          imageUrl
       ),
     };
 
@@ -132,26 +184,52 @@ const UpdateProfile = () => {
   }
 
   return (
-    <SafeAreaView className="flex-1">
-      <ScrollView className="">
-        <View className="flex-1">
-          <Text className="text-lg m-4 text-sky-600 font-bold">Avatar: </Text>
+    <SafeAreaView className="flex-1 bg-white">
+      <ScrollView className="flex-1">
+        <View className="p-4">
+          <Text className="text-lg text-blue-800 font-bold">Avatar: </Text>
           <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
-            <View className="flex flex-row space-x-3 justify-center">
-              <TouchableOpacity>
-                <View className="h-[70px] w-[70px] rounded-full bg-gray-200 flex justify-center items-center">
-                  <Icon name="plus" size={40} color={"gray"} />
+            <View className="flex flex-row py-4 space-x-3 justify-center">
+              <TouchableOpacity onPress={selectPhoto}>
+                <View className="h-16 w-16 rounded-full bg-gray-200 flex justify-center items-center">
+                  <Icon name="camera" size={40} color={"gray"} />
                 </View>
               </TouchableOpacity>
+
+              {currentUser?.img && (
+                <TouchableOpacity
+                  onPress={() => setUserData({ ...userData, imageFile: photo })}
+                >
+                  <View className="h-16 w-16 rounded-full bg-gray-200 flex justify-center items-center relative">
+                    <Image
+                      source={{ uri: photo || currentUser?.img }}
+                      className="w-16 h-16 rounded-full"
+                    />
+                    {(userData.imageFile ||
+                      userData.img ) && (
+                        <View className="absolute top-0 right-0 bg-white rounded-full">
+                          <Icon
+                            name="checkbox-marked-circle"
+                            size={20}
+                            color="green"
+                          />
+                        </View>
+                      )}
+                  </View>
+                </TouchableOpacity>
+              )}
+
               {imageUrl.map((url) => (
                 <TouchableOpacity
                   key={url}
-                  onPress={() => setUserData({ ...userData, img: url })}
+                  onPress={() =>
+                    setUserData({ ...userData, img: url, imageFile: null })
+                  }
                   className="relative"
                 >
                   <Image
                     source={{ uri: url }}
-                    className="h-[70px] w-[70px] rounded-full"
+                    className="h-16 w-16 rounded-full"
                   />
 
                   {userData.img === url && (
@@ -167,7 +245,7 @@ const UpdateProfile = () => {
               ))}
             </View>
           </ScrollView>
-          <View className="m-4">
+          <View className="">
             <CustomInput
               label={"First Name"}
               value={userData.firstname}
@@ -188,7 +266,7 @@ const UpdateProfile = () => {
               errorMessage={error}
             />
             <View className="w-full mb-4">
-              <Text className="text-lg mb-1 text-sky-600 font-bold">
+              <Text className="text-lg mb-1 text-blue-800 font-bold">
                 Select Gender:
               </Text>
               <View className="flex flex-row justify-around p-2">
@@ -198,9 +276,9 @@ const UpdateProfile = () => {
                     className={`flex flex-row items-center my-1`}
                     onPress={() => setUserData({ ...userData, gender })}
                   >
-                    <View className="h-5 w-5 rounded-full border-2 border-blue-600 items-center justify-center">
+                    <View className="h-6 w-6 rounded-full border-2 border-blue-800 flex items-center justify-center">
                       {userData.gender === gender && (
-                        <View className="h-3 w-3 rounded-full bg-blue-600" />
+                        <View className="h-3 w-3 rounded-full bg-blue-800" />
                       )}
                     </View>
                     <Text className="ml-2 font-bold text-lg">{gender}</Text>
@@ -208,21 +286,22 @@ const UpdateProfile = () => {
                 ))}
               </View>
             </View>
-
-            <TouchableOpacity
-              className={`p-3 w-full rounded-2xl ${
-                !valid ? "bg-gray-400" : "bg-green-500"
-              }`}
-              onPress={handleUpdateProfile}
-              disabled={!valid}
-            >
-              <Text className="text-center text-lg font-extrabold text-white">
-                Update Profile
-              </Text>
-            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
+      <View className="p-4">
+        <TouchableOpacity
+          className={`p-3 w-full rounded-2xl ${
+            !valid ? "bg-gray-400" : "bg-blue-800"
+          }`}
+          onPress={handleUpdateProfile}
+          disabled={!valid}
+        >
+          <Text className="text-center text-lg font-extrabold text-white">
+            Update Profile
+          </Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 };
