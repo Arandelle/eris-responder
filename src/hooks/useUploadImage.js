@@ -60,6 +60,11 @@ const useUploadImage = () => {
         {
           text: "Camera",
           onPress: takePhoto,
+        }, 
+        {
+          text: "Cancel",
+          onPress: () => console.log("Cancel Pressed"),
+          style: "cancel",
         },
       ],
       { cancelable: true }

@@ -18,7 +18,7 @@ import useCurrentUser from "../hooks/useCurrentUser";
 
 const Profile = () => {
   const navigation = useNavigation();
-  const {currentUser, loading} = useCurrentUser();
+  const { currentUser, loading } = useCurrentUser();
   const [logout, setLogout] = useState(false);
 
   const handleShowUpdateForm = () => {
@@ -28,13 +28,12 @@ const Profile = () => {
   if (loading) {
     return (
       <SafeAreaView className="flex-1">
-       <View className="h-full flex items-center justify-center"> 
-       <Text>Loading please wait...</Text>
-       </View>
+        <View className="h-full flex items-center justify-center">
+          <Text>Loading please wait...</Text>
+        </View>
       </SafeAreaView>
     );
   }
-
 
   const handleLogoutModal = () => {
     setLogout(!logout);
@@ -49,57 +48,56 @@ const Profile = () => {
     }
   };
 
-  const SectionStyle = ({onPress, iconName, label, isLogout}) => {
-    return(
+  const SectionStyle = ({ onPress, iconName, label, isLogout }) => {
+    return (
       <View className="space-y-4">
-      <TouchableOpacity
+        <TouchableOpacity
           className="p-3 flex-row items-center justify-between bg-blue-100 rounded-lg"
           onPress={onPress}
         >
           <View className="flex flex-row space-x-5">
             <Icon name={iconName} size={24} color={colors.blue[800]} />
-            <Text className={`text-lg font-bold ${isLogout && "text-red-500"}`}>{label}</Text>
+            <Text className={`text-lg font-bold ${isLogout && "text-red-500"}`}>
+              {label}
+            </Text>
           </View>
           {!isLogout && (
             <Icon name="arrow-right" size={24} color={colors.blue[800]} />
           )}
         </TouchableOpacity>
       </View>
-    )
-  }
+    );
+  };
+
+  const defaultImage ="https://flowbite.com/docs/images/people/profile-picture-1.jpg";
 
   return (
     <SafeAreaView className="flex-1 bg-white">
       <ScrollView>
         <View className="flex flex-row items-center h-40 bg-blue-800 pl-8 space-x-4">
-          {currentUser?.img ? (
-            <View className="relative border border-white rounded-full">
+          <View className="relative border border-white rounded-full">
               <Image
-                source={{ uri: currentUser.img }}
+                source={{ uri: currentUser.img || defaultImage }}
                 className="h-24 w-24  rounded-full"
               />
-              <TouchableOpacity
-                className="absolute bottom-0 right-0 rounded-full p-2 bg-blue-800 border border-white"
-                onPress={handleShowUpdateForm}
-              >
-                <Icon name="pencil" size={18} color={"white"} />
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <Text className="text-gray-900 text-lg">Image not available</Text>
-          )}
-
+            <TouchableOpacity
+              className="absolute bottom-0 right-0 rounded-full p-2 bg-blue-800 border border-white"
+              onPress={handleShowUpdateForm}
+            >
+              <Icon name="pencil" size={18} color={"white"} />
+            </TouchableOpacity>
+          </View>
           <View className="text-2xl space-y-1 font-bold p-2">
-              <View className="flex flex-row items-center space-x-2">
-                <Text className="text-xl text-white font-bold">
-                  {currentUser?.fullname ?? "Your fullname"}
-                </Text>
-                {auth.currentUser.emailVerified && (
-                  <View className="p-0.5 rounded-full border border-white bg-green-500">
-                    <Icon name="check" size={12} color={"white"} />
-                  </View>
-                )}
-              </View>
+            <View className="flex flex-row items-center space-x-2">
+              <Text className="text-xl text-white font-bold">
+                {currentUser?.fullname ?? "Your fullname"}
+              </Text>
+              {auth.currentUser.emailVerified && (
+                <View className="p-0.5 rounded-full border border-white bg-green-500">
+                  <Icon name="check" size={12} color={"white"} />
+                </View>
+              )}
+            </View>
             <Text className="text-blue-200">{currentUser?.customId}</Text>
           </View>
         </View>
@@ -144,22 +142,22 @@ const Profile = () => {
             </View>
           </View>
 
-        <View>
-           <SectionStyle 
-            onPress={() => navigation.navigate("ChangePassword")}
-            iconName={"lock"}
-            label={"Change Password"}
-           />
-        </View>
+          <View>
+            <SectionStyle
+              onPress={() => navigation.navigate("ChangePassword")}
+              iconName={"lock"}
+              label={"Change Password"}
+            />
+          </View>
 
-        <View>
-           <SectionStyle 
-            onPress={handleLogoutModal}
-            iconName={"logout"}
-            label={"Logout"}
-            isLogout
-           />
-        </View>
+          <View>
+            <SectionStyle
+              onPress={handleLogoutModal}
+              iconName={"logout"}
+              label={"Logout"}
+              isLogout
+            />
+          </View>
         </View>
       </ScrollView>
 

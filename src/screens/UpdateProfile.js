@@ -10,7 +10,7 @@ import {
   Image,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { ref, onValue, push, serverTimestamp } from "firebase/database";
+import { ref, onValue, push, serverTimestamp, set } from "firebase/database";
 import { auth, database, storage} from "../services/firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
 import CustomInput from "../components/CustomInput";
@@ -203,7 +203,7 @@ const UpdateProfile = () => {
                       source={{ uri: photo || currentUser?.img }}
                       className="w-16 h-16 rounded-full"
                     />
-                    {(userData.imageFile || userData.img === null)  && (
+                    {(userData.imageFile || userData.img === null )  && (
                         <View className="absolute top-0 right-0 bg-white rounded-full">
                           <Icon
                             name="checkbox-marked-circle"
