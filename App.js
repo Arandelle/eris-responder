@@ -12,6 +12,7 @@ import UpdateProfile from "./src/screens/UpdateProfile";
 import Logo from "./assets/logo.png";
 import Records from "./src/screens/Records";
 import ChangePassModal from "./src/screens/ChangePassModal";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 const Stack = createNativeStackNavigator();
 
@@ -57,46 +58,48 @@ const App = () => {
   }
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator
-        screenOptions={{
-          headerShown: false,
-          headerTitleAlign: "center",
-          headerTitleStyle: {
-            fontWeight: "900",
-            fontSize: 24,
-          },
-        }}
-      >
-        {user && isResponder ? (
-          <>
-            <Stack.Screen name="Eris">
-              {() => <TabNavigator responderUid={user.uid} />}
-            </Stack.Screen>
-            <Stack.Screen name="Records" component={Records} />
-            <Stack.Screen name="Map" component={Home} />
-            <Stack.Screen
-              name="ChangePassword"
-              component={ChangePassModal}
-              options={() => ({
-                title: "Change Password",
-                headerShown: true,
-              })}
-            />
-            <Stack.Screen
-              name="UpdateProfile"
-              component={UpdateProfile}
-              options={() => ({
-                title: "Update your profile",
-                headerShown: true,
-              })}
-            />
-          </>
-        ) : (
-          <Stack.Screen name="Login" component={LoginForm} />
-        )}
-      </Stack.Navigator>
-    </NavigationContainer>
+    <GestureHandlerRootView style={{flex : 1}}>
+      <NavigationContainer>
+        <Stack.Navigator
+          screenOptions={{
+            headerShown: false,
+            headerTitleAlign: "center",
+            headerTitleStyle: {
+              fontWeight: "900",
+              fontSize: 24,
+            },
+          }}
+        >
+          {user && isResponder ? (
+            <>
+              <Stack.Screen name="Eris">
+                {() => <TabNavigator responderUid={user.uid} />}
+              </Stack.Screen>
+              <Stack.Screen name="Records" component={Records} />
+              <Stack.Screen name="Map" component={Home} />
+              <Stack.Screen
+                name="ChangePassword"
+                component={ChangePassModal}
+                options={() => ({
+                  title: "Change Password",
+                  headerShown: true,
+                })}
+              />
+              <Stack.Screen
+                name="UpdateProfile"
+                component={UpdateProfile}
+                options={() => ({
+                  title: "Update your profile",
+                  headerShown: true,
+                })}
+              />
+            </>
+          ) : (
+            <Stack.Screen name="Login" component={LoginForm} />
+          )}
+        </Stack.Navigator>
+      </NavigationContainer>
+    </GestureHandlerRootView>
   );
 };
 

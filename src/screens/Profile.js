@@ -90,12 +90,9 @@ const Profile = () => {
           )}
 
           <View className="text-2xl space-y-1 font-bold p-2">
-            {currentUser?.firstname || currentUser?.lastname ? (
               <View className="flex flex-row items-center space-x-2">
                 <Text className="text-xl text-white font-bold">
-                  {[currentUser?.firstname, currentUser?.lastname]
-                    .filter(Boolean)
-                    .join(" ")}
+                  {currentUser?.fullname ?? "Your fullname"}
                 </Text>
                 {auth.currentUser.emailVerified && (
                   <View className="p-0.5 rounded-full border border-white bg-green-500">
@@ -103,13 +100,6 @@ const Profile = () => {
                   </View>
                 )}
               </View>
-            ) : (
-              <>
-                <Text className="font-bold text-xl text-white">
-                  Update your fullname
-                </Text>
-              </>
-            )}
             <Text className="text-blue-200">{currentUser?.customId}</Text>
           </View>
         </View>
@@ -132,7 +122,7 @@ const Profile = () => {
                 <Text className="text-xl font-bold mb-2 ">
                   Gender:{" "}
                   <Text className="text-lg text-gray-500 font-bold">
-                    {currentUser?.gender ? currentUser?.gender : "Your gender"}
+                    {currentUser?.gender ?? "Your gender"}
                   </Text>
                 </Text>
               </View>

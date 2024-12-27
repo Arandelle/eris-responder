@@ -27,11 +27,10 @@ import {
 
 const UpdateProfile = () => {
   const navigation = useNavigation();
-  const { photo, selectPhoto } = useUploadImage();
+  const { photo, choosePhoto } = useUploadImage();
   const { currentUser, updateCurrentUser } = useCurrentUser();
   const [userData, setUserData] = useState({
-    firstname: "",
-    lastname: "",
+    fullname: "",
     mobileNum: "",
     gender: "Male",
     img: "https://flowbite.com/docs/images/people/profile-picture-1.jpg",
@@ -139,8 +138,7 @@ const UpdateProfile = () => {
       ...userData,
       img: imageUrl,
       profileComplete: Boolean(
-        userData.firstname &&
-          userData.lastname &&
+          userData.fullname &&
           userData.mobileNum &&
           userData.gender &&
           imageUrl
@@ -190,7 +188,7 @@ const UpdateProfile = () => {
           <Text className="text-lg text-blue-800 font-bold">Avatar: </Text>
           <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
             <View className="flex flex-row py-4 space-x-3 justify-center">
-              <TouchableOpacity onPress={selectPhoto}>
+              <TouchableOpacity onPress={choosePhoto}>
                 <View className="h-16 w-16 rounded-full bg-gray-200 flex justify-center items-center">
                   <Icon name="camera" size={40} color={"gray"} />
                 </View>
@@ -198,15 +196,14 @@ const UpdateProfile = () => {
 
               {currentUser?.img && (
                 <TouchableOpacity
-                  onPress={() => setUserData({ ...userData, imageFile: photo })}
+                  onPress={() => setUserData({ ...userData, img:null, imageFile: photo })}
                 >
                   <View className="h-16 w-16 rounded-full bg-gray-200 flex justify-center items-center relative">
                     <Image
                       source={{ uri: photo || currentUser?.img }}
                       className="w-16 h-16 rounded-full"
                     />
-                    {(userData.imageFile ||
-                      userData.img ) && (
+                    {(userData.imageFile || userData.img === null)  && (
                         <View className="absolute top-0 right-0 bg-white rounded-full">
                           <Icon
                             name="checkbox-marked-circle"
@@ -247,16 +244,10 @@ const UpdateProfile = () => {
           </ScrollView>
           <View className="">
             <CustomInput
-              label={"First Name"}
-              value={userData.firstname}
-              onChangeText={(value) => handleFieldChange("firstname", value)}
-              placeholder="Enter your firstname"
-            />
-            <CustomInput
-              label={"Last Name"}
-              value={userData.lastname}
-              onChangeText={(value) => handleFieldChange("lastname", value)}
-              placeholder="Enter your lastname"
+              label={"Fullname"}
+              value={userData.fullname}
+              onChangeText={(value) => handleFieldChange("fullname", value)}
+              placeholder="Enter your fullname"
             />
             <CustomInput
               label={"Mobile phone"}

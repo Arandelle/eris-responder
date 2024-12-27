@@ -13,8 +13,12 @@ const Records = ({ status }) => {
       <ScrollView>
         <View className="space-y-2">
           {emergencyRecords.length > 0 ? (
-            emergencyRecords.map((records) => (
-                <RecordItem className="space-y-2" key={records.id} records={records} />
+            emergencyRecords.map((records, index) => (
+              <RecordItem
+                className="space-y-2"
+                key={index}
+                records={records}
+              />
             ))
           ) : (
             <Text className="text-center text-gray-500">{`No records found for ${status}`}</Text>
@@ -25,8 +29,8 @@ const Records = ({ status }) => {
   );
 };
 
-const RecordItem = ({ records }) => {
-  const {data: userData} = useFetchData("users");
+const RecordItem = ({ records, key}) => {
+  const { data: userData } = useFetchData("users");
   const userDetails = userData?.find((user) => user.id === records.userId);
 
   const emergencyStatus = {
@@ -36,8 +40,17 @@ const RecordItem = ({ records }) => {
     expired: "bg-red-300",
   };
 
+  const RowStyle = ({ label, value }) => {
+    return (
+      <View className="flex flex-row">
+        <Text className="w-1/3 font-bold text-gray-500">{label}</Text>
+        <Text className="flex-1 font-bold">{value}</Text>
+      </View>
+    );
+  };
+
   return (
-    <View className="border border-gray-300 rounded-lg">
+    <View key={key} className="border border-gray-300 rounded-lg">
       <View className="flex flex-row space-x-2 p-4">
         <Image
           source={{ uri: userDetails?.img }}
@@ -45,8 +58,7 @@ const RecordItem = ({ records }) => {
         />
         <View>
           <Text className="text-lg font-bold">
-            {`${userDetails?.firstname} ${userDetails?.lastname}` ||
-              "Loading..."}
+            {userDetails?.fullname ?? "User Name"}
           </Text>
           <Text className="text-sm text-gray-400">{userDetails?.customId}</Text>
         </View>
@@ -62,45 +74,33 @@ const RecordItem = ({ records }) => {
         </Text>
 
         <View className="space-y-2 p-1">
-          <View className="flex flex-row">
-            <Text className="w-1/3 font-bold text-gray-500">Emergency Id:</Text>
-            <Text className="flex-1 font-bold">{records?.emergencyId}</Text>
+          <View>
+            <RowStyle label="Emergency Id" value={records.emergencyId} />
           </View>
-
-          <View className="flex flex-row">
-            <Text className="w-1/3 font-bold text-gray-500">Description:</Text>
-            <Text className="flex-1 font-bold">{records.description}</Text>
+          <View>
+            <RowStyle label="Description" value={records.description} />
           </View>
-
-          <View className="flex flex-row">
-            <Text className="w-1/3 font-bold text-gray-500">Location:</Text>
-            <Text className="flex-1 font-bold">{records.location}</Text>
+          <View>
+            <RowStyle label="Location" value={records.location} />
           </View>
-
-          <View className="flex flex-row">
-            <Text className="w-1/3 font-bold text-gray-500">Reported At:</Text>
-            <Text className="flex-1 font-bold">
-              {formatDateWithTime(records.date)}
-            </Text>
+          <View>
+            <RowStyle
+              label="Date Reported"
+              value={formatDateWithTime(records.date)}
+            />
           </View>
-
-          <View className="flex flex-row">
-            <Text className="w-1/3 font-bold text-gray-500">
-              Response Time:
-            </Text>
-            <Text className="flex-1 font-bold">
-              {formatDateWithTime(records.responseTime)}
-            </Text>
+          <View>
+            <RowStyle
+              label="Response Time"
+              value={formatDateWithTime(records.responseTime)}
+            />
           </View>
-
           {records.dateResolved && (
-            <View className="flex flex-row">
-              <Text className="w-1/3 font-bold text-gray-500">
-                Date Resolved:
-              </Text>
-              <Text className="flex-1 font-bold">
-                {formatDateWithTime(records.dateResolved)}
-              </Text>
+            <View>
+              <RowStyle
+                label="Date Resolved"
+                value={formatDateWithTime(records.dateResolved)}
+              />
             </View>
           )}
         </View>
