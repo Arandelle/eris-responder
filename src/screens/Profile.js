@@ -9,17 +9,21 @@ import {
   TouchableWithoutFeedback,
   Image,
 } from "react-native";
+import ImageViewer from "react-native-image-viewing";
 import { useNavigation } from "@react-navigation/native";
 import { auth } from "../services/firebaseConfig";
 import { signOut } from "firebase/auth";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import colors from "../constants/colors";
 import useCurrentUser from "../hooks/useCurrentUser";
+import useViewImage from "../hooks/useViewImage";
 
 const Profile = () => {
   const navigation = useNavigation();
   const { currentUser, loading } = useCurrentUser();
   const [logout, setLogout] = useState(false);
+  const { isImageModalVisible, selectedImageUri, handleImageClick, closeImageModal} = useViewImage();
+
 
   const handleShowUpdateForm = () => {
     navigation.navigate("UpdateProfile");
@@ -75,11 +79,20 @@ const Profile = () => {
     <SafeAreaView className="flex-1 bg-white">
       <ScrollView>
         <View className="flex flex-row items-center h-40 bg-blue-800 pl-8 space-x-4">
+        
+      <ImageViewer
+        images={[{ uri: selectedImageUri }]} // Ensure it's an array, even for one image
+        imageIndex={0}
+        visible={isImageModalVisible}
+        onRequestClose={closeImageModal} // Close viewer
+      />
           <View className="relative border border-white rounded-full">
-              <Image
-                source={{ uri: currentUser.img || defaultImage }}
-                className="h-24 w-24  rounded-full"
-              />
+              <TouchableOpacity onPress={() => handleImageClick(currentUser.img)}>
+                <Image
+                  source={{ uri: currentUser.img || defaultImage }}
+                  className="h-24 w-24  rounded-full"
+                />
+              </TouchableOpacity>
             <TouchableOpacity
               className="absolute bottom-0 right-0 rounded-full p-2 bg-blue-800 border border-white"
               onPress={handleShowUpdateForm}

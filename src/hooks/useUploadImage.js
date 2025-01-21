@@ -6,8 +6,12 @@ const useUploadImage = () => {
   const [photo, setPhoto] = useState(null);
 
   const selectPhoto = async () => {
+    console.log("Gallery button clicked"); // Debug log
+  
     const permissionResult =
       await ImagePicker.requestMediaLibraryPermissionsAsync();
+    console.log("Permission Result:", permissionResult); // Debug log
+  
     if (!permissionResult.granted) {
       Alert.alert(
         "Permission Denied",
@@ -15,20 +19,21 @@ const useUploadImage = () => {
       );
       return;
     }
-
+  
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images", "videos"],
       allowsEditing: true,
       aspect: [1, 1],
       quality: 1,
     });
-
-    console.log(result);
-
+  
+    console.log("ImagePicker Result:", result);
+  
     if (!result.canceled) {
       setPhoto(result.assets[0].uri);
     }
   };
+  
 
   const takePhoto = async () => {
     const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
