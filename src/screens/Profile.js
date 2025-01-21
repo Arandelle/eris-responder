@@ -78,14 +78,13 @@ const Profile = () => {
   return (
     <SafeAreaView className="flex-1 bg-white">
       <ScrollView>
-        <View className="flex flex-row items-center h-40 bg-blue-800 pl-8 space-x-4">
-        
       <ImageViewer
         images={[{ uri: selectedImageUri }]} // Ensure it's an array, even for one image
         imageIndex={0}
         visible={isImageModalVisible}
         onRequestClose={closeImageModal} // Close viewer
       />
+        <View className="flex flex-row items-center h-40 bg-blue-800 pl-8 space-x-4">
           <View className="relative border border-white rounded-full">
               <TouchableOpacity onPress={() => handleImageClick(currentUser.img)}>
                 <Image

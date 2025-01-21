@@ -1,7 +1,9 @@
-import { View, Text, ScrollView, Image } from "react-native";
+import { View, Text, ScrollView, Image, TouchableOpacity } from "react-native";
 import useFetchRecord from "../hooks/useFetchRecord";
 import useFetchData from "../hooks/useFetchData";
 import { formatDateWithTime } from "../helper/FormatDate";
+import useViewImage from "../hooks/useViewImage";
+import ImageViewer from "react-native-image-viewing";
 
 const Records = ({ status }) => {
   const { emergencyRecords } = useFetchRecord(status);
@@ -32,6 +34,7 @@ const Records = ({ status }) => {
 const RecordItem = ({ records, key}) => {
   const { data: userData } = useFetchData("users");
   const userDetails = userData?.find((user) => user.id === records.userId);
+  const { handleImageClick, selectedImageUri, isImageModalVisible, closeImageModal } = useViewImage();
 
   const emergencyStatus = {
     "awaiting response": "bg-orange-100 text-orange-600",
@@ -50,62 +53,72 @@ const RecordItem = ({ records, key}) => {
   };
 
   return (
-    <View key={key} className="border border-gray-300 rounded-lg">
-      <View className="flex flex-row space-x-2 p-4">
-        <Image
-          source={{ uri: userDetails?.img }}
-          className="h-12 w-12 rounded-full"
-        />
-        <View>
-          <Text className="text-lg font-bold">
-            {userDetails?.fullname ?? "User Name"}
-          </Text>
-          <Text className="text-sm text-gray-400">{userDetails?.customId}</Text>
+    <>
+      <ImageViewer
+        images={[{ uri: selectedImageUri }]}
+        imageIndex={0}
+        visible={isImageModalVisible}
+        onRequestClose={closeImageModal}
+      />
+      <View key={key} className="border border-gray-300 rounded-lg">
+        <View className="flex flex-row space-x-2 p-4">
+          <TouchableOpacity onPress={() => handleImageClick(userDetails?.img)}>
+            <Image
+              source={{ uri: userDetails?.img }}
+              className="h-12 w-12 rounded-full"
+            />
+          </TouchableOpacity>
+          <View>
+            <Text className="text-lg font-bold">
+              {userDetails?.fullname ?? "User Name"}
+            </Text>
+            <Text className="text-sm text-gray-400">{userDetails?.customId}</Text>
+          </View>
         </View>
-      </View>
-
-      <View className="mx-2 mb-2 rounded-md p-4 space-y-2 bg-gray-100">
-        <Text
-          className={`font-bold ${
-            emergencyStatus[records.status]
-          } py-1 px-3 rounded-lg self-start`}
-        >
-          {records.status.toUpperCase()}
-        </Text>
-
-        <View className="space-y-2 p-1">
-          <View>
-            <RowStyle label="Emergency Id" value={records.emergencyId} />
-          </View>
-          <View>
-            <RowStyle label="Description" value={records.description} />
-          </View>
-          <View>
-            <RowStyle label="Location" value={records.location} />
-          </View>
-          <View>
-            <RowStyle
-              label="Date Reported"
-              value={formatDateWithTime(records.date)}
-            />
-          </View>
-          <View>
-            <RowStyle
-              label="Response Time"
-              value={formatDateWithTime(records.responseTime)}
-            />
-          </View>
-          {records.dateResolved && (
+  
+        <View className="mx-2 mb-2 rounded-md p-4 space-y-2 bg-gray-100">
+          <Text
+            className={`font-bold ${
+              emergencyStatus[records.status]
+            } py-1 px-3 rounded-lg self-start`}
+          >
+            {records.status.toUpperCase()}
+          </Text>
+  
+          <View className="space-y-2 p-1">
+            <View>
+              <RowStyle label="Emergency Id" value={records.emergencyId} />
+            </View>
+            <View>
+              <RowStyle label="Description" value={records.description} />
+            </View>
+            <View>
+              <RowStyle label="Location" value={records.location} />
+            </View>
             <View>
               <RowStyle
-                label="Date Resolved"
-                value={formatDateWithTime(records.dateResolved)}
+                label="Date Reported"
+                value={formatDateWithTime(records.date)}
               />
             </View>
-          )}
+            <View>
+              <RowStyle
+                label="Response Time"
+                value={formatDateWithTime(records.responseTime)}
+              />
+            </View>
+            {records.dateResolved && (
+              <View>
+                <RowStyle
+                  label="Date Resolved"
+                  value={formatDateWithTime(records.dateResolved)}
+                />
+              </View>
+            )}
+          </View>
         </View>
       </View>
-    </View>
+    </>
   );
 };
 
