@@ -24,7 +24,7 @@ const LoginForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
-  const [isPromptVisible, setPromptVisible] = useState(false);
+  const [forgotPassModal, setForgotPassModal] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleShowPass = () => {
@@ -71,7 +71,7 @@ const LoginForm = () => {
   };
 
   const handleForgotPassword = () => {
-    setPromptVisible(true);
+    setForgotPassModal(!forgotPassModal);
   };
 
   const handlePasswordReset = async (email) => {
@@ -92,7 +92,7 @@ const LoginForm = () => {
             <Text className="text-lg">Email</Text>
             <View className="relative z-10">
               <View className="flex items-center absolute top-3 left-3 z-50">
-                <Icon name="alternate-email" size={20} color={colors.gray[500]} />
+                <Icon name="alternate-email" size={20} color={colors.blue[800]} />
               </View>
               <TextInput
                 className="bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full ps-10 p-2.5 pl-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
@@ -113,7 +113,7 @@ const LoginForm = () => {
             </View>
             <View className="relative z-10">
               <View className="flex items-center absolute top-3 left-3 z-50">
-                <Icon name="lock" size={20} color={colors.gray[500]} />
+                <Icon name="lock" size={20} color={colors.blue[800]} />
               </View>
               <TextInput
                 className="bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full ps-10 p-2.5 pl-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
@@ -129,7 +129,7 @@ const LoginForm = () => {
                 <Icon
                   name={showPass ? "visibility" : "visibility-off"}
                   size={20}
-                  color={colors.gray[500]}
+                  color={colors.blue[800]}
                 />
               </TouchableOpacity>
             </View>
@@ -144,8 +144,8 @@ const LoginForm = () => {
             </Text>
           </TouchableOpacity>
           <ForgotPass
-            visible={isPromptVisible}
-            onClose={() => setPromptVisible(false)}
+            visible={forgotPassModal}
+            onClose={handleForgotPassword}
             onSubmit={handlePasswordReset}
           />
         </View>
