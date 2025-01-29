@@ -132,7 +132,7 @@ const EmergencyDetailsModal = ({
                 <View className="p-2 space-y-3">
                  <View className="flex flex-row items-center space-x-2">
                     <Text className="text-lg font-bold">
-                      {userDetails?.firstname} {userDetails?.lastname} 
+                      {userDetails?.fullname}
                     </Text>
                     <Text className="p-1 rounded-lg bg-yellow-100">{userDetails?.customId}</Text>
                  </View>
