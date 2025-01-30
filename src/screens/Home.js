@@ -69,13 +69,13 @@ const Home = ({ responderUid }) => {
 
   const handleSelectEmergency = async (emergency) => {
     try {
-      // if (currentUser?.pendingEmergency) {
-      //   Alert.alert(
-      //     "Error Navigating",
-      //     "You have on-going emergency,please make sure to assist them first"
-      //   );
-      //   return;
-      // }
+      if (currentUser?.pendingEmergency) {
+        Alert.alert(
+          "Error Navigating",
+          "You have on-going emergency,please make sure to assist them first"
+        );
+        return;
+      }
       const user = auth.currentUser;
       const historyRef = ref(database, `responders/${user.uid}/history`);
       const newHistoryEntry = {

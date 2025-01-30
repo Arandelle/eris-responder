@@ -1,20 +1,23 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { View, Text, Modal, TouchableOpacity } from 'react-native';
 import { useNavigation } from "@react-navigation/native";
-import { useFetchData } from '../hooks/useFetchData';
 import useCurrentUser from '../hooks/useCurrentUser';
 
 const ProfileReminderModal = () => {
   const navigation = useNavigation();
-  const {currentUser} = useCurrentUser();
+  const { currentUser } = useCurrentUser();
   const [modalVisible, setModalVisible] = useState(false);
 
-  useEffect(() => {
-    if (currentUser) {
-      setModalVisible(!currentUser?.profileComplete);
+  const checkProfileCompletion = useCallback(() => {
+    if (currentUser && !currentUser.profileComplete) {
+      setModalVisible(true);
     }
   }, [currentUser]);
-  
+
+  useEffect(() => {
+    checkProfileCompletion();
+  }, [checkProfileCompletion]);
+
   return (
     <Modal
       animationType="slide"
@@ -27,7 +30,7 @@ const ProfileReminderModal = () => {
           <Text className="text-lg mb-4">
             To access certain features of the app, please update and verify your information.
           </Text>
-          <View className=" flex-row justify-around">
+          <View className="flex-row justify-around">
             <TouchableOpacity onPress={() => setModalVisible(false)}>
               <Text className="text-gray-500 text-lg">Remind Me Later</Text>
             </TouchableOpacity>
@@ -37,7 +40,7 @@ const ProfileReminderModal = () => {
                 navigation.navigate("UpdateProfile");
               }}
             >
-              <Text className="text-blue-600 text-lg" >Update Profile</Text>
+              <Text className="text-blue-600 text-lg">Update Profile</Text>
             </TouchableOpacity>
           </View>
         </View>

@@ -3,7 +3,7 @@ import * as Location from "expo-location";
 import { Alert } from "react-native";
 import { ref, update, onValue, get } from "firebase/database";
 import { database } from "../services/firebaseConfig";
-import  useFetchData  from "./useFetchData";
+import useFetchData from "./useFetchData";
 
 const useLocation = (responderUid) => {
   const { data: userData } = useFetchData("responders");
@@ -36,6 +36,14 @@ const useLocation = (responderUid) => {
       console.error("Error updating location: ", error);
     }
   }
+
+  const hasLocationChanged = (oldLocation, newLocation, threshold = 0.0001) => {
+    return (
+      Math.abs(oldLocation.latitude - newLocation.latitude) > threshold ||
+      Math.abs(oldLocation.longitude - newLocation.longitude) > threshold
+    );
+  }
+
   useEffect(() => {
     const requestLocation = async () => {
       try {
@@ -49,7 +57,7 @@ const useLocation = (responderUid) => {
           );
 
           const fallbackLocation = { latitude: 14.33289, longitude: 120.85065 }; // fallback position
-          await updateLocation(fallbackLocation.latitude, fallbackLocation.longitude)
+          await updateLocation(fallbackLocation.latitude, fallbackLocation.longitude);
           setResponderPosition(fallbackLocation);
           setLoading(false);
           return;
@@ -61,8 +69,10 @@ const useLocation = (responderUid) => {
 
         Location.watchPositionAsync({ distanceInterval: 1 }, async (newLocation) => {
           const { latitude, longitude } = newLocation.coords;
-          setResponderPosition({ latitude, longitude });
-          await updateLocation(latitude, longitude)
+          if (!responderPosition || hasLocationChanged(responderPosition, { latitude, longitude })) {
+            setResponderPosition({ latitude, longitude });
+            await updateLocation(latitude, longitude);
+          }
         });
 
         setLoading(false);
@@ -74,7 +84,7 @@ const useLocation = (responderUid) => {
         );
         
         const fallbackLocation = { latitude: 14.33289, longitude: 120.85065 };
-        await updateLocation(fallbackLocation.latitude, fallbackLocation.longitude)
+        await updateLocation(fallbackLocation.latitude, fallbackLocation.longitude);
         setResponderPosition(fallbackLocation);
         setLoading(false);
       }
@@ -85,9 +95,9 @@ const useLocation = (responderUid) => {
 
   // Firebase real-time listener for the responder's location
   useEffect(() => {
-    const respondeRef = ref(database, `responders/${responderUid}/location`);
+    const responderRef = ref(database, `responders/${responderUid}/location`);
     
-    const unsubscribe = onValue(respondeRef, (snapshot) => {
+    const unsubscribe = onValue(responderRef, (snapshot) => {
       const responderLocation = snapshot.val();
       if (responderLocation) {
         setResponderPosition({
