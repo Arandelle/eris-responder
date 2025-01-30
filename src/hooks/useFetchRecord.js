@@ -1,37 +1,42 @@
-import {useEffect, useState} from 'react'
-import { auth, database } from '../services/firebaseConfig';
-import { ref, onValue } from 'firebase/database';
+import { useEffect, useState, useCallback } from "react";
+import { auth, database } from "../services/firebaseConfig";
+import { ref, onValue, query, orderByChild, equalTo } from "firebase/database";
 
 const useFetchRecord = (status) => {
+  const [emergencyRecords, setEmergencyRecords] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-    const [emergencyRecords, setEmergencyRecords] = useState([]);
-    const [loading, setLoading] = useState(true);
-  
-    useEffect(() => {
-      const user = auth.currentUser;
-      if (user) {
-        const requestRef = ref(database, `responders/${user.uid}/history`);
-        const unsubscribe = onValue(requestRef, (snapshot) => {
-          try {
-            const data = snapshot.val();
-            const emergencyList = Object.keys(data)
-              .map((key) => ({
-                id: key,
-                ...data[key],
-              }))
-              .filter((item) => item.status === status); // Filter by status
-            setEmergencyRecords(emergencyList);
-            setLoading(false);
-          } catch (error) {
-            console.error('Error fetching emergency data:', error);
-            setLoading(false);
-          }
-        });
-        return () => unsubscribe();
+  useEffect(() => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const requestRef = query(
+      ref(database, `responders/${user.uid}/history`),
+      orderByChild("status"), 
+      equalTo(status) // Only fetch relevant status
+    );
+
+    const unsubscribe = onValue(requestRef, (snapshot) => {
+      if (!snapshot.exists()) {
+        setEmergencyRecords([]);
+        setLoading(false);
+        return;
       }
-    }, [status]);
 
-  return {emergencyRecords}; 
-}
+      const data = snapshot.val();
+      const emergencyList = Object.keys(data).map((key) => ({
+        id: key,
+        ...data[key],
+      }));
 
-export default useFetchRecord
+      setEmergencyRecords(emergencyList);
+      setLoading(false);
+    });
+
+    return () => unsubscribe(); // Cleanup on unmount
+  }, [status]);
+
+  return { emergencyRecords, loading };
+};
+
+export default useFetchRecord;
