@@ -38,7 +38,7 @@ const UpdateProfile = () => {
   });
 
   const genders = ["Male", "Female"];
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setErrors] = useState("");
   const [valid, setValid] = useState(true);
 
@@ -57,6 +57,14 @@ const UpdateProfile = () => {
   ];
 
   useEffect(() => {
+    if(currentUser){
+      setUserData({
+        ...currentUser
+      });
+    }
+  }, [currentUser]);
+
+  useEffect(() => {
     // This useEffect ensures the check icon appears immediately after the user selects an image from their gallery.
     // It automatically updates the `userData` object with the chosen image,
     // so the user doesn't need to click the image again to confirm their selection.
@@ -69,21 +77,7 @@ const UpdateProfile = () => {
     }
   }, [photo]); // Depend on photo, so this useEffect runs every time photo changes.
 
-  useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        const userRef = ref(database, `responders/${user.uid}`);
-        onValue(userRef, (snapshot) => {
-          const data = snapshot.val();
-          if (data) setUserData(data);
-          setLoading(false);
-        });
-      } else {
-        navigation.navigate("Login");
-      }
-    });
-    return unsubscribeAuth;
-  }, [navigation]);
+
 
   const handleFieldChange = (field, value) => {
     setUserData((prev) => ({ ...prev, [field]: value }));
