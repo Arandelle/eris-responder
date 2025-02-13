@@ -51,7 +51,7 @@ const RecordItem = ({ records }) => {
         visible={isImageModalVisible}
         onRequestClose={closeImageModal}
       />
-      <View className="border border-gray-300 rounded-lg">
+      <View className="border border-gray-300 rounded-lg m-2">
         <View className="flex flex-row space-x-2 p-4">
           <TouchableOpacity onPress={() => handleImageClick(userDetails?.img)}>
             <Image
@@ -93,7 +93,7 @@ const RecordItem = ({ records }) => {
 };
 
 const RowStyle = ({ label, value }) => (
-  <View className="flex flex-row">
+  <View className="flex flex-row m-1">
     <Text className="w-1/3 font-bold text-gray-500">{label}</Text>
     <Text className="flex-1 font-bold">{value}</Text>
   </View>

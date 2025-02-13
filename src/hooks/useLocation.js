@@ -96,7 +96,7 @@ const useLocation = (responderUid) => {
     };
 
     requestLocation();
-  }, [responderUid, updateLocation]);
+  }, []);
 
   // Firebase real-time listener for the responder's location
   useEffect(() => {

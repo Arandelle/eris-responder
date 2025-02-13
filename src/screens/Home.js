@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
-import { Text, View, Image, Alert, TouchableOpacity } from "react-native";
+import { Text, View, Image, Alert } from "react-native";
 import MapView, { Polyline, Marker } from "react-native-maps";
-import { ref, serverTimestamp, push, update, onValue, get, remove } from "firebase/database";
+import { ref, serverTimestamp, push, update, onValue, get, remove, set } from "firebase/database";
 import { auth, database } from "../services/firebaseConfig";
 import responderMarker from "../../assets/ambulance.png";
 import Logo from "../../assets/logo.png";
@@ -11,90 +11,9 @@ import useRoute from "../hooks/useRoute";
 import useCurrentUser from "../hooks/useCurrentUser";
 import useFetchData from "../hooks/useFetchData";
 import MyBottomSheet from "../components/MyBottomSheet";
-import { getTimeDifference } from "../helper/getTimeDifference";
+import MyDialog from "../components/MyDialog";
+import EmergencyDetailsContent from "../components/EmergencyDetailsContent";
 
-// Separate EmergencyDetailsContent component for better organization
-const EmergencyDetailsContent = ({
-  emergencyDetails,
-  userDetails,
-  selectedEmergency,
-  route,
-  onNavigate,
-  onMarkResolved,
-}) => {
-  const severity = emergencyDetails?.type?.toLowerCase().includes("crime")
-    ? "bg-red-100"
-    : "bg-yellow-100";
-  const isResponding =
-    selectedEmergency?.id === emergencyDetails?.emergencyId && route.length > 0;
-
-  return (
-    <View className="bg-white w-full rounded-t-xl">
-      <View className="flex p-4 justify-between items-center flex-row bg-gray-100 rounded-t-xl border-b border-gray-200">
-        <View>
-          <Text className="text-lg font-bold text-gray-800 uppercase">
-            {emergencyDetails?.emergencyType}
-          </Text>
-          <Text className="text-sm text-gray-600">
-            ID: {emergencyDetails?.emergencyId}
-          </Text>
-        </View>
-        <Text>{}</Text>
-      </View>
-
-      <View className="flex px-4 py-6 space-y-4">
-        {/* User Info Section */}
-        <View className="flex flex-row items-start space-x-4">
-          <Image
-            source={{ uri: userDetails?.img }}
-            className="h-16 w-16 rounded-full"
-          />
-          <View className="flex-1">
-            <View className="flex flex-row items-center space-x-2 mb-1">
-              <Text className="text-lg font-bold text-gray-800">
-                {userDetails?.fullname}
-              </Text>
-              <Text className="px-2 py-1 rounded-lg bg-blue-100 text-blue-800 text-sm">
-                {userDetails?.customId}
-              </Text>
-            </View>
-            <Text className="text-gray-600">
-              📍{userDetails?.location?.address}
-            </Text>
-            <Text className="text-sm text-blue-600 mt-1">
-              Reported {getTimeDifference(emergencyDetails?.timestamp)}
-            </Text>
-          </View>
-        </View>
-
-        {/* Emergency Description */}
-        {emergencyDetails?.description && (
-          <View className={`p-4 rounded-lg ${severity}`}>
-            <Text className="text-gray-800 leading-relaxed">
-              {emergencyDetails.description}
-            </Text>
-          </View>
-        )}
-
-        <Image source={{uri: emergencyDetails?.imageUrl}} className="h-60 w-60"/>
-
-        {/* Action Buttons */}
-        <View className="pt-2">
-          <TouchableOpacity
-            className={`py-4 items-center w-full rounded-lg ${
-              isResponding ? "bg-green-600" : "bg-blue-600"
-            }`}
-            onPress={isResponding ? onMarkResolved : onNavigate}
-          >
-            <Text className="text-white font-bold text-lg">
-              {isResponding ? "Mark as resolved" : "Respond to Emergency"}
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </View>
-  );
-};
 
 const Home = ({ responderUid }) => {
   const bottomSheetRef = useRef(null);
@@ -110,9 +29,33 @@ const Home = ({ responderUid }) => {
   );
   const [emergencyDetails, setEmergencyDetails] = useState(null);
   const [heading, setHeading] = useState(0);
+  const [isEmergencyDone, setIsEmergencyDone] = useState(false);
+  const [logMessage, setLogMessage] = useState("");
 
   const { data: userData } = useFetchData("users");
 
+    // Effect for pending emergency subscription
+    useEffect(() => {
+      const user = auth.currentUser;
+      const respondeRef = ref(
+        database,
+        `responders/${user.uid}/pendingEmergency`
+      );
+  
+      return onValue(respondeRef, (snapshot) => {
+        const responderData = snapshot.val();
+        if (responderData?.locationCoords) {
+          setSelectedEmergency({
+            latitude: responderData.locationCoords.latitude,
+            longitude: responderData.locationCoords.longitude,
+            id: responderData.emergencyId,
+          });
+        } else {
+          setSelectedEmergency(null);
+        }
+      });
+    }, []);
+    
   // Memoize filtered emergency data
   const activeEmergencies = useMemo(
     () =>
@@ -291,6 +234,7 @@ const Home = ({ responderUid }) => {
   
                 Alert.alert("Success!", "Emergency request successfully resolved!");
                 setSelectedEmergency(false);
+                setIsEmergencyDone(true);
                 setRoute(0);
                 setDistance(0);
               } else {
@@ -307,27 +251,18 @@ const Home = ({ responderUid }) => {
       },
     ]);
   }, []);
+
+  const addMessageLog = async (id, logMessage) => {  
+    try{
+      const emergencyRef = ref(database,`emergencyRequest/${id}/messageLog` );
+   
+      await set(emergencyRef, logMessage);
+
+    }catch(error){
+      Alert.alert("Error", error);
+    }    
+  } 
   
-
-  // Effect for pending emergency subscription
-  useEffect(() => {
-    const user = auth.currentUser;
-    const respondeRef = ref(
-      database,
-      `responders/${user.uid}/pendingEmergency`
-    );
-
-    return onValue(respondeRef, (snapshot) => {
-      const responderData = snapshot.val();
-      if (responderData?.locationCoords) {
-        setSelectedEmergency({
-          latitude: responderData.locationCoords.latitude,
-          longitude: responderData.locationCoords.longitude,
-          id: responderData.emergencyId,
-        });
-      }
-    });
-  }, []);
 
   if (emergencyLoading || locationLoading || !responderPosition) {
     return (
@@ -336,11 +271,20 @@ const Home = ({ responderUid }) => {
         <Text>Loading map...</Text>
       </View>
     );
-  }
+  };
 
   return (
     <View className="flex-1">
       <ProfileReminderModal />
+      <MyDialog
+            visible={isEmergencyDone}
+            setVisible={setIsEmergencyDone}
+            title={"Emergency Resolve!"}
+            subMesage={"Short description how you resolved the issue"}
+            onChangeText={setLogMessage}
+            value={logMessage}
+            onPress={() => addMessageLog(emergencyDetails.id, logMessage)}
+          />
       <MapView
         className="flex-1"
         initialRegion={{
@@ -383,6 +327,7 @@ const Home = ({ responderUid }) => {
           </Text>
         </View>
       )}
+
 
       <MyBottomSheet ref={bottomSheetRef}>
         {emergencyDetails && (
