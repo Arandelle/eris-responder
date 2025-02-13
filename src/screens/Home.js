@@ -237,80 +237,77 @@ const Home = ({ responderUid }) => {
     [currentUser]
   );
 
-   const handleEmergencyDone = (emergency) => {
-      Alert.alert("Notice!", "Are you sure this emergency is resolved?", [
-        {
-          text: "cancel",
-        },
-        {
-          text: "Mark as  Resolved",
-          onPress: async () => {
-            try {
-              const user = auth.currentUser;
-              if (user) {
+  const handleEmergencyDone = useCallback((emergency) => {
+    Alert.alert("Notice!", "Are you sure this emergency is resolved?", [
+      {
+        text: "cancel",
+      },
+      {
+        text: "Mark as Resolved",
+        onPress: async () => {
+          try {
+            const user = auth.currentUser;
+            if (user) {
+              const responderDataRef = ref(
+                database,
+                `responders/${user.uid}/pendingEmergency`
+              );
+              const responderSnapshot = await get(responderDataRef);
   
-                const responderDataRef = ref(database, `responders/${user.uid}/pendingEmergency`);
-                const responderSnapshot = await get(responderDataRef);
+              if (responderSnapshot.exists()) {
+                const responderData = responderSnapshot.val();
+                const historyId = responderData?.historyId;
   
-                if(responderSnapshot.exists()){
-                  const responderData = responderSnapshot.val();
-                  const historyId = responderData?.historyId;
+                await remove(
+                  ref(database, `responders/${user.uid}/pendingEmergency`)
+                );
+                await remove(ref(database, `users/${emergency.userId}/activeRequest`));
   
-                  await remove(ref(database, `responders/${user.uid}/pendingEmergency`));
-                  await remove(ref(database, `users/${emergency.userId}/activeRequest`));
+                const notificationRefForUser = ref(
+                  database,
+                  `users/${emergency.userId}/notifications`
+                );
+                await push(notificationRefForUser, {
+                  responderId: user.uid,
+                  type: "responder",
+                  title: "Emergency report resolved!",
+                  message: `Your report for ${emergency.type} has been resolved`,
+                  isSeen: false,
+                  date: new Date().toISOString(),
+                  timestamp: serverTimestamp(),
+                  icon: "shield-check",
+                });
   
-                  const notificationRefForUser = ref(database, `users/${emergency.userId}/notifications`);
-                  const newNotificationForUser = {
-                    responderId: user.uid,
-                    type: "responder",
-                    title: "Emergency report resolved!",
-                    message: `Your report for ${emergency.type} has been resolved`,
-                    isSeen: false,
-                    date: new Date().toISOString(),
-                    timestamp: serverTimestamp(),
-                    icon: "shield-check"
-                  }
+                const updates = {
+                  [`emergencyRequest/${emergency.id}/status`]: "resolved",
+                  [`users/${emergency.userId}/emergencyHistory/${emergency.id}/status`]: "resolved",
+                  [`responders/${user.uid}/history/${historyId}/status`]: "resolved",
+                  [`emergencyRequest/${emergency.id}/dateResolved`]: new Date().toISOString(),
+                  [`users/${emergency.userId}/emergencyHistory/${emergency.id}/dateResolved`]: new Date().toISOString(),
+                  [`responders/${user.uid}/history/${historyId}/dateResolved`]: new Date().toISOString(),
+                };
   
-                  await push(notificationRefForUser, newNotificationForUser);
-    
-                  const updates = {};
-                  updates[`emergencyRequest/${emergency.id}/status`] = "resolved";
-                  updates[
-                    `users/${emergency.userId}/emergencyHistory/${emergency.id}/status`
-                  ] = "resolved";
-                  updates[
-                    `responders/${user.uid}/history/${historyId}/status`
-                  ] = "resolved";
+                await update(ref(database), updates);
   
-                  updates[`emergencyRequest/${emergency.id}/dateResolved`] = new Date().toISOString();
-                  updates[
-                    `users/${emergency.userId}/emergencyHistory/${emergency.id}/dateResolved`
-                  ] = new Date().toISOString();
-                  updates[
-                    `responders/${user.uid}/history/${historyId}/dateResolved`
-                  ] =new Date().toISOString();
-    
-                  await update(ref(database), updates);
-    
-                  Alert.alert("Success!", "Emergency request succussfully resolved!");
-                  setSelectedEmergency(false);
-                  setRoute(0);
-                  setDistance(0);
-                } else{
-                  console.log("No pending emergency")
-                }
-             
+                Alert.alert("Success!", "Emergency request successfully resolved!");
+                setSelectedEmergency(false);
+                setRoute(0);
+                setDistance(0);
               } else {
-                console.log("No user available");
+                console.log("No pending emergency");
               }
-              bottomSheetRef.current?.closeBottomSheet();
-            } catch (error) {
-              console.error("Error", error);
+            } else {
+              console.log("No user available");
             }
-          },
+            bottomSheetRef.current?.closeBottomSheet();
+          } catch (error) {
+            console.error("Error", error);
+          }
         },
-      ]);
-    };
+      },
+    ]);
+  }, []);
+  
 
   // Effect for pending emergency subscription
   useEffect(() => {
