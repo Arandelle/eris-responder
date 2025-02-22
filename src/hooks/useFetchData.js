@@ -14,7 +14,7 @@ const useFetchData = (dataType) => {
                     id: key,
                     ...data[key],
                 }));
-                setData(dataList);
+                setData(prevData => JSON.stringify(dataList) ? dataList : prevData);
             }else{
                 setData([])
             }

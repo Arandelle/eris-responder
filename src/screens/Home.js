@@ -1,7 +1,16 @@
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { Text, View, Image, Alert } from "react-native";
 import MapView, { Polyline, Marker } from "react-native-maps";
-import { ref, serverTimestamp, push, update, onValue, get, remove, set } from "firebase/database";
+import {
+  ref,
+  serverTimestamp,
+  push,
+  update,
+  onValue,
+  get,
+  remove,
+  set,
+} from "firebase/database";
 import { auth, database } from "../services/firebaseConfig";
 import responderMarker from "../../assets/ambulance.png";
 import Logo from "../../assets/logo.png";
@@ -13,7 +22,6 @@ import useFetchData from "../hooks/useFetchData";
 import MyBottomSheet from "../components/MyBottomSheet";
 import MyDialog from "../components/MyDialog";
 import EmergencyDetailsContent from "../components/EmergencyDetailsContent";
-
 
 const Home = ({ responderUid }) => {
   const bottomSheetRef = useRef(null);
@@ -34,28 +42,28 @@ const Home = ({ responderUid }) => {
 
   const { data: userData } = useFetchData("users");
 
-    // Effect for pending emergency subscription
-    useEffect(() => {
-      const user = auth.currentUser;
-      const respondeRef = ref(
-        database,
-        `responders/${user.uid}/pendingEmergency`
-      );
-  
-      return onValue(respondeRef, (snapshot) => {
-        const responderData = snapshot.val();
-        if (responderData?.locationCoords) {
-          setSelectedEmergency({
-            latitude: responderData.locationCoords.latitude,
-            longitude: responderData.locationCoords.longitude,
-            id: responderData.emergencyId,
-          });
-        } else {
-          setSelectedEmergency(null);
-        }
-      });
-    }, []);
-    
+  // Effect for pending emergency subscription
+  useEffect(() => {
+    const user = auth.currentUser;
+    const respondeRef = ref(
+      database,
+      `responders/${user.uid}/pendingEmergency`
+    );
+
+    return onValue(respondeRef, (snapshot) => {
+      const responderData = snapshot.val();
+      if (responderData?.locationCoords) {
+        setSelectedEmergency({
+          latitude: responderData.locationCoords.latitude,
+          longitude: responderData.locationCoords.longitude,
+          id: responderData.emergencyId,
+        });
+      } else {
+        setSelectedEmergency(null);
+      }
+    });
+  }, []);
+
   // Memoize filtered emergency data
   const activeEmergencies = useMemo(
     () =>
@@ -196,16 +204,18 @@ const Home = ({ responderUid }) => {
                 `responders/${user.uid}/pendingEmergency`
               );
               const responderSnapshot = await get(responderDataRef);
-  
+
               if (responderSnapshot.exists()) {
                 const responderData = responderSnapshot.val();
                 const historyId = responderData?.historyId;
-  
+
                 await remove(
                   ref(database, `responders/${user.uid}/pendingEmergency`)
                 );
-                await remove(ref(database, `users/${emergency.userId}/activeRequest`));
-  
+                await remove(
+                  ref(database, `users/${emergency.userId}/activeRequest`)
+                );
+
                 const notificationRefForUser = ref(
                   database,
                   `users/${emergency.userId}/notifications`
@@ -220,19 +230,27 @@ const Home = ({ responderUid }) => {
                   timestamp: serverTimestamp(),
                   icon: "shield-check",
                 });
-  
+
                 const updates = {
                   [`emergencyRequest/${emergency.id}/status`]: "resolved",
-                  [`users/${emergency.userId}/emergencyHistory/${emergency.id}/status`]: "resolved",
-                  [`responders/${user.uid}/history/${historyId}/status`]: "resolved",
-                  [`emergencyRequest/${emergency.id}/dateResolved`]: new Date().toISOString(),
-                  [`users/${emergency.userId}/emergencyHistory/${emergency.id}/dateResolved`]: new Date().toISOString(),
-                  [`responders/${user.uid}/history/${historyId}/dateResolved`]: new Date().toISOString(),
+                  [`users/${emergency.userId}/emergencyHistory/${emergency.id}/status`]:
+                    "resolved",
+                  [`responders/${user.uid}/history/${historyId}/status`]:
+                    "resolved",
+                  [`emergencyRequest/${emergency.id}/dateResolved`]:
+                    new Date().toISOString(),
+                  [`users/${emergency.userId}/emergencyHistory/${emergency.id}/dateResolved`]:
+                    new Date().toISOString(),
+                  [`responders/${user.uid}/history/${historyId}/dateResolved`]:
+                    new Date().toISOString(),
                 };
-  
+
                 await update(ref(database), updates);
-  
-                Alert.alert("Success!", "Emergency request successfully resolved!");
+
+                Alert.alert(
+                  "Success!",
+                  "Emergency request successfully resolved!"
+                );
                 setSelectedEmergency(false);
                 setIsEmergencyDone(true);
                 setRoute(0);
@@ -252,17 +270,15 @@ const Home = ({ responderUid }) => {
     ]);
   }, []);
 
-  const addMessageLog = async (id, logMessage) => {  
-    try{
-      const emergencyRef = ref(database,`emergencyRequest/${id}/messageLog` );
-   
-      await set(emergencyRef, logMessage);
+  const addMessageLog = async (id, logMessage) => {
+    try {
+      const emergencyRef = ref(database, `emergencyRequest/${id}/messageLog`);
 
-    }catch(error){
+      await set(emergencyRef, logMessage);
+    } catch (error) {
       Alert.alert("Error", error);
-    }    
-  } 
-  
+    }
+  };
 
   if (emergencyLoading || locationLoading || !responderPosition) {
     return (
@@ -271,20 +287,20 @@ const Home = ({ responderUid }) => {
         <Text>Loading map...</Text>
       </View>
     );
-  };
+  }
 
   return (
     <View className="flex-1">
       <ProfileReminderModal />
       <MyDialog
-            visible={isEmergencyDone}
-            setVisible={setIsEmergencyDone}
-            title={"Emergency Resolve!"}
-            subMesage={"Short description how you resolved the issue"}
-            onChangeText={setLogMessage}
-            value={logMessage}
-            onPress={() => addMessageLog(emergencyDetails.id, logMessage)}
-          />
+        visible={isEmergencyDone}
+        setVisible={setIsEmergencyDone}
+        title={"Emergency Resolve!"}
+        subMesage={"Short description how you resolved the issue"}
+        onChangeText={setLogMessage}
+        value={logMessage}
+        onPress={() => addMessageLog(emergencyDetails.id, logMessage)}
+      />
       <MapView
         className="flex-1"
         initialRegion={{
@@ -327,7 +343,6 @@ const Home = ({ responderUid }) => {
           </Text>
         </View>
       )}
-
 
       <MyBottomSheet ref={bottomSheetRef}>
         {emergencyDetails && (

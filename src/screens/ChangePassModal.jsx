@@ -50,38 +50,39 @@ const ChangePassModal = () => {
     }
   };
 
+  const handleInputChange = (field, value) => {
+    setPasswordData({
+      ...passwordData,
+      [field] : value
+    });
+  };
+
   useEffect(() => {
         const {oldPassword, newPassword, reEnterPass} = passwordData;
       const completed = oldPassword && newPassword && reEnterPass;
       setIsComplete(completed);
-    }, [passwordData.oldPassword, passwordData.newPassword, passwordData.reEnterPass]);
+    }, [passwordData]);
 
   return (
-    <View className="p-4 space-y-4 bg-white h-screen">
+    <View className="p-4 space-y-4 bg-white h-screen" pointerEvents="auto">
 
       <Text>Old Password</Text>
         <TextInput
           className="w-full border border-gray-300 rounded-lg p-4"
           placeholder={"Enter old Password"}
           value={passwordData.oldPassword}
-          onChangeText={(value) =>
-            setPasswordData({
-              ...passwordData,
-              oldPassword: value,
-            })
+          onChangeText={(value) => handleInputChange("oldPassword", value)
           }
           secureTextEntry
+          keyboardType="default"
+          autoFocus
         />
         <Text>New Password</Text>
         <TextInput
           className="w-full border border-gray-300 rounded-lg p-4"
           placeholder={"Enter new password"}
           value={passwordData.newPassword}
-          onChangeText={(value) =>
-            setPasswordData({
-              ...passwordData,
-              newPassword: value,
-            })
+          onChangeText={(value) => handleInputChange("newPassword", value)
           }
           secureTextEntry
         />
@@ -90,11 +91,7 @@ const ChangePassModal = () => {
           className="w-full border border-gray-300 rounded-lg p-4"
           placeholder={"Re-enter your new password"}
           value={passwordData.reEnterPass}
-          onChangeText={(value) =>
-            setPasswordData({
-              ...passwordData,
-              reEnterPass: value,
-            })
+          onChangeText={(value) => handleInputChange("reEnterPass", value)
           }
           secureTextEntry
         />

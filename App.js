@@ -58,8 +58,8 @@ const App = () => {
   }
 
   return (
-    <GestureHandlerRootView style={{flex : 1}}>
       <NavigationContainer>
+       <GestureHandlerRootView  pointerEvents="box-none">
         <Stack.Navigator
           screenOptions={{
             headerShown: false,
@@ -68,6 +68,8 @@ const App = () => {
               fontWeight: "900",
               fontSize: 24,
             },
+            gestureEnabled: true,
+            gestureResponseDistance: 50
           }}
         >
           {user && isResponder ? (
@@ -98,8 +100,9 @@ const App = () => {
             <Stack.Screen name="Login" component={LoginForm} />
           )}
         </Stack.Navigator>
+        </GestureHandlerRootView>
       </NavigationContainer>
-    </GestureHandlerRootView>
+   
   );
 };
 
