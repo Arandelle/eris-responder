@@ -19,12 +19,10 @@ import useLocation from "../hooks/useLocation";
 import useRoute from "../hooks/useRoute";
 import useCurrentUser from "../hooks/useCurrentUser";
 import useFetchData from "../hooks/useFetchData";
-import MyBottomSheet from "../components/MyBottomSheet";
 import MyDialog from "../components/MyDialog";
 import EmergencyDetailsContent from "../components/EmergencyDetailsContent";
 
 const Home = ({ responderUid }) => {
-  const bottomSheetRef = useRef(null);
   const { data: emergencyData, loading: emergencyLoading } =
     useFetchData("emergencyRequest");
   const { currentUser } = useCurrentUser();
@@ -84,7 +82,7 @@ const Home = ({ responderUid }) => {
   // Memoize handlers
   const handleShowEmergencyDetails = useCallback((emergency) => {
     setEmergencyDetails(emergency);
-    bottomSheetRef.current?.openBottomSheet();
+    
   }, []);
 
   const handleSelectEmergency = useCallback(
@@ -106,7 +104,7 @@ const Home = ({ responderUid }) => {
           emergencyId: emergency.emergencyId,
           userId: emergency.userId,
           timestamp: serverTimestamp(),
-          location: emergency.location.address,
+          location: emergency.location.geoCodeLocation,
           description: emergency.description ?? "No description",
           status: "on-going",
           date: emergency.date,
@@ -176,7 +174,6 @@ const Home = ({ responderUid }) => {
           "You have been assigned to this emergency. Please proceed to the location."
         );
 
-        bottomSheetRef.current?.closeBottomSheet();
       } catch (error) {
         console.error("Error selecting emergency:", error);
         Alert.alert(
@@ -252,6 +249,7 @@ const Home = ({ responderUid }) => {
                   "Emergency request successfully resolved!"
                 );
                 setSelectedEmergency(false);
+                setEmergencyDetails(null);
                 setIsEmergencyDone(true);
                 setRoute(0);
                 setDistance(0);
@@ -261,7 +259,6 @@ const Home = ({ responderUid }) => {
             } else {
               console.log("No user available");
             }
-            bottomSheetRef.current?.closeBottomSheet();
           } catch (error) {
             console.error("Error", error);
           }
@@ -290,7 +287,7 @@ const Home = ({ responderUid }) => {
   }
 
   return (
-    <View className="flex-1">
+    <>
       <ProfileReminderModal />
       <MyDialog
         visible={isEmergencyDone}
@@ -343,20 +340,19 @@ const Home = ({ responderUid }) => {
           </Text>
         </View>
       )}
-
-      <MyBottomSheet ref={bottomSheetRef}>
-        {emergencyDetails && (
-          <EmergencyDetailsContent
-            emergencyDetails={emergencyDetails}
-            userDetails={userDetails}
-            selectedEmergency={selectedEmergency}
-            route={route}
-            onNavigate={() => handleSelectEmergency(emergencyDetails)}
-            onMarkResolved={() => handleEmergencyDone(emergencyDetails)}
-          />
-        )}
-      </MyBottomSheet>
-    </View>
+      {emergencyDetails && (
+        <EmergencyDetailsContent
+          emergencyDetails={emergencyDetails}
+          userDetails={userDetails}
+          selectedEmergency={selectedEmergency}
+          route={route}
+          onNavigate={() => handleSelectEmergency(emergencyDetails)}
+          onMarkResolved={() => handleEmergencyDone(emergencyDetails)}
+          onClose={() => setEmergencyDetails(null)}
+        />
+      )}
+        
+    </>
   );
 };
 

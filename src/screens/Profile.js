@@ -86,9 +86,9 @@ const Profile = () => {
       />
         <View className="flex flex-row items-center h-40 bg-blue-800 pl-8 space-x-4">
           <View className="relative border border-white rounded-full">
-              <TouchableOpacity onPress={() => handleImageClick(currentUser.img)}>
+              <TouchableOpacity onPress={() => handleImageClick(currentUser?.img)}>
                 <Image
-                  source={{ uri: currentUser.img || defaultImage }}
+                  source={{ uri: currentUser?.img || defaultImage }}
                   className="h-24 w-24  rounded-full"
                 />
               </TouchableOpacity>
