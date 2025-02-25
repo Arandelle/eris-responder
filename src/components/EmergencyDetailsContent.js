@@ -3,6 +3,7 @@ import { View, Text, Image, TouchableOpacity } from "react-native";
 import { getTimeDifference } from "../helper/getTimeDifference";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import colors from "../constants/colors";
+import VideoStyle from "./VideoStyle";
 
 const EmergencyDetailsContent = ({
   emergencyDetails,
@@ -82,9 +83,9 @@ const EmergencyDetailsContent = ({
         )}
 
         {emergencyDetails?.media && emergencyDetails?.media.mediaType === "video" && (
-          <View>
-          <Text>Video is not available</Text>
-          </View>
+          <VideoStyle 
+          videoUri={emergencyDetails?.media.mediaUrl}
+          />
         )}
 
         {/* Action Buttons */}
