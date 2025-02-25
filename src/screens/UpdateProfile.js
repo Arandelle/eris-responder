@@ -10,9 +10,8 @@ import {
   Image,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { ref, onValue, push, serverTimestamp, set } from "firebase/database";
+import { ref, push, serverTimestamp } from "firebase/database";
 import { auth, database, storage} from "../services/firebaseConfig";
-import { onAuthStateChanged } from "firebase/auth";
 import CustomInput from "../components/CustomInput";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import useCurrentUser from "../hooks/useCurrentUser";
@@ -23,11 +22,12 @@ import {
   ref as storageRef,
   uploadBytes,
 } from "firebase/storage";
+import colors from "../constants/colors";
 
 
 const UpdateProfile = () => {
   const navigation = useNavigation();
-  const { photo, choosePhoto } = useUploadImage();
+  const { file,setFile, chooseFile} = useUploadImage("image");
   const { currentUser, updateCurrentUser } = useCurrentUser();
   const [userData, setUserData] = useState({
     fullname: "",
@@ -45,14 +45,14 @@ const UpdateProfile = () => {
   const imageUrl = [
     ...Array.from(
       {
-        length: 5,
+        length: 3,
       },
       (_, i) =>
         `https://flowbite.com/docs/images/people/profile-picture-${i + 1}.jpg`
     ),
     ...Array.from(
-      { length: 99 },
-      (_, i) => `https://api.multiavatar.com/${i + 1}.png`
+      { length: 5 },
+      (_, i) => `https://api.dicebear.com/7.x/avataaars/png?seed=${i + 1}`
     ),
   ];
 
@@ -64,21 +64,7 @@ const UpdateProfile = () => {
     }
   }, [currentUser]);
 
-  useEffect(() => {
-    // This useEffect ensures the check icon appears immediately after the user selects an image from their gallery.
-    // It automatically updates the `userData` object with the chosen image,
-    // so the user doesn't need to click the image again to confirm their selection.
-    if (photo) {
-      setUserData({
-        ...userData,
-        img: null, // Set img to null when a photo is selected to ensure the check icon doesn't appear for img.
-        imageFile: photo, // Set imageFile to the selected photo URI.
-      });
-    }
-  }, [photo]); // Depend on photo, so this useEffect runs every time photo changes.
-
-
-
+ 
   const handleFieldChange = (field, value) => {
     setUserData((prev) => ({ ...prev, [field]: value }));
     validateInput(field, value);
@@ -95,6 +81,11 @@ const UpdateProfile = () => {
       }
     }
   };
+
+  const handleAvatarSelection = (url) => {
+    setFile({ uri: url, type: "image" });
+    setUserData({...userData, img: url, imageFile: null});
+  }
 
   const handleUpdateProfile = async () => {
     setLoading(true);
@@ -182,22 +173,23 @@ const UpdateProfile = () => {
           <Text className="text-lg text-blue-800 font-bold">Avatar: </Text>
           <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
             <View className="flex flex-row py-4 space-x-3 justify-center">
-              <TouchableOpacity onPress={choosePhoto}>
+              <TouchableOpacity onPress={chooseFile}>
                 <View className="h-16 w-16 rounded-full bg-gray-200 flex justify-center items-center">
                   <Icon name="camera" size={40} color={"gray"} />
                 </View>
               </TouchableOpacity>
 
-              {currentUser?.img && (
+              {userData
+              .img && (
                 <TouchableOpacity
-                  onPress={() => setUserData({ ...userData, img:null, imageFile: photo })}
+                  onPress={() => setUserData({ ...userData, img:null, imageFile: file.uri })}
                 >
                   <View className="h-16 w-16 rounded-full bg-gray-200 flex justify-center items-center relative">
                     <Image
-                      source={{ uri: photo || currentUser?.img }}
+                      source={{ uri: file.uri || userData.img }}
                       className="w-16 h-16 rounded-full"
                     />
-                    {(userData.imageFile || userData.img === null )  && (
+                    {userData.img && (
                         <View className="absolute top-0 right-0 bg-white rounded-full">
                           <Icon
                             name="checkbox-marked-circle"
@@ -214,7 +206,7 @@ const UpdateProfile = () => {
                 <TouchableOpacity
                   key={url}
                   onPress={() =>
-                    setUserData({ ...userData, img: url, imageFile: null })
+                    handleAvatarSelection(url)
                   }
                   className="relative"
                 >
@@ -234,6 +226,13 @@ const UpdateProfile = () => {
                   )}
                 </TouchableOpacity>
               ))}
+              <TouchableOpacity onPress={() => navigation.navigate("Avatars", {
+                onSelectAvatar: handleAvatarSelection
+              })} 
+              className="h-16 w-16 rounded-full bg-gray-200 flex justify-center items-center"
+              >
+                <Icon name="arrow-right-thick" size={20} color={colors.blue[800]}/>
+              </TouchableOpacity>
             </View>
           </ScrollView>
           <View className="">

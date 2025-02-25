@@ -2,16 +2,13 @@ import React, { useState } from "react";
 import * as ImagePicker from "expo-image-picker";
 import { Alert } from "react-native";
 
-const useUploadImage = () => {
-  const [photo, setPhoto] = useState(null);
+const useUploadImage = (mode = "both") => {
+  const [file, setFile] = useState({uri: null, type: null});
 
-  const selectPhoto = async () => {
-    console.log("Gallery button clicked"); // Debug log
-  
-    const permissionResult =
-      await ImagePicker.requestMediaLibraryPermissionsAsync();
-    console.log("Permission Result:", permissionResult); // Debug log
-  
+  const selectFile = async () => {
+
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
     if (!permissionResult.granted) {
       Alert.alert(
         "Permission Denied",
@@ -21,16 +18,19 @@ const useUploadImage = () => {
     }
   
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images", "videos"],
-      allowsEditing: true,
+      mediaTypes: mode === "image" ? ['images'] : ['images', 'videos'],
+      allowsEditing: mode === "image",
       aspect: [1, 1],
       quality: 1,
     });
   
-    console.log("ImagePicker Result:", result);
-  
     if (!result.canceled) {
-      setPhoto(result.assets[0].uri);
+      const asset = result.assets[0];
+      if(mode === "image" && asset.type !== "image"){
+        Alert.alert("Invalid Selection", "Please select an image file.");
+          return;
+      }
+      setFile({ uri: asset.uri, type: asset.type });
     }
   };
   
@@ -49,18 +49,18 @@ const useUploadImage = () => {
     });
 
     if (!result.canceled) {
-      setPhoto(result.assets[0].uri);
+      setFile({uri: result.assets[0].uri, type: "image"});
     }
   };
 
-  const choosePhoto = async () => {
+  const chooseFile = async () => {
     Alert.alert(
-      "Choose an image source",
-      "Select an image source to upload",
+      "Choose an media source",
+      `Select a file source`,
       [
         {
           text: "Gallery",
-          onPress: selectPhoto,
+          onPress: selectFile,
         },
         {
           text: "Camera",
@@ -76,7 +76,7 @@ const useUploadImage = () => {
     );
   }
 
-  return { photo, choosePhoto };
+  return { file,setFile, chooseFile };
 };
 
 export default useUploadImage;

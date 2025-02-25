@@ -13,6 +13,7 @@ import Logo from "./assets/logo.png";
 import Records from "./src/screens/Records";
 import ChangePassModal from "./src/screens/ChangePassModal";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import AvatarList from "./src/components/AvatarList";
 
 
 const Stack = createNativeStackNavigator();
@@ -91,6 +92,14 @@ const App = () => {
                   component={UpdateProfile}
                   options={() => ({
                     title: "Update your profile",
+                    headerShown: true,
+                  })}
+                />
+                <Stack.Screen 
+                  name="Avatars"
+                  component={AvatarList}
+                  options={() => ({
+                    title: "Choose Avatar",
                     headerShown: true,
                   })}
                 />
