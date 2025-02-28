@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState, useMemo, useCallback } from "react";
-import { Text, View, Image, Alert } from "react-native";
+import { useEffect, useState, useMemo, useCallback } from "react";
+import { Text, View, Image, Alert, TouchableOpacity } from "react-native";
 import MapView, { Polyline, Marker } from "react-native-maps";
 import {
   ref,
@@ -21,24 +21,40 @@ import useCurrentUser from "../hooks/useCurrentUser";
 import useFetchData from "../hooks/useFetchData";
 import MyDialog from "../components/MyDialog";
 import EmergencyDetailsContent from "../components/EmergencyDetailsContent";
+import openLinks from "../helper/openLinks";
 
 const Home = ({ responderUid }) => {
   const { data: emergencyData, loading: emergencyLoading } =
     useFetchData("emergencyRequest");
+  const { data: userData } = useFetchData("users");
+  const { data: hotlines } = useFetchData("hotlines");
+
   const { currentUser } = useCurrentUser();
   const { responderPosition, loading: locationLoading } =
     useLocation(responderUid);
-  const [selectedEmergency, setSelectedEmergency] = useState(null);
+  const [selectedEmergency, setSelectedEmergency] = useState(null); // on-going emergency
   const { route, setRoute, distance, setDistance } = useRoute(
     responderPosition,
     selectedEmergency
   );
-  const [emergencyDetails, setEmergencyDetails] = useState(null);
+  const [emergencyDetails, setEmergencyDetails] = useState(null); // emergency details
   const [heading, setHeading] = useState(0);
   const [isEmergencyDone, setIsEmergencyDone] = useState(false);
   const [logMessage, setLogMessage] = useState("");
+  const [recommendedHotlines, setRecommendedHotlines] = useState([]);
+  const [showRecommended, setShowRecommended] = useState(false);
 
-  const { data: userData } = useFetchData("users");
+  // to check the recommended hotlines
+  useEffect(() => {
+    if (selectedEmergency && emergencyDetails) {
+      const recommended =
+      Array.isArray(hotlines) && 
+        hotlines.filter(
+          (hotlines) => hotlines.category === emergencyDetails.emergencyType
+        );
+      setRecommendedHotlines(recommended || []);
+    }
+  }, [selectedEmergency, emergencyDetails, hotlines]);
 
   // Effect for pending emergency subscription
   useEffect(() => {
@@ -82,7 +98,6 @@ const Home = ({ responderUid }) => {
   // Memoize handlers
   const handleShowEmergencyDetails = useCallback((emergency) => {
     setEmergencyDetails(emergency);
-    
   }, []);
 
   const handleSelectEmergency = useCallback(
@@ -173,7 +188,6 @@ const Home = ({ responderUid }) => {
           "Response Initiated",
           "You have been assigned to this emergency. Please proceed to the location."
         );
-
       } catch (error) {
         console.error("Error selecting emergency:", error);
         Alert.alert(
@@ -249,7 +263,6 @@ const Home = ({ responderUid }) => {
                   "Emergency request successfully resolved!"
                 );
                 setSelectedEmergency(false);
-                setEmergencyDetails(null);
                 setIsEmergencyDone(true);
                 setRoute(0);
                 setDistance(0);
@@ -267,15 +280,22 @@ const Home = ({ responderUid }) => {
     ]);
   }, []);
 
-  const addMessageLog = async (id, logMessage) => {
+  const addMessageLog = async (id, logMessage) => { 
+    if (!id) {
+      console.error("Error: Emergency ID is undefined!");
+      return; // Prevent Firebase error
+    }
+  
     try {
       const emergencyRef = ref(database, `emergencyRequest/${id}/messageLog`);
-
       await set(emergencyRef, logMessage);
+      setEmergencyDetails(null);
+      setLogMessage("");
     } catch (error) {
-      Alert.alert("Error", error);
+      Alert.alert("Error", error.message);
     }
   };
+  
 
   if (emergencyLoading || locationLoading || !responderPosition) {
     return (
@@ -289,6 +309,7 @@ const Home = ({ responderUid }) => {
   return (
     <>
       <ProfileReminderModal />
+      {/** dialog to narate the process of emergency */}
       <MyDialog
         visible={isEmergencyDone}
         setVisible={setIsEmergencyDone}
@@ -296,7 +317,7 @@ const Home = ({ responderUid }) => {
         subMesage={"Short description how you resolved the issue"}
         onChangeText={setLogMessage}
         value={logMessage}
-        onPress={() => addMessageLog(emergencyDetails.id, logMessage)}
+        onPress={() => addMessageLog(emergencyDetails?.id, logMessage)}
       />
       <MapView
         className="flex-1"
@@ -334,12 +355,46 @@ const Home = ({ responderUid }) => {
       </MapView>
 
       {selectedEmergency && distance > 0 && (
-        <View className="absolute top-4 left-4 right-4 bg-white p-4 rounded-lg shadow-lg">
-          <Text className="text-lg font-semibold">
-            Distance to emergency: {distance.toFixed(2)} km
-          </Text>
-        </View>
-      )}
+  <View className="absolute top-4 left-4 right-4 bg-white p-4 rounded-lg shadow-lg space-y-4">
+    <Text className="text-lg font-semibold">
+      Distance to the emergency: {distance.toFixed(2)} km
+    </Text>
+
+    {/* Show/Hide Recommended Hotlines */}
+    <TouchableOpacity
+      onPress={() => setShowRecommended(!showRecommended)}
+      className="bg-blue-500 p-2 rounded-lg"
+    >
+      <Text className="text-white text-center font-bold">
+        {showRecommended ? "Hide Hotlines" : "Show Hotlines"}
+      </Text>
+    </TouchableOpacity>
+
+    {showRecommended && (
+      <View className="space-y-2">
+        {recommendedHotlines.length > 0 ? (
+          recommendedHotlines.map((hotline, index) => (
+            <TouchableOpacity
+              key={index}
+              onPress={() => openLinks(hotline.contact, "phone")}
+              className="flex flex-row p-1"
+            >
+              <Text className="text-gray-800 font-bold flex-1 basis-1/2">
+                {hotline.organization}
+              </Text>
+              <Text className="flex-1 basis-1/2">{hotline.contact}</Text>
+              <Text className="font-bold text-red-500">Call</Text>
+            </TouchableOpacity>
+          ))
+        ) : (
+          <Text className="text-gray-500">No available hotlines.</Text>
+        )}
+      </View>
+    )}
+  </View>
+)}
+
+
       {emergencyDetails && (
         <EmergencyDetailsContent
           emergencyDetails={emergencyDetails}
@@ -351,7 +406,6 @@ const Home = ({ responderUid }) => {
           onClose={() => setEmergencyDetails(null)}
         />
       )}
-        
     </>
   );
 };
