@@ -36,6 +36,25 @@
     "updates": {
       "url": "https://u.expo.dev/545bd9fd-2c02-4f7c-a52a-5abf499e9b0c"
     },
-    "newArchEnabled": true
+    "newArchEnabled": true,
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#ff0000",
+          "sounds": [
+            "./assets/sounds/emergencySound.mp3"
+          ]
+        }
+      ],
+      [
+        "expo-av",
+        {
+          "microphonePermission": false
+        }
+      ]
+    ]
+    
   }
 }

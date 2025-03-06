@@ -83,7 +83,7 @@ const Home = ({ responderUid }) => {
     () =>
       emergencyData.filter(
         (emergency) =>
-          emergency.status === "awaiting response" ||
+          emergency.status === "pending" ||
           emergency.status === "on-going"
       ),
     [emergencyData]
@@ -343,7 +343,7 @@ const Home = ({ responderUid }) => {
               longitude: emergency.location.longitude,
             }}
             pinColor={
-              emergency.status === "awaiting response" ? "red" : "yellow"
+              emergency.status === "pending" ? "red" : "yellow"
             }
             onPress={() => handleShowEmergencyDetails(emergency)}
           />
