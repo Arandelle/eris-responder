@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   View,
   Text,
@@ -8,8 +8,6 @@ import {
   Modal,
   TouchableWithoutFeedback,
   Image,
-  Alert,
-  Button,
 } from "react-native";
 import ImageViewer from "react-native-image-viewing";
 import { useNavigation } from "@react-navigation/native";
@@ -19,26 +17,12 @@ import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import colors from "../constants/colors";
 import useCurrentUser from "../hooks/useCurrentUser";
 import useViewImage from "../hooks/useViewImage";
-import * as Notifications from "expo-notifications";
-import NotificationListener from "./NotificationListener";
-
 
 const Profile = () => {
   const navigation = useNavigation();
   const { currentUser, loading } = useCurrentUser();
   const [logout, setLogout] = useState(false);
   const { isImageModalVisible, selectedImageUri, handleImageClick, closeImageModal} = useViewImage();
-
-const sendTestNotification = async () => {
-  await Notifications.scheduleNotificationAsync({
-    content: {
-      title: "🚨 Emergency Alert!",
-      body: "This is a test notification.",
-      sound: true, // Ensures sound plays
-    },
-    trigger: null, // Send immediately
-  });
-};
 
 
   const handleShowUpdateForm = () => {
@@ -187,7 +171,6 @@ const sendTestNotification = async () => {
             />
           </View>
         </View>
-        <Button title="Test Notification" onPress={sendTestNotification} />
       </ScrollView>
 
       <Modal

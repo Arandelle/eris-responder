@@ -57,9 +57,14 @@ const UpdateProfile = () => {
   ];
 
   useEffect(() => {
-    if(currentUser){
+    if (currentUser) {
       setUserData({
-        ...currentUser
+        email: currentUser.email || "Not verified",
+        fullname: currentUser.fullname || "",
+        mobileNum: currentUser.mobileNum || "",
+        gender: currentUser.gender || "Male",
+        img: currentUser.img || "https://flowbite.com/docs/images/people/profile-picture-1.jpg",
+        imageFile: null,
       });
     }
   }, [currentUser]);
