@@ -19,6 +19,7 @@ import NotificationListener from "./src/screens/NotificationListener";
 import * as BackgroundFetch from "expo-background-fetch";
 import * as TaskManager from "expo-task-manager";
 import useFetchData from "./src/hooks/useFetchData";
+import AlertUi from "./src/screens/AlertUi";
 
 const Stack = createNativeStackNavigator();
 const BACKGROUND_NOTIFICATION_TASK = "BACKGROUND_NOTIFICATION_TASK";
@@ -49,12 +50,7 @@ const App = () => {
   const { data: emergencyRequest } = useFetchData("emergencyRequest");
   const [pendingEmergency, setPendingEmergency] = useState([]);
   const [prevLength, setPrevLength] = useState(0);
-  const [tryNotif, setTry] = useState(false)
-
-  const data = {
-    message: "Arandelle sent an emergency!",
-    geoCodeLocation: "819xw Tanza Cavite"
-  }
+  const [showAlert, setShowAlert] = useState(false);
 
   // Request permissions and set up background tasks
   useEffect(() => {
@@ -171,6 +167,10 @@ const App = () => {
     if (pendingRequests.length > prevLength) {
       setPendingEmergency(pendingRequests);
       sendTestNotification(); // Trigger sound/notification
+      setShowAlert(true);
+      setTimeout(() => {
+        setShowAlert(false)
+      }, 10000);
     }
   
     // Update previous length state
@@ -189,6 +189,7 @@ const App = () => {
   return (
     <GestureHandlerRootView style={{ flex: 1 }} pointerEvents="auto">
       <NotificationListener />
+      {showAlert && <AlertUi/>}
       <NavigationContainer>
         <Stack.Navigator
           screenOptions={{
