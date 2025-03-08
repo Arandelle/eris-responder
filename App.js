@@ -47,7 +47,14 @@ const App = () => {
   const [isResponder, setIsResponder] = useState(false);
   const [loading, setLoading] = useState(true);
   const { data: emergencyRequest } = useFetchData("emergencyRequest");
+  const [pendingEmergency, setPendingEmergency] = useState([]);
   const [prevLength, setPrevLength] = useState(0);
+  const [tryNotif, setTry] = useState(false)
+
+  const data = {
+    message: "Arandelle sent an emergency!",
+    geoCodeLocation: "819xw Tanza Cavite"
+  }
 
   // Request permissions and set up background tasks
   useEffect(() => {
@@ -107,10 +114,12 @@ const App = () => {
 
   // Function to send a test notification
   const sendTestNotification = async () => {
+    const message =
+     `🚨 ${pendingEmergency[0].emergencyType} at ${pendingEmergency[0].location.geoCodeLocation}. ${pendingEmergency[0].description}` 
     await Notifications.scheduleNotificationAsync({
       content: {
         title: "🚨 Emergency Alert!",
-        body: "New emergency occur.",
+        body: message || "New emergency occur",
         sound: true,
         priority: Notifications.AndroidNotificationPriority.MAX,
         categoryIdentifier: "emergency",
@@ -124,6 +133,7 @@ const App = () => {
     });
   };
 
+  // check the current logged in
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
@@ -159,13 +169,13 @@ const App = () => {
   
     // Check if a new "pending" request was added
     if (pendingRequests.length > prevLength) {
+      setPendingEmergency(pendingRequests);
       sendTestNotification(); // Trigger sound/notification
     }
   
     // Update previous length state
     setPrevLength(pendingRequests.length);
-  }, [emergencyRequest]);
-  
+  }, [emergencyRequest]);  
 
   if (loading) {
     return (
