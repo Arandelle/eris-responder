@@ -181,6 +181,7 @@ const Home = ({ responderUid }) => {
             latitude: currentUser?.location.latitude,
             longitude: currentUser?.location.longitude,
           },
+          [`users/${emergency.userId}/activeRequest/status`]: "on-going"
         };
   
         await update(ref(database), updates);
