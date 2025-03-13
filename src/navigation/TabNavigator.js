@@ -92,7 +92,7 @@ const TabNavigator = ({responderUid}) => {
         component={Notification}
         options={{
           title: "Notification",
-          tabBarBadge: notificationsCount === 0 ? null : notificationsCount,
+          tabBarBadge: notificationsCount > 99 ? "99+" : notificationsCount === 0 ? null : notificationsCount,
         }}
       />
       <Tab.Screen

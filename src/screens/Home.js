@@ -110,10 +110,11 @@ const Home = ({ responderUid }) => {
           );
           return;
         }
-
+  
         const user = auth.currentUser;
-
-        // Create history entry
+        if (!user) throw new Error("User not authenticated.");
+  
+        // Create history entry first
         const historyRef = ref(database, `responders/${user.uid}/history`);
         const newHistoryEntry = {
           emergencyId: emergency.emergencyId,
@@ -125,11 +126,32 @@ const Home = ({ responderUid }) => {
           date: emergency.date,
           responseTime: new Date().toISOString(),
         };
-
+  
         const newHistoryRef = await push(historyRef, newHistoryEntry);
+        if (!newHistoryRef.key) throw new Error("Failed to create history entry.");
+  
         const historyId = newHistoryRef.key;
-
-        // Batch updates for better performance
+  
+        // Notification Data
+        const notificationRef = ref(
+          database,
+          `users/${emergency.userId}/notifications`
+        );
+        const notificationData = {
+          responderId: user.uid,
+          type: "responder",
+          title: "Emergency Response Dispatched",
+          message: `A responder has been dispatched for your ${emergency.type} emergency.`,
+          isSeen: false,
+          date: new Date().toISOString(),
+          timestamp: serverTimestamp(),
+          icon: "car-emergency",
+        };
+  
+        // Create notification BEFORE updates
+        await push(notificationRef, notificationData);
+  
+        // If history entry and notification succeeded, proceed with batch updates
         const updates = {
           [`responders/${user.uid}/pendingEmergency`]: {
             userId: emergency.userId,
@@ -146,44 +168,23 @@ const Home = ({ responderUid }) => {
             longitude: currentUser?.location.longitude,
           },
           [`emergencyRequest/${emergency.id}/responderId`]: user.uid,
-          [`emergencyRequest/${emergency.id}/responseTime`]:
-            new Date().toISOString(),
-          [`users/${emergency.userId}/emergencyHistory/${emergency.id}/status`]:
-            "on-going",
-          [`users/${emergency.userId}/emergencyHistory/${emergency.id}/locationOfResponder`]:
-            {
-              latitude: currentUser?.location.latitude,
-              longitude: currentUser?.location.longitude,
-            },
-          [`users/${emergency.userId}/emergencyHistory/${emergency.id}/responderId`]:
-            user.uid,
-          [`users/${emergency.userId}/emergencyHistory/${emergency.id}/responseTime`]:
-            new Date().toISOString(),
+          [`emergencyRequest/${emergency.id}/responseTime`]: new Date().toISOString(),
+          [`users/${emergency.userId}/emergencyHistory/${emergency.id}/status`]: "on-going",
+          [`users/${emergency.userId}/emergencyHistory/${emergency.id}/locationOfResponder`]: {
+            latitude: currentUser?.location.latitude,
+            longitude: currentUser?.location.longitude,
+          },
+          [`users/${emergency.userId}/emergencyHistory/${emergency.id}/responderId`]: user.uid,
+          [`users/${emergency.userId}/emergencyHistory/${emergency.id}/responseTime`]: new Date().toISOString(),
           [`users/${emergency.userId}/activeRequest/responderId`]: user.uid,
           [`users/${emergency.userId}/activeRequest/locationOfResponder`]: {
             latitude: currentUser?.location.latitude,
             longitude: currentUser?.location.longitude,
           },
         };
-
-        // Create notification
-        const notificationRef = ref(
-          database,
-          `users/${emergency.userId}/notifications`
-        );
-        await push(notificationRef, {
-          responderId: user.uid,
-          type: "responder",
-          title: "Emergency Response Dispatched",
-          message: `A responder has been dispatched for your ${emergency.type} emergency.`,
-          isSeen: false,
-          date: new Date().toISOString(),
-          timestamp: serverTimestamp(),
-          icon: "car-emergency",
-        });
-
+  
         await update(ref(database), updates);
-
+  
         Alert.alert(
           "Response Initiated",
           "You have been assigned to this emergency. Please proceed to the location."
@@ -197,7 +198,7 @@ const Home = ({ responderUid }) => {
       }
     },
     [currentUser]
-  );
+  );  
 
   const handleEmergencyDone = useCallback((emergency) => {
     Alert.alert("Notice!", "Are you sure this emergency is resolved?", [

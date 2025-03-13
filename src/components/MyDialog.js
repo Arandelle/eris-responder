@@ -17,7 +17,6 @@ const MyDialog = ({visible,setVisible, title, subMesage, onChangeText, value, on
             onChangeText={onChangeText}
             value={value}
           />
-          <Dialog.Button label="Cancel" onPress={() => setVisible(false)} />
           <Dialog.Button
             label="OK"
             onPress={() => {onPress(), setVisible(false)}}

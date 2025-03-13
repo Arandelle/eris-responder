@@ -32,7 +32,7 @@ const EmergencyDetailsContent = ({
             {emergencyDetails?.emergencyType}
           </Text>
           <Text className="text-sm text-gray-600">
-            ID: {emergencyDetails?.emergencyId} {emergencyDetails.id}
+            ID: {emergencyDetails?.emergencyId}
           </Text>
         </View>
         <TouchableOpacity 
