@@ -1,12 +1,11 @@
 import {useState, useEffect} from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import Home from "../screens/Home";
+import Home from "../screens/Map/Home";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import Notification from "../screens/Notification";
 import { View } from "react-native";
 import Profile from "../screens/Profile";
 import TopBarNavigator from "../navigation/TopBarNavigator";
-import  useFetchData  from "../hooks/useFetchData";
 import { useNotificationData } from "../hooks/useNotificationData";
 import colors from "../constants/colors";
 import useCurrentUser from "../hooks/useCurrentUser";

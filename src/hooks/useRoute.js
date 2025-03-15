@@ -3,10 +3,7 @@ import { useState, useEffect } from "react";
 
 const openRouteKey = OPENROUTE_API_KEY;
 
-const useRoute = (responderPosition, selectedEmergency) => {
-
-  const [route, setRoute] = useState([]);
-  const [distance, setDistance] = useState(0);
+const useRoute = (responderPosition, selectedEmergency, setDistance, setRoute) => {
 
   const fetchRoute = async () => {
     if (!responderPosition || !selectedEmergency) return;
@@ -37,7 +34,7 @@ const useRoute = (responderPosition, selectedEmergency) => {
     }
   }, [responderPosition, selectedEmergency]);
 
-  return {route,setRoute, distance,setDistance}
+  return null;
 };
 
 export default useRoute;

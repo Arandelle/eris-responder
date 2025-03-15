@@ -5,7 +5,7 @@ import { auth } from "./src/services/firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
 import { get, getDatabase, ref } from "firebase/database";
 import { NavigationContainer } from "@react-navigation/native";
-import Home from "./src/screens/Home";
+import Home from "./src/screens/Map/Home";
 import LoginForm from "./src/screens/LoginForm";
 import TabNavigator from "./src/navigation/TabNavigator";
 import UpdateProfile from "./src/screens/UpdateProfile";
