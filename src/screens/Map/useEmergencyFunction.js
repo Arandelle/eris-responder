@@ -10,6 +10,7 @@ const useEmergencyFunction = (
     currentUser
 ) => {
     const [selectedEmergency, setSelectedEmergency] = useState(null); // on-going emergency
+    const [loading, setLoading] = useState(false)
 
       // Effect for pending emergency subscription
       useEffect(() => {
@@ -33,9 +34,9 @@ const useEmergencyFunction = (
         });
       }, []);
     
-
     const handleSelectEmergency = useCallback(
         async (emergency) => {
+          setLoading(true);
           try {
             if (currentUser?.pendingEmergency) {
               Alert.alert(
@@ -136,6 +137,8 @@ const useEmergencyFunction = (
               "Error",
               "Failed to process emergency response. Please try again."
             );
+          } finally {
+            setLoading(false);
           }
         },
         [currentUser]
@@ -222,7 +225,7 @@ const useEmergencyFunction = (
         ]);
       }, []);
 
-  return {handleSelectEmergency,handleEmergencyDone,selectedEmergency }
+  return {handleSelectEmergency,handleEmergencyDone,selectedEmergency, loading }
 }
 
 export default useEmergencyFunction;
