@@ -21,7 +21,6 @@ const Home = ({ responderUid }) => {
   const { data: emergencyData, loading: emergencyLoading } =
     useFetchData("emergencyRequest");
   const { data: userData } = useFetchData("users");
-  const { data: hotlines } = useFetchData("hotlines");
   const { currentUser } = useCurrentUser();
   const { responderPosition, loading: locationLoading } =
     useLocation(responderUid);
@@ -30,24 +29,22 @@ const Home = ({ responderUid }) => {
   const [emergencyDetails, setEmergencyDetails] = useState(null); // emergency details
   const [isEmergencyDone, setIsEmergencyDone] = useState(false);
   const [logMessage, setLogMessage] = useState("");
-  const [recommendedHotlines, setRecommendedHotlines] = useState([]);
-  const [showRecommended, setShowRecommended] = useState(false);
 
   const [region, setRegion] = useState(null);
   const [isOutOfScreen, setIsOutOfScreen] = useState(false);
   const [nearestEmergency, setNearestEmergency] = useState(null);
 
   const EMERGENCY_PRIORITIES = {
-    "fire": 1,
-    "medical": 2,
-    "crime": 3,
+    fire: 1,
+    medical: 2,
+    crime: 3,
     "natural disaster": 4,
     "public disturbance": 5,
-    "other": 10
-  }
+    other: 10,
+  };
 
-    // use hooks for selecting and marking as done for the emergency
-    const { handleSelectEmergency, handleEmergencyDone, selectedEmergency } =
+  // use hooks for selecting and marking as done for the emergency
+  const { handleSelectEmergency, handleEmergencyDone, selectedEmergency } =
     useEmergencyFunction(
       setIsEmergencyDone,
       setRoute,
@@ -69,18 +66,6 @@ const Home = ({ responderUid }) => {
       });
     }
   }, [responderPosition]);
-
-  // to check the recommended hotlines
-  useEffect(() => {
-    if (selectedEmergency && emergencyDetails) {
-      const recommended =
-        Array.isArray(hotlines) &&
-        hotlines.filter(
-          (hotlines) => hotlines.category === emergencyDetails.emergencyType
-        );
-      setRecommendedHotlines(recommended || []);
-    }
-  }, [selectedEmergency, emergencyDetails, hotlines]);
 
   // Memoize filtered emergency data
   const activeEmergencies = useMemo(
@@ -129,20 +114,18 @@ const Home = ({ responderUid }) => {
             emergency.location.latitude,
             emergency.location.longitude
           ),
-          priority: EMERGENCY_PRIORITIES[emergency.emergencyType] // get priority level
+          priority: EMERGENCY_PRIORITIES[emergency.emergencyType], // get priority level
         })
       );
 
       // Sort by distance
       emergenciesWithDistance.sort((a, b) => {
-        if(a.priority !== b.priority){
-          return a.priority - b.priority; 
-        }
-        else{
+        if (a.priority !== b.priority) {
+          return a.priority - b.priority;
+        } else {
           return a.distance - b.distance;
         }
-      }
-      );
+      });
 
       // Store the nearest emergency
       setNearestEmergency(emergenciesWithDistance[0]);
@@ -153,7 +136,7 @@ const Home = ({ responderUid }) => {
 
   // function to navigate to the emergency
   const navigateToNearestEmergency = () => {
-    if (nearestEmergency && mapRef.current) {      
+    if (nearestEmergency && mapRef.current) {
       mapRef.current.animateToRegion({
         latitude: nearestEmergency.location.latitude,
         longitude: nearestEmergency.location.longitude,
@@ -216,19 +199,19 @@ const Home = ({ responderUid }) => {
         onPress={() => addMessageLog(emergencyDetails?.id, logMessage)}
       />
 
-{isOutOfScreen && nearestEmergency && (
-  <TouchableOpacity
-    className="absolute top-10 self-center bg-red-500 z-50 p-3 rounded-md flex-row items-center"
-    onPress={navigateToNearestEmergency}
-  >
-    <Text className="text-white font-bold">
-      {nearestEmergency.emergencyType.toUpperCase()} 
-    </Text>
-    <Text className="text-white ml-2">
-      ({nearestEmergency.distance.toFixed(1)} km)
-    </Text>
-  </TouchableOpacity>
-)}
+      {isOutOfScreen && nearestEmergency && (
+        <TouchableOpacity
+          className="absolute top-10 self-center bg-red-500 z-50 p-3 rounded-md flex-row items-center"
+          onPress={navigateToNearestEmergency}
+        >
+          <Text className="text-white font-bold">
+            {nearestEmergency.emergencyType.toUpperCase()}
+          </Text>
+          <Text className="text-white ml-2">
+            ({nearestEmergency.distance.toFixed(1)} km)
+          </Text>
+        </TouchableOpacity>
+      )}
 
       <MapView
         ref={mapRef}
@@ -261,9 +244,8 @@ const Home = ({ responderUid }) => {
       {selectedEmergency && distance > 0 && (
         <Hotlines
           distance={distance}
-          showRecommended={showRecommended}
-          recommendedHotlines={recommendedHotlines}
-          setShowRecommended={setShowRecommended}
+          selectedEmergency={selectedEmergency}
+          emergencyDetails={emergencyDetails}
         />
       )}
 

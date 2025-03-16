@@ -1,13 +1,33 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { View, Text, TouchableOpacity } from 'react-native';
 import openLinks from '../../helper/openLinks';
+import useFetchData from '../../hooks/useFetchData';
 
 const Hotlines = ({
     distance,
-    showRecommended,
-    recommendedHotlines,
-    setShowRecommended
+    selectedEmergency,
+    emergencyDetails
 }) => {
+  const { data: hotlines } = useFetchData("hotlines");
+  const [recommendedHotlines, setRecommendedHotlines] = useState([]);
+  const [showRecommended, setShowRecommended] = useState(false);
+    // to check the recommended hotlines
+    useEffect(() => {
+      if (selectedEmergency && emergencyDetails) {
+        const recommended =
+          Array.isArray(hotlines) &&
+          hotlines.filter(
+            (hotlines) => hotlines.category === emergencyDetails.emergencyType
+          );
+        
+        const generalHotlines = Array.isArray(hotlines) && hotlines.filter((hotline) => hotline.category === "other");
+  
+        const combineHotline = [...new Set([...recommended, ...generalHotlines])];
+  
+        setRecommendedHotlines(combineHotline || []);
+      }
+    }, [selectedEmergency, emergencyDetails, hotlines]);
+
   return (
     <View className="absolute top-4 left-4 right-4 bg-white p-4 rounded-lg shadow-lg space-y-4">
     <Text className="text-lg font-semibold">
@@ -41,7 +61,7 @@ const Hotlines = ({
             </TouchableOpacity>
           ))
         ) : (
-          <Text className="text-gray-500">No available hotlines.</Text>
+          <Text className="text-gray-500">No available hotlines. Try clicking the on-going emergency</Text>
         )}
       </View>
     )}
