@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useCallback, act } from "react";
+import { useEffect, useState, useMemo, useCallback, act, useRef } from "react";
 import { Text, View, Image, Alert, TouchableOpacity } from "react-native";
 import MapView, { Polyline, Marker } from "react-native-maps";
 import { ref, set } from "firebase/database";
@@ -14,8 +14,10 @@ import MyDialog from "../../components/MyDialog";
 import EmergencyDetailsContent from "../../components/EmergencyDetailsContent";
 import Hotlines from "./Hotlines";
 import useEmergencyFunction from "./useEmergencyFunction";
+import { calculateDistance } from "./calculateDistance";
 
 const Home = ({ responderUid }) => {
+  const mapRef = useRef(null);
   const { data: emergencyData, loading: emergencyLoading } =
     useFetchData("emergencyRequest");
   const { data: userData } = useFetchData("users");
@@ -33,24 +35,19 @@ const Home = ({ responderUid }) => {
 
   const [region, setRegion] = useState(null);
   const [isOutOfScreen, setIsOutOfScreen] = useState(false);
+  const [nearestEmergency, setNearestEmergency] = useState(null);
 
-  // Add this function to calculate distance between two coordinates
-  const calculateDistance = (lat1, lon1, lat2, lon2) => {
-    const R = 6371; // Radius of the earth in km
-    const dLat = ((lat2 - lat1) * Math.PI) / 180;
-    const dLon = ((lon2 - lon1) * Math.PI) / 180;
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos((lat1 * Math.PI) / 180) *
-        Math.cos((lat2 * Math.PI) / 180) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c; // Distance in km
-  };
+  const EMERGENCY_PRIORITIES = {
+    "fire": 1,
+    "medical": 2,
+    "crime": 3,
+    "natural disaster": 4,
+    "public disturbance": 5,
+    "other": 10
+  }
 
-  // use hooks for selecting and marking as done for the emergency
-  const { handleSelectEmergency, handleEmergencyDone, selectedEmergency } =
+    // use hooks for selecting and marking as done for the emergency
+    const { handleSelectEmergency, handleEmergencyDone, selectedEmergency } =
     useEmergencyFunction(
       setIsEmergencyDone,
       setRoute,
@@ -95,7 +92,7 @@ const Home = ({ responderUid }) => {
     [emergencyData]
   );
 
-  // In your useEffect that checks for out-of-screen emergencies
+  // checks for out-of-screen emergencies
   useEffect(() => {
     if (!region || activeEmergencies.length === 0 || !responderPosition) return;
 
@@ -132,11 +129,20 @@ const Home = ({ responderUid }) => {
             emergency.location.latitude,
             emergency.location.longitude
           ),
+          priority: EMERGENCY_PRIORITIES[emergency.emergencyType] // get priority level
         })
       );
 
       // Sort by distance
-      emergenciesWithDistance.sort((a, b) => a.distance - b.distance);
+      emergenciesWithDistance.sort((a, b) => {
+        if(a.priority !== b.priority){
+          return a.priority - b.priority; 
+        }
+        else{
+          return a.distance - b.distance;
+        }
+      }
+      );
 
       // Store the nearest emergency
       setNearestEmergency(emergenciesWithDistance[0]);
@@ -145,26 +151,17 @@ const Home = ({ responderUid }) => {
     }
   }, [region, activeEmergencies, responderPosition]);
 
-  // Add this state
-  const [nearestEmergency, setNearestEmergency] = useState(null);
-
-  // Then modify your navigation function
+  // function to navigate to the emergency
   const navigateToNearestEmergency = () => {
-    if (nearestEmergency) {
-      // Adjust the zoom level based on distance
-      const zoomLevel = Math.min(
-        0.04,
-        Math.max(0.004, nearestEmergency.distance * 0.02)
-      );
-
-      setRegion({
+    if (nearestEmergency && mapRef.current) {      
+      mapRef.current.animateToRegion({
         latitude: nearestEmergency.location.latitude,
         longitude: nearestEmergency.location.longitude,
-        latitudeDelta: zoomLevel,
-        longitudeDelta: zoomLevel,
+        latitudeDelta: 0.004,
+        longitudeDelta: 0.004,
       });
 
-      // Optionally, show emergency details
+      // show emergency details
       handleShowEmergencyDetails(nearestEmergency);
     }
   };
@@ -219,26 +216,25 @@ const Home = ({ responderUid }) => {
         onPress={() => addMessageLog(emergencyDetails?.id, logMessage)}
       />
 
-      {isOutOfScreen && (
-        <TouchableOpacity
-          className="absolute top-10 self-center bg-green-500 z-50 p-2 rounded-md"
-          onPress={navigateToNearestEmergency}
-        > 
-          <Text className="text-white text-center">
-           🚨 Navigate to nearest emergency 
-          </Text>
-          <Text className="text-white text-center text-lg font-thin">(
-            {nearestEmergency
-              ? `${nearestEmergency.distance.toFixed(1)} km away`
-              : "Go to emergency!"}
-            )</Text>
-        </TouchableOpacity>
-      )}
+{isOutOfScreen && nearestEmergency && (
+  <TouchableOpacity
+    className="absolute top-10 self-center bg-red-500 z-50 p-3 rounded-md flex-row items-center"
+    onPress={navigateToNearestEmergency}
+  >
+    <Text className="text-white font-bold">
+      {nearestEmergency.emergencyType.toUpperCase()} 
+    </Text>
+    <Text className="text-white ml-2">
+      ({nearestEmergency.distance.toFixed(1)} km)
+    </Text>
+  </TouchableOpacity>
+)}
 
       <MapView
+        ref={mapRef}
         className="flex-1"
         initialRegion={region}
-        onRegionChangeComplete={setRegion}
+        onRegionChangeComplete={(newRegion) => setRegion(newRegion)}
       >
         <Marker coordinate={responderPosition} title="Your Location">
           <Image source={responderMarker} className="h-10 w-10" />

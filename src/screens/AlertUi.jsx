@@ -1,17 +1,18 @@
 import React, { useRef, useEffect } from "react";
 import { Animated, Image, View } from "react-native";
 
-const AlertUi = () => {
+export const useScaleAnim = () => {
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     const pulse = Animated.loop(
       Animated.sequence([
-        Animated.timing(scaleAnim, {
+        Animated.timing(scaleAnim,{
           toValue: 1.2,
           duration: 500,
           useNativeDriver: true
         }),
+
         Animated.timing(scaleAnim, {
           toValue: 1,
           duration: 500,
@@ -19,9 +20,14 @@ const AlertUi = () => {
         })
       ])
     );
-    pulse.start();
+    pulse.start()
   }, [scaleAnim]);
 
+  return scaleAnim;
+}
+
+const AlertUi = () => {
+  const scaleAnim = useScaleAnim();
   return (
     <View
       style={{
