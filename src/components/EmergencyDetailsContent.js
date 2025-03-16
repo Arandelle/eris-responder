@@ -59,7 +59,7 @@ const EmergencyDetailsContent = ({
               </Text>
             </View>
             <Text className="text-gray-600">
-              📍{userDetails?.location?.address}
+              📍{emergencyDetails?.location?.geoCodeLocation}
             </Text>
             <Text className="text-sm text-blue-600 mt-1">
               Reported {getTimeDifference(emergencyDetails?.timestamp)}
