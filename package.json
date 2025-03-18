@@ -53,7 +53,8 @@
   "expo": {
     "doctor": {
       "reactNativeDirectoryCheck": {
-        "listUnknownPackages": false
+        "listUnknownPackages": false,
+        "exclude" : ["react-native-maps", "react-native-image-viewing"]
       }
     }
   }
