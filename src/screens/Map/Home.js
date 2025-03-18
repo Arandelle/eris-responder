@@ -26,7 +26,7 @@ const Home = ({ responderUid }) => {
     useLocation(responderUid);
   const [distance, setDistance] = useState(0);
   const [route, setRoute] = useState([]);
-  const [emergencyDetails, setEmergencyDetails] = useState(null); // regardless if selected (on-going) or not
+  const [emergencyDetails, setEmergencyDetails] = useState(null); // emergency details
   const [isEmergencyDone, setIsEmergencyDone] = useState(false);
   const [logMessage, setLogMessage] = useState("");
 
@@ -44,7 +44,7 @@ const Home = ({ responderUid }) => {
   };
 
   // use hooks for selecting and marking as done for the emergency
-  const { handleSelectEmergency, handleEmergencyDone, selectedEmergency, loading: selectingEmergencyLoading } =
+  const { handleSelectEmergency, handleEmergencyDone, selectedEmergency } =
     useEmergencyFunction(
       setIsEmergencyDone,
       setRoute,
@@ -183,15 +183,6 @@ const Home = ({ responderUid }) => {
         <Text>Loading map...</Text>
       </View>
     );
-  }
-
-  if(selectingEmergencyLoading){
-    return (
-      <View className="flex w-full h-full items-center justify-center">
-      <Image source={Logo} alt="Loading..." />
-      <Text>Navigating to selected emergency please wait...</Text>
-    </View>
-    )
   }
 
   return (
