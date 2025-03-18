@@ -54,7 +54,10 @@
     "doctor": {
       "reactNativeDirectoryCheck": {
         "listUnknownPackages": false,
-        "exclude" : ["react-native-maps", "react-native-image-viewing"]
+        "exclude": [
+          "react-native-maps",
+          "react-native-image-viewing"
+        ]
       }
     }
   }
