@@ -12,7 +12,8 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.arandelle.erisresponder"
     },
     "android": {
       "adaptiveIcon": {
@@ -41,7 +42,7 @@
       [
         "expo-notifications",
         {
-          "icon": "./assets/notification-icon.png",
+          "icon": "./assets/logo.png",
           "color": "#ff0000",
           "sounds": [
             "./assets/sounds/emergencySound.mp3"
@@ -55,6 +56,5 @@
         }
       ]
     ]
-    
   }
 }
