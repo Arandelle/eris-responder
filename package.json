@@ -39,7 +39,6 @@
     "react-native-gesture-handler": "~2.20.2",
     "react-native-gif": "^1.0.3",
     "react-native-image-viewing": "^0.2.2",
-    "react-native-mapbox-gl": "^5.2.1-deprecated",
     "react-native-maps": "^1.18.0",
     "react-native-reanimated": "~3.16.1",
     "react-native-screens": "~4.4.0",
