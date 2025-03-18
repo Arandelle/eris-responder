@@ -90,7 +90,7 @@ const useEmergencyFunction = (
 
             const logsDataRef = ref(database, `usersLog`);
             const usersLogData = {
-              userd: user?.uid,
+              userId: user?.uid,
               date: new Date().toISOString(),
               type: "Assist an emergency",   
             }
@@ -190,7 +190,7 @@ const useEmergencyFunction = (
                     
                     const logsDataRef = ref(database, `usersLog`);
                     const usersLogData = {
-                      userd: user?.uid,
+                      userId: user?.uid,
                       date: new Date().toISOString(),
                       type: "Emergency mark as done",   
                     }

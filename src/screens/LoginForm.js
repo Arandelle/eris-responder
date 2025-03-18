@@ -49,7 +49,7 @@ const LoginForm = () => {
         const logsDataRef = ref(database, `usersLog`);
 
         const usersLogData = {
-          userd: user?.uid,
+          userId: user?.uid,
           date: new Date().toISOString(),
           type: "Login",   
         }

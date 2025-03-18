@@ -155,7 +155,7 @@ const UpdateProfile = () => {
       };
 
       const usersLogData = {
-        userd: user?.uid,
+        userId: user?.uid,
         date: new Date().toISOString(),
         type: "Update Profile",   
       }
