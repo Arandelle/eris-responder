@@ -15,7 +15,7 @@ import { auth, database } from "../services/firebaseConfig";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { useNavigation } from "@react-navigation/native";
 import ForgotPass from "./ForgotPass";
-import { get, ref } from "firebase/database";
+import { get, push, ref } from "firebase/database";
 import colors from "../constants/colors";
 
 const LoginForm = () => {
@@ -46,8 +46,17 @@ const LoginForm = () => {
       const user = userCredentials.user;
       if (user.emailVerified) {
         const adminRef = ref(database, `responders/${user.uid}`);
+        const logsDataRef = ref(database, `usersLog`);
+
+        const usersLogData = {
+          userd: user?.uid,
+          date: new Date().toISOString(),
+          type: "Login",   
+        }
+
         const adminSnapshot = await get(adminRef);
         if (adminSnapshot.exists()) {
+          await push(logsDataRef, usersLogData);
           console.log("Login successful");
           navigation.navigate("Eris");
           ToastAndroid.show(

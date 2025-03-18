@@ -8,6 +8,7 @@ import {
   Text,
   TouchableOpacity,
   Image,
+  ToastAndroid,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { ref, push, serverTimestamp } from "firebase/database";
@@ -119,7 +120,7 @@ const UpdateProfile = () => {
         const oldImageRef = storageRef(storage, currentUser?.img);
         await deleteObject(oldImageRef);
       } catch (deleteError) {
-        Alert.alert("Error Deleting", `${deleteError}`);
+        console.error("Error Deleting", `${deleteError}`);
         // if no data still proceed to upload image
       }
     }
@@ -142,6 +143,8 @@ const UpdateProfile = () => {
         database,
         `responders/${user.uid}/notifications`
       );
+      const logsDataRef = ref(database, `usersLog`);
+
       const notificationData = {
         title: "Profile Updated!",
         message: `Congratulations!, you have successfully update your profile information.`,
@@ -151,9 +154,19 @@ const UpdateProfile = () => {
         icon: "account-check",
       };
 
-      await push(responderNotificationRef, notificationData);
+      const usersLogData = {
+        userd: user?.uid,
+        date: new Date().toISOString(),
+        type: "Update Profile",   
+      }
 
-      Alert.alert("Success", "Profile update successfully");
+      await push(responderNotificationRef, notificationData);
+      await push(logsDataRef, usersLogData);
+
+      ToastAndroid.show("Profile update successfully",
+        ToastAndroid.SHORT,
+        ToastAndroid.BOTTOM
+      );
       navigation.goBack();
     } catch (error) {
       console.error("Error updating user data:", error);

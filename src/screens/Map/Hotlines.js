@@ -19,28 +19,28 @@ const Hotlines = ({
           hotlines.filter(
             (hotlines) => hotlines.category === emergencyDetails.emergencyType
           );
-        
+
         const generalHotlines = Array.isArray(hotlines) && hotlines.filter((hotline) => hotline.category === "other");
-  
+
         const combineHotline = [...new Set([...recommended, ...generalHotlines])];
-  
+
         setRecommendedHotlines(combineHotline || []);
       }
     }, [selectedEmergency, emergencyDetails, hotlines]);
 
   return (
-    <View className="absolute top-4 left-4 right-4 bg-white p-4 rounded-lg shadow-lg space-y-4">
+    <View className="absolute top-10 left-4 right-4 bg-white p-4 rounded-lg space-y-2">
     <Text className="text-lg font-semibold">
-      Distance to the emergency: {distance.toFixed(2)} km
+      Distance: {distance.toFixed(2)} km
     </Text>
 
     {/* Show/Hide Recommended Hotlines */}
     <TouchableOpacity
       onPress={() => setShowRecommended(!showRecommended)}
-      className="bg-blue-500 p-2 rounded-lg"
+      className="pb-2"
     >
-      <Text className="text-white text-center font-bold">
-        {showRecommended ? "Hide Hotlines" : "Show Hotlines"}
+      <Text className="text-blue-500 text-start font-bold">
+        {showRecommended ? "Hide Hotlines" : "See recommended hotlines"}
       </Text>
     </TouchableOpacity>
 

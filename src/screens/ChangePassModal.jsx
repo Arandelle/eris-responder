@@ -1,7 +1,7 @@
   import React from "react";
   import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
   import { useState } from "react";
-  import { auth } from "../services/firebaseConfig";
+  import { auth, database } from "../services/firebaseConfig";
   import {
     EmailAuthProvider,
     reauthenticateWithCredential,
@@ -10,6 +10,7 @@
   import { useEffect } from "react";
   import { useNavigation } from "@react-navigation/native";
 import { Gesture, GestureHandlerRootView } from "react-native-gesture-handler";
+import { push, ref } from "firebase/database";
 
   const ChangePassModal = () => {
       const navigate = useNavigation();
@@ -29,6 +30,13 @@ import { Gesture, GestureHandlerRootView } from "react-native-gesture-handler";
 
       try {
         const credential = EmailAuthProvider.credential(user.email, oldPassword);
+        const logsDataRef = ref(database, `usersLog`);
+        const usersLogData = {
+          userd: user?.uid,
+          date: new Date().toISOString(),
+          type: "Update Password",   
+        }
+
         await reauthenticateWithCredential(user, credential);
         if (newPassword === oldPassword) {
           Alert.alert(
@@ -39,6 +47,7 @@ import { Gesture, GestureHandlerRootView } from "react-native-gesture-handler";
           Alert.alert("Error updating!", "New password do not match");
         } else {
           await updatePassword(user, newPassword);
+          await push(logsDataRef, usersLogData);
           Alert.alert("Success update!", "Successfully changed password");
           navigate.goBack();
         }

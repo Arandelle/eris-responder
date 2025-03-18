@@ -10,6 +10,7 @@ const useEmergencyFunction = (
     currentUser
 ) => {
     const [selectedEmergency, setSelectedEmergency] = useState(null); // on-going emergency
+    const [loading, setLoading] = useState(false);
 
       // Effect for pending emergency subscription
       useEffect(() => {
@@ -36,6 +37,7 @@ const useEmergencyFunction = (
 
     const handleSelectEmergency = useCallback(
         async (emergency) => {
+          setLoading(true);
           try {
             if (currentUser?.pendingEmergency) {
               Alert.alert(
@@ -85,6 +87,15 @@ const useEmergencyFunction = (
     
             // Create notification BEFORE updates
             await push(notificationRef, notificationData);
+
+            const logsDataRef = ref(database, `usersLog`);
+            const usersLogData = {
+              userd: user?.uid,
+              date: new Date().toISOString(),
+              type: "Assist an emergency",   
+            }
+            await push(logsDataRef,usersLogData);
+           
     
             // If history entry and notification succeeded, proceed with batch updates
             const updates = {
@@ -136,6 +147,8 @@ const useEmergencyFunction = (
               "Error",
               "Failed to process emergency response. Please try again."
             );
+          } finally{
+            setLoading(false);
           }
         },
         [currentUser]
@@ -150,6 +163,7 @@ const useEmergencyFunction = (
             text: "Mark as Resolved",
             onPress: async () => {
               try {
+                setLoading(true)
                 const user = auth.currentUser;
                 if (user) {
                   const responderDataRef = ref(
@@ -173,6 +187,14 @@ const useEmergencyFunction = (
                       database,
                       `users/${emergency.userId}/notifications`
                     );
+                    
+                    const logsDataRef = ref(database, `usersLog`);
+                    const usersLogData = {
+                      userd: user?.uid,
+                      date: new Date().toISOString(),
+                      type: "Emergency mark as done",   
+                    }
+
                     await push(notificationRefForUser, {
                       responderId: user.uid,
                       type: "responder",
@@ -183,7 +205,8 @@ const useEmergencyFunction = (
                       timestamp: serverTimestamp(),
                       icon: "shield-check",
                     });
-    
+                    await push(logsDataRef, usersLogData);
+
                     const updates = {
                       [`emergencyRequest/${emergency.id}/status`]: "resolved",
                       [`users/${emergency.userId}/emergencyHistory/${emergency.id}/status`]:
@@ -216,13 +239,15 @@ const useEmergencyFunction = (
                 }
               } catch (error) {
                 console.error("Error", error);
+              } finally{
+                setLoading(false);
               }
             },
           },
         ]);
       }, []);
 
-  return {handleSelectEmergency,handleEmergencyDone,selectedEmergency }
+  return {handleSelectEmergency,handleEmergencyDone,selectedEmergency, loading }
 }
 
 export default useEmergencyFunction;

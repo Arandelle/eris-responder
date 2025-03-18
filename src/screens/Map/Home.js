@@ -44,7 +44,7 @@ const Home = ({ responderUid }) => {
   };
 
   // use hooks for selecting and marking as done for the emergency
-  const { handleSelectEmergency, handleEmergencyDone, selectedEmergency } =
+  const { handleSelectEmergency, handleEmergencyDone, selectedEmergency, loading: selectedEmergencyLoading } =
     useEmergencyFunction(
       setIsEmergencyDone,
       setRoute,
@@ -181,6 +181,15 @@ const Home = ({ responderUid }) => {
       <View className="flex w-full h-full items-center justify-center">
         <Image source={Logo} alt="Loading..." />
         <Text>Loading map...</Text>
+      </View>
+    );
+  }
+
+  if (selectedEmergencyLoading) {
+    return (
+      <View className="flex w-full h-full items-center justify-center">
+        <Image source={Logo} alt="Loading..." />
+        <Text>Loading emergency...</Text>
       </View>
     );
   }
