@@ -1,10 +1,12 @@
-import { View, Text, ScrollView, Image, TouchableOpacity } from "react-native";
-import { useMemo } from "react";
+import { View, Text, ScrollView, Image, TouchableOpacity, ToastAndroid, Alert } from "react-native";
+import { useMemo, useState } from "react";
 import useFetchRecord from "../hooks/useFetchRecord";
 import useFetchData from "../hooks/useFetchData";
 import { formatDateWithTime } from "../helper/FormatDate";
 import useViewImage from "../hooks/useViewImage";
 import ImageViewer from "react-native-image-viewing";
+import { get, ref, remove } from "firebase/database";
+import { auth, database } from "../services/firebaseConfig";
 
 const Records = ({ status }) => {
   const { emergencyRecords } = useFetchRecord(status);
@@ -33,8 +35,10 @@ const Records = ({ status }) => {
 
 const RecordItem = ({ records }) => {
   const { data: userData } = useFetchData("users");
+  const {data: responderHistory} = useFetchData(`responder`)
   const userDetails = userData?.find((user) => user.id === records.userId);
   const { handleImageClick, selectedImageUri, isImageModalVisible, closeImageModal } = useViewImage();
+  const [loading, setLoading] = useState(false);
 
   const emergencyStatus = {
     "awaiting response": "bg-orange-100 text-orange-600",
@@ -42,6 +46,55 @@ const RecordItem = ({ records }) => {
     resolved: "bg-green-100 text-green-600",
     expired: "bg-red-300",
   };
+
+  const deleteRecord = async (emergencyId) => {
+    setLoading(true);
+    try {
+      const user = auth.currentUser;
+      if (!user || !emergencyId) return;
+  
+      const historyRef = ref(database, `responders/${user.uid}/history`);
+      
+      // Fetch all history records of the responder
+      const snapshot = await get(historyRef);
+      
+      if (snapshot.exists()) {
+        const historyData = snapshot.val();
+  
+        // Find all history records that match the emergencyId
+        const historyIds = Object.keys(historyData).filter(
+          (key) => historyData[key].emergencyId === emergencyId
+        );
+  
+        if (historyIds.length > 0) {
+          // Delete all matched history records
+          const deletePromises = historyIds.map((historyId) => 
+            remove(ref(database, `responders/${user.uid}/history/${historyId}`))
+          );
+  
+          await Promise.all(deletePromises);
+          ToastAndroid.show("Successfully Deleted", ToastAndroid.SHORT);
+        } else {
+          Alert.alert("Error", "No matching history found for this emergency.");
+        }
+      } else {
+        Alert.alert("Error", "No history records found.");
+      }
+    } catch (error) {
+      Alert.alert("Error Deleting Record", `${error}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+
+  if(loading){
+    return (
+      <View className="flex-1">
+        <Text>Deleting...</Text>
+      </View>
+    )
+  }
 
   return (
     <>
@@ -52,19 +105,24 @@ const RecordItem = ({ records }) => {
         onRequestClose={closeImageModal}
       />
       <View className="border border-gray-300 rounded-lg m-2">
-        <View className="flex flex-row space-x-2 p-4">
-          <TouchableOpacity onPress={() => handleImageClick(userDetails?.img)}>
-            <Image
-              source={{ uri: userDetails?.img }}
-              className="h-12 w-12 rounded-full"
-            />
-          </TouchableOpacity>
-          <View>
-            <Text className="text-lg font-bold">
-              {userDetails?.fullname ?? "User Name"}
-            </Text>
-            <Text className="text-sm text-gray-400">{userDetails?.customId}</Text>
+        <View className="flex flex-row justify-between p-2">
+          <View className="flex flex-row space-x-2">
+            <TouchableOpacity onPress={() => handleImageClick(userDetails?.img)}>
+              <Image
+                source={{ uri: userDetails?.img }}
+                className="h-12 w-12 rounded-full"
+              />
+            </TouchableOpacity>
+            <View>
+              <Text className="text-lg font-bold">
+                {userDetails?.fullname ?? "User Name"}
+              </Text>
+              <Text className="text-sm text-gray-400">{userDetails?.customId}</Text>
+            </View>
           </View>
+          <TouchableOpacity className="p-2" onPress={() => deleteRecord(records.emergencyId)}>
+            <Text className="text-red-500">🗑 Delete</Text>
+          </TouchableOpacity>
         </View>
 
         <View className="mx-2 mb-2 rounded-md p-4 space-y-2 bg-gray-100">
