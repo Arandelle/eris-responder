@@ -17,6 +17,7 @@ import { useNavigation } from "@react-navigation/native";
 import ForgotPass from "./ForgotPass";
 import { get, push, ref } from "firebase/database";
 import colors from "../constants/colors";
+import logAuditTrail from "../hooks/useAuditTrail";
 
 const LoginForm = () => {
   const navigation = useNavigation();
@@ -46,17 +47,10 @@ const LoginForm = () => {
       const user = userCredentials.user;
       if (user.emailVerified) {
         const adminRef = ref(database, `responders/${user.uid}`);
-        const logsDataRef = ref(database, `usersLog`);
-
-        const usersLogData = {
-          userId: user?.uid,
-          date: new Date().toISOString(),
-          type: "Login",   
-        }
 
         const adminSnapshot = await get(adminRef);
         if (adminSnapshot.exists()) {
-          await push(logsDataRef, usersLogData);
+          await logAuditTrail("Login", user.uid);
           console.log("Login successful");
           navigation.navigate("Eris");
           ToastAndroid.show(

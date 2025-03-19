@@ -17,6 +17,7 @@ import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import colors from "../constants/colors";
 import useCurrentUser from "../hooks/useCurrentUser";
 import useViewImage from "../hooks/useViewImage";
+import logAuditTrail from "../hooks/useAuditTrail";
 
 const Profile = () => {
   const navigation = useNavigation();
@@ -45,7 +46,9 @@ const Profile = () => {
 
   const handleLogout = async () => {
     try {
+      const user = auth.currentUser;
       await signOut(auth);
+      await logAuditTrail("Logout", user.uid);
       navigation.navigate("Login");
     } catch (e) {
       console.error(e);

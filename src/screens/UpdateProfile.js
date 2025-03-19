@@ -24,6 +24,7 @@ import {
   uploadBytes,
 } from "firebase/storage";
 import colors from "../constants/colors";
+import logAuditTrail from "../hooks/useAuditTrail";
 
 
 const UpdateProfile = () => {
@@ -143,8 +144,7 @@ const UpdateProfile = () => {
         database,
         `responders/${user.uid}/notifications`
       );
-      const logsDataRef = ref(database, `usersLog`);
-
+      
       const notificationData = {
         title: "Profile Updated!",
         message: `Congratulations!, you have successfully update your profile information.`,
@@ -154,14 +154,8 @@ const UpdateProfile = () => {
         icon: "account-check",
       };
 
-      const usersLogData = {
-        userId: user?.uid,
-        date: new Date().toISOString(),
-        type: "Update Profile",   
-      }
-
       await push(responderNotificationRef, notificationData);
-      await push(logsDataRef, usersLogData);
+      await logAuditTrail("Update Profile")
 
       ToastAndroid.show("Profile update successfully",
         ToastAndroid.SHORT,

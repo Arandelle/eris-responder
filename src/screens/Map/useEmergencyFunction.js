@@ -2,6 +2,7 @@ import React, {useCallback, useState, useEffect} from 'react';
 import { Alert } from 'react-native';
 import { auth,database } from '../../services/firebaseConfig';
 import { ref, get, remove, push, serverTimestamp, update, onValue } from 'firebase/database';
+import logAuditTrail from '../../hooks/useAuditTrail';
 
 const useEmergencyFunction = (
     setIsEmergencyDone,
@@ -87,15 +88,7 @@ const useEmergencyFunction = (
     
             // Create notification BEFORE updates
             await push(notificationRef, notificationData);
-
-            const logsDataRef = ref(database, `usersLog`);
-            const usersLogData = {
-              userId: user?.uid,
-              date: new Date().toISOString(),
-              type: "Assist an emergency",   
-            }
-            await push(logsDataRef,usersLogData);
-           
+            await logAuditTrail("Navigate to Emergency");
     
             // If history entry and notification succeeded, proceed with batch updates
             const updates = {
@@ -188,13 +181,7 @@ const useEmergencyFunction = (
                       `users/${emergency.userId}/notifications`
                     );
                     
-                    const logsDataRef = ref(database, `usersLog`);
-                    const usersLogData = {
-                      userId: user?.uid,
-                      date: new Date().toISOString(),
-                      type: "Emergency mark as done",   
-                    }
-
+   
                     await push(notificationRefForUser, {
                       responderId: user.uid,
                       type: "responder",
@@ -205,7 +192,7 @@ const useEmergencyFunction = (
                       timestamp: serverTimestamp(),
                       icon: "shield-check",
                     });
-                    await push(logsDataRef, usersLogData);
+                    await logAuditTrail("Marked Emergency Done")
 
                     const updates = {
                       [`emergencyRequest/${emergency.id}/status`]: "resolved",

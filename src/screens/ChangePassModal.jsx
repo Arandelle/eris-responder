@@ -11,6 +11,7 @@
   import { useNavigation } from "@react-navigation/native";
 import { Gesture, GestureHandlerRootView } from "react-native-gesture-handler";
 import { push, ref } from "firebase/database";
+import logAuditTrail from "../hooks/useAuditTrail";
 
   const ChangePassModal = () => {
       const navigate = useNavigation();
@@ -30,12 +31,6 @@ import { push, ref } from "firebase/database";
 
       try {
         const credential = EmailAuthProvider.credential(user.email, oldPassword);
-        const logsDataRef = ref(database, `usersLog`);
-        const usersLogData = {
-          userId: user?.uid,
-          date: new Date().toISOString(),
-          type: "Update Password",   
-        }
 
         await reauthenticateWithCredential(user, credential);
         if (newPassword === oldPassword) {
@@ -47,7 +42,7 @@ import { push, ref } from "firebase/database";
           Alert.alert("Error updating!", "New password do not match");
         } else {
           await updatePassword(user, newPassword);
-          await push(logsDataRef, usersLogData);
+          await logAuditTrail("Update Password")
           Alert.alert("Success update!", "Successfully changed password");
           navigate.goBack();
         }
