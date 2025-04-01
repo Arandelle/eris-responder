@@ -65,7 +65,7 @@ const Notification = () => {
             </View>
           )}
 
-          {notifications.length > 6 && ( // is viewAll true? and notifications is more than seven? then show the button
+          {notifications.length > 6 && displayedNotifications.length !== notifications.length && (
               <TouchableOpacity
                 className="mx-3 my-2 rounded-md p-2.5 text-center text-gray-500 bg-gray-200"
                 onPress={() => setPage(page + 1)}
@@ -198,7 +198,7 @@ const NotificationItem = ({ notification }) => {
           </View>
           <View className="flex flex-row justify-between text-xs text-gray-500">
             <Text className="text-blue-500">
-              {getTimeDifference(notification.timestamp)}
+              {getTimeDifference(notification.date)}
             </Text>
             <Text className="text-gray-500">
               {formatDate(notification.date)}
