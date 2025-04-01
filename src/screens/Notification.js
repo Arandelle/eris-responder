@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   View,
   Text,
   Image,
   ScrollView,
   TouchableOpacity,
+  Alert,
+  ToastAndroid,
+  ActivityIndicator
 } from "react-native";
 import  useFetchData  from "../hooks/useFetchData";
 import { getTimeDifference } from "../helper/getTimeDifference";
@@ -13,6 +16,9 @@ import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { useNavigation } from "@react-navigation/native";
 import { useNotificationData } from "../hooks/useNotificationData";
 import useCurrentUser from "../hooks/useCurrentUser";
+import { ref, remove } from "firebase/database";
+import { database } from "../services/firebaseConfig";
+import colors from "../constants/colors"
 
 const Notification = () => {
   const {
@@ -20,14 +26,18 @@ const Notification = () => {
     notifications,
     markAllNotificationsAsRead,
   } = useNotificationData();
-  const [viewAll, setViewAll] = useState(false);
 
-  notifications.sort((a, b) => new Date(b.date) - new Date(a.date));
+  const sortedNotifications = useMemo(() => {
+    return notifications.sort((a, b) => new Date(b.date) - new Date(a.date))
+  }, [notifications]);
 
-  const displayedNotifications = viewAll
-    ? notifications
-    : notifications.slice(0, 6); // it's like telling viewAll is true? then show all notifications else slice it to 7
+  const [displayedNotifications, setDisplayedNotifications] = useState([]);
+  const [page, setPage] = useState(1);
+  const itemPerPage = 6;
 
+  useEffect(() => {
+    setDisplayedNotifications(sortedNotifications.slice(0, page * itemPerPage));
+  }, [page, sortedNotifications]);
    
   return (
     <>
@@ -55,11 +65,10 @@ const Notification = () => {
             </View>
           )}
 
-          {!viewAll &&
-            notifications.length > 6 && ( // is viewAll true? and notifications is more than seven? then show the button
+          {notifications.length > 6 && ( // is viewAll true? and notifications is more than seven? then show the button
               <TouchableOpacity
                 className="mx-3 my-2 rounded-md p-2.5 text-center text-gray-500 bg-gray-200"
-                onPress={() => setViewAll(true)}
+                onPress={() => setPage(page + 1)}
               >
                 <Text className="text-center text">
                   See previous notification
@@ -79,6 +88,8 @@ const NotificationItem = ({ notification }) => {
   const userDetails = userData?.find((user) => user.id === notification?.userId);
   const { handleSpecificNotification} = useNotificationData();
 
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const notificationImg = {
     "account-check": currentUser?.img,
     "account-alert": currentUser?.img,
@@ -94,6 +105,28 @@ const NotificationItem = ({ notification }) => {
     "shield-check": "bg-green-500",
     "car-emergency": "bg-red-500",
   };
+
+  const handleDeleteNotification = async (id) => {
+    if(isDeleting) return;
+    setIsDeleting(true);
+
+    try{
+      if(id){
+        const notificationRef = ref(database, `responders/${currentUser?.id}/notifications/${id}`);
+        await remove(notificationRef);
+        ToastAndroid.show(
+          "Deleted successfully",
+          ToastAndroid.BOTTOM,
+          ToastAndroid.SHORT
+        );
+      }
+    } catch(error){
+      console.error(error);
+      Alert.alert("Error deleting notification: ", `${error}`);
+    }finally{
+      setIsDeleting(false);
+    }
+  }
 
 
   return (
@@ -119,45 +152,60 @@ const NotificationItem = ({ notification }) => {
           }
       }}
     >
-       <View
-          className={`flex flex-row justify-between p-4 ${
-            notification.isSeen ? "bg-white" : "bg-blue-50"
-          }`}
-        >
-          <View className="relative">
-            <View>
-                <Image
-                  source={{ uri: notificationImg[notification.icon] }}
-                  className="rounded-full h-16 w-16"
-                />
-              <View
-                className={`absolute bottom-0 -right-[4px] ${
-                  notificationData[notification.icon]
-                } rounded-full p-1.5`}
-              >
-                <Icon name={notification.icon} size={18} color={"white"} />
-              </View>
+        <View
+        className={`flex flex-row justify-between p-4 ${
+          notification.isSeen ? "bg-white" : "bg-blue-50"
+        }`}
+      >
+        <View className="relative">
+          <View>
+            <Image
+              source={{
+                uri:
+                  notificationImg[notification.icon]
+              }}
+              className="rounded-full h-16 w-16 border-4 border-blue-500"
+            />
+            <View
+              className={`absolute bottom-0 -right-[4px] ${
+                notificationData[notification.icon]
+              } rounded-full p-1.5 border border-blue-50`}
+            >
+              <Icon name={notification.icon} size={18} color={"white"} />
             </View>
           </View>
-          <View className="pl-4 flex-1">
+        </View>
+        <View className="pl-4 flex-1">
+          <View className="flex relative flex-row justify-between">
             <View className="text-sm mb-1 text-gray-600">
               <Text className="font-semibold text-lg text-gray-800">
-                {notification.title}
+                {isDeleting ? "Deleting ..." : notification.title}
               </Text>
               <Text className="font-semibold text-gray-500">
                 {notification.message}
               </Text>
             </View>
-            <View className="flex flex-row justify-between text-xs text-gray-500">
-              <Text className="text-blue-500">
-                {getTimeDifference(notification.timestamp)}
-              </Text>
-              <Text className="text-gray-500">
-                {formatDate(notification.date)}
-              </Text>
-            </View>
+            <TouchableOpacity
+              onPress={() => handleDeleteNotification(notification.id)}
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <ActivityIndicator size="small" color={colors.red[400]} />
+              ) : (
+                <Icon name="delete-forever" size={20} color={colors.red[400]} />
+              )}
+            </TouchableOpacity>
+          </View>
+          <View className="flex flex-row justify-between text-xs text-gray-500">
+            <Text className="text-blue-500">
+              {getTimeDifference(notification.timestamp)}
+            </Text>
+            <Text className="text-gray-500">
+              {formatDate(notification.date)}
+            </Text>
           </View>
         </View>
+      </View>
     </TouchableOpacity>
   );
 };
