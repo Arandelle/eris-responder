@@ -37,7 +37,7 @@
     "updates": {
       "url": "https://u.expo.dev/545bd9fd-2c02-4f7c-a52a-5abf499e9b0c"
     },
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "plugins": [
       [
         "expo-notifications",
