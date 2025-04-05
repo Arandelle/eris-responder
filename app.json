@@ -20,7 +20,9 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.arandelle.erisresponder"
+      "package": "com.arandelle.erisresponder",
+      "minSdkVersion": 21,
+      "permissions": ["RECEIVE_BOOT_COMPLETED", "VIBRATE", "WAKE_LOCK"]
     },
     "web": {
       "favicon": "./assets/favicon.png"
