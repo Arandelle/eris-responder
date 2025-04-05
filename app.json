@@ -17,12 +17,10 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/logo.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.arandelle.erisresponder",
-      "minSdkVersion": 21,
-      "permissions": ["RECEIVE_BOOT_COMPLETED", "VIBRATE", "WAKE_LOCK"]
+      "package": "com.arandelle.erisresponder"
     },
     "web": {
       "favicon": "./assets/favicon.png"
