@@ -20,6 +20,9 @@ import * as BackgroundFetch from "expo-background-fetch";
 import * as TaskManager from "expo-task-manager";
 import useFetchData from "./src/hooks/useFetchData";
 import AlertUi from "./src/screens/AlertUi";
+import { enableScreens } from 'react-native-screens';
+
+enableScreens();
 
 const Stack = createNativeStackNavigator();
 const BACKGROUND_NOTIFICATION_TASK = "BACKGROUND_NOTIFICATION_TASK";
