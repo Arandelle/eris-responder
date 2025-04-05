@@ -1,10 +1,19 @@
-import { View, Text, ScrollView, Image, TouchableOpacity, ToastAndroid, Alert } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  Image,
+  TouchableOpacity,
+  ToastAndroid,
+  Alert,
+  Modal,
+  TouchableWithoutFeedback
+} from "react-native";
 import { useMemo, useState } from "react";
 import useFetchRecord from "../hooks/useFetchRecord";
 import useFetchData from "../hooks/useFetchData";
 import { formatDateWithTime } from "../helper/FormatDate";
 import useViewImage from "../hooks/useViewImage";
-import ImageViewer from "react-native-image-viewing";
 import { get, ref, remove } from "firebase/database";
 import { auth, database } from "../services/firebaseConfig";
 
@@ -13,7 +22,9 @@ const Records = ({ status }) => {
 
   // Sorting records efficiently with useMemo
   const sortedRecords = useMemo(() => {
-    return [...emergencyRecords].sort((a, b) => new Date(b.date) - new Date(a.date));
+    return [...emergencyRecords].sort(
+      (a, b) => new Date(b.date) - new Date(a.date)
+    );
   }, [emergencyRecords]);
 
   return (
@@ -35,9 +46,13 @@ const Records = ({ status }) => {
 
 const RecordItem = ({ records }) => {
   const { data: userData } = useFetchData("users");
-  const {data: responderHistory} = useFetchData(`responder`)
   const userDetails = userData?.find((user) => user.id === records.userId);
-  const { handleImageClick, selectedImageUri, isImageModalVisible, closeImageModal } = useViewImage();
+  const {
+    handleImageClick,
+    selectedImageUri,
+    isImageModalVisible,
+    closeImageModal,
+  } = useViewImage();
   const [loading, setLoading] = useState(false);
 
   const emergencyStatus = {
@@ -52,26 +67,26 @@ const RecordItem = ({ records }) => {
     try {
       const user = auth.currentUser;
       if (!user || !emergencyId) return;
-  
+
       const historyRef = ref(database, `responders/${user.uid}/history`);
-      
+
       // Fetch all history records of the responder
       const snapshot = await get(historyRef);
-      
+
       if (snapshot.exists()) {
         const historyData = snapshot.val();
-  
+
         // Find all history records that match the emergencyId
         const historyIds = Object.keys(historyData).filter(
           (key) => historyData[key].emergencyId === emergencyId
         );
-  
+
         if (historyIds.length > 0) {
           // Delete all matched history records
-          const deletePromises = historyIds.map((historyId) => 
+          const deletePromises = historyIds.map((historyId) =>
             remove(ref(database, `responders/${user.uid}/history/${historyId}`))
           );
-  
+
           await Promise.all(deletePromises);
           ToastAndroid.show("Successfully Deleted", ToastAndroid.SHORT);
         } else {
@@ -86,28 +101,40 @@ const RecordItem = ({ records }) => {
       setLoading(false);
     }
   };
-  
 
-  if(loading){
+  if (loading) {
     return (
       <View className="flex-1">
         <Text>Deleting...</Text>
       </View>
-    )
+    );
   }
 
   return (
     <>
-      <ImageViewer
-        images={[{ uri: selectedImageUri }]}
-        imageIndex={0}
+      <Modal
+        animationType="slide"
+        transparent={true}
         visible={isImageModalVisible}
         onRequestClose={closeImageModal}
-      />
+      >
+        <TouchableWithoutFeedback onPress={closeImageModal}>
+          <View className="flex-1 justify-center items-center bg-black/70">
+            <Image
+              source={{ uri: selectedImageUri }}
+              className="w-[90%] h-[70%] rounded-lg"
+              resizeMode="contain"
+            />
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+
       <View className="border border-gray-300 rounded-lg m-2">
         <View className="flex flex-row justify-between p-2">
           <View className="flex flex-row space-x-2">
-            <TouchableOpacity onPress={() => handleImageClick(userDetails?.img)}>
+            <TouchableOpacity
+              onPress={() => handleImageClick(userDetails?.img)}
+            >
               <Image
                 source={{ uri: userDetails?.img }}
                 className="h-12 w-12 rounded-full"
@@ -117,10 +144,15 @@ const RecordItem = ({ records }) => {
               <Text className="text-lg font-bold">
                 {userDetails?.fullname ?? "User Name"}
               </Text>
-              <Text className="text-sm text-gray-400">{userDetails?.customId}</Text>
+              <Text className="text-sm text-gray-400">
+                {userDetails?.customId}
+              </Text>
             </View>
           </View>
-          <TouchableOpacity className="p-2" onPress={() => deleteRecord(records.emergencyId)}>
+          <TouchableOpacity
+            className="p-2"
+            onPress={() => deleteRecord(records.emergencyId)}
+          >
             <Text className="text-red-500">🗑 Delete</Text>
           </TouchableOpacity>
         </View>
@@ -138,10 +170,19 @@ const RecordItem = ({ records }) => {
             <RowStyle label="Emergency Id" value={records.emergencyId} />
             <RowStyle label="Description" value={records.description} />
             <RowStyle label="Location" value={records.location} />
-            <RowStyle label="Date Reported" value={formatDateWithTime(records.date)} />
-            <RowStyle label="Response Time" value={formatDateWithTime(records.responseTime)} />
+            <RowStyle
+              label="Date Reported"
+              value={formatDateWithTime(records.date)}
+            />
+            <RowStyle
+              label="Response Time"
+              value={formatDateWithTime(records.responseTime)}
+            />
             {records.dateResolved && (
-              <RowStyle label="Date Resolved" value={formatDateWithTime(records.dateResolved)} />
+              <RowStyle
+                label="Date Resolved"
+                value={formatDateWithTime(records.dateResolved)}
+              />
             )}
           </View>
         </View>

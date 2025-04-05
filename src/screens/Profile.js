@@ -9,7 +9,6 @@ import {
   TouchableWithoutFeedback,
   Image,
 } from "react-native";
-import ImageViewer from "react-native-image-viewing";
 import { useNavigation } from "@react-navigation/native";
 import { auth } from "../services/firebaseConfig";
 import { signOut } from "firebase/auth";
@@ -23,8 +22,12 @@ const Profile = () => {
   const navigation = useNavigation();
   const { currentUser, loading } = useCurrentUser();
   const [logout, setLogout] = useState(false);
-  const { isImageModalVisible, selectedImageUri, handleImageClick, closeImageModal} = useViewImage();
-
+  const {
+    isImageModalVisible,
+    selectedImageUri,
+    handleImageClick,
+    closeImageModal,
+  } = useViewImage();
 
   const handleShowUpdateForm = () => {
     navigation.navigate("UpdateProfile");
@@ -76,25 +79,40 @@ const Profile = () => {
     );
   };
 
-  const defaultImage ="https://flowbite.com/docs/images/people/profile-picture-1.jpg";
+  const defaultImage =
+    "https://flowbite.com/docs/images/people/profile-picture-1.jpg";
 
   return (
     <SafeAreaView className="flex-1 bg-white">
       <ScrollView>
-      <ImageViewer
-        images={[{ uri: selectedImageUri }]} // Ensure it's an array, even for one image
-        imageIndex={0}
-        visible={isImageModalVisible}
-        onRequestClose={closeImageModal} // Close viewer
-      />
+      {/* Image Modal for viewing profile picture in full screen */}
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={isImageModalVisible}
+          onRequestClose={closeImageModal}
+        >
+          <TouchableWithoutFeedback onPress={closeImageModal}>
+            <View className="flex-1 justify-center items-center bg-black/70">
+              <Image
+                source={{ uri: selectedImageUri }}
+                className="w-[90%] h-full rounded-lg"
+                resizeMode="contain"
+              />
+            </View>
+          </TouchableWithoutFeedback>
+        </Modal>
+
         <View className="flex flex-row items-center h-40 bg-blue-800 pl-8 space-x-4">
           <View className="relative border border-white rounded-full">
-              <TouchableOpacity onPress={() => handleImageClick(currentUser?.img)}>
-                <Image
-                  source={{ uri: currentUser?.img || defaultImage }}
-                  className="h-24 w-24  rounded-full"
-                />
-              </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => handleImageClick(currentUser?.img)}
+            >
+              <Image
+                source={{ uri: currentUser?.img || defaultImage }}
+                className="h-24 w-24  rounded-full"
+              />
+            </TouchableOpacity>
             <TouchableOpacity
               className="absolute bottom-0 right-0 rounded-full p-2 bg-blue-800 border border-white"
               onPress={handleShowUpdateForm}
