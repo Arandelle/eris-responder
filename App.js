@@ -158,24 +158,29 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    if (loading) return; // Wait until data is loaded
+    if (loading || !emergencyRequest) return; // Wait until data is loaded and ensure it exists
   
     // Filter emergency requests with "pending" status
-    const pendingRequests = emergencyRequest.filter(req => req.status === "pending");
+    const pendingRequests = Array.isArray(emergencyRequest) 
+      ? emergencyRequest.filter(req => req.status === "pending")
+      : [];
   
     // Check if a new "pending" request was added
     if (pendingRequests.length > prevLength) {
       setPendingEmergency(pendingRequests);
-      sendTestNotification(); // Trigger sound/notification
-      setShowAlert(true);
-      setTimeout(() => {
-        setShowAlert(false)
-      }, 10000);
+      // Only send notification if there are pending emergencies
+      if (pendingRequests.length > 0) {
+        sendTestNotification(); // Trigger sound/notification
+        setShowAlert(true);
+        setTimeout(() => {
+          setShowAlert(false)
+        }, 10000);
+      }
     }
   
     // Update previous length state
     setPrevLength(pendingRequests.length);
-  }, [emergencyRequest]);  
+  }, [emergencyRequest, loading]);
 
   if (loading) {
     return (
