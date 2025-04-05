@@ -121,7 +121,7 @@ const App = () => {
         categoryIdentifier: "emergency",
         autoDismiss: false,
         // You can specify a custom sound file for iOS
-        sound: "emergencySound.mp3",
+        sound: "emergency_sound.mp3",
         // Add vibration pattern for Android
         vibrate: [0, 250, 250, 250],
       },
