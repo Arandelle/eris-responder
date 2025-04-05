@@ -8,7 +8,7 @@ const playNotificationSound = async () => {
   try {
     // Load sound
     const { sound } = await Audio.Sound.createAsync(
-      require('../../assets/sounds/emergencySound.mp3'),
+      require('../../assets/sounds/emergency_sound.mp3'),
       { shouldPlay: false }
     );
 

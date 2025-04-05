@@ -45,7 +45,7 @@
           "icon": "./assets/logo.png",
           "color": "#ff0000",
           "sounds": [
-            "./assets/sounds/emergencySound.mp3"
+            "./assets/sounds/emergency_sound.mp3"
           ]
         }
       ],
