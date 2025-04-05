@@ -10,6 +10,15 @@
       "channel": "development",
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "API_KEY": "AIzaSyBrkkfs5GIMi1U4UwjLVtR8B9AJ4xZz8Uw",
+        "AUTH_DOMAIN": "eris-app-cc463.firebaseapp.com",
+        "PROJECT_ID": "eris-app-cc463",
+        "STORAGE_BUCKET": "eris-app-cc463.appspot.com",
+        "MESSAGING_SENDER_ID": "495460903256",
+        "APP_ID": "1:495460903256:android:45f3216f01278a6d4ddd2d",
+        "DATABASE_URL": "https://eris-app-cc463-default-rtdb.firebaseio.com/"
       }
     },
     "preview": {
@@ -24,6 +33,15 @@
       "channel": "production",
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "API_KEY": "AIzaSyBrkkfs5GIMi1U4UwjLVtR8B9AJ4xZz8Uw",
+        "AUTH_DOMAIN": "eris-app-cc463.firebaseapp.com",
+        "PROJECT_ID": "eris-app-cc463",
+        "STORAGE_BUCKET": "eris-app-cc463.appspot.com",
+        "MESSAGING_SENDER_ID": "495460903256",
+        "APP_ID": "1:495460903256:android:45f3216f01278a6d4ddd2d",
+        "DATABASE_URL": "https://eris-app-cc463-default-rtdb.firebaseio.com/"
       }
     }
   },
